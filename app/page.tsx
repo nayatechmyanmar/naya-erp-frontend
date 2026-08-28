@@ -15,19 +15,23 @@ import {
   ArrowRight,
   CheckCircle2,
   RefreshCw,
+  Users,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth/auth-context';
 import { apiFetch } from '@/lib/api/bff-client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { formatCurrency, formatQuantity, formatDate } from '@/lib/utils';
-import { InventoryMovement, PurchaseOrder, SalesOrder, ProductionOrder } from '@/types/erp';
+import { InventoryMovement, PurchaseOrder, SalesOrder, ProductionOrder, DashboardKpis, TeamPerformanceOverview } from '@/types/erp';
 
 export default function DashboardPage() {
   const { orgContext } = useAuth();
 
   const [isLoading, setIsLoading] = React.useState(true);
+  const [dashboardKpis, setDashboardKpis] = React.useState<DashboardKpis | null>(null);
+  const [teamPerformances, setTeamPerformances] = React.useState<TeamPerformanceOverview[]>([]);
   const [salesOrders, setSalesOrders] = React.useState<SalesOrder[]>([]);
   const [purchaseOrders, setPurchaseOrders] = React.useState<PurchaseOrder[]>([]);
   const [productionOrders, setProductionOrders] = React.useState<ProductionOrder[]>([]);
@@ -37,7 +41,9 @@ export default function DashboardPage() {
   const loadDashboardData = React.useCallback(async () => {
     setIsLoading(true);
     try {
-      const [soRes, poRes, prodRes, movRes, stockRes] = await Promise.all([
+      const [kpiRes, teamPerfRes, soRes, poRes, prodRes, movRes, stockRes] = await Promise.all([
+        apiFetch<DashboardKpis>('/api/reports/dashboard'),
+        apiFetch<TeamPerformanceOverview[]>('/api/sales-teams/all-performance'),
         apiFetch<SalesOrder[]>('/api/sales/sales-orders'),
         apiFetch<PurchaseOrder[]>('/api/purchase/purchase-orders'),
         apiFetch<ProductionOrder[]>('/api/manufacturing/production-orders'),
@@ -45,6 +51,8 @@ export default function DashboardPage() {
         apiFetch<any[]>('/api/inventory/inventory'),
       ]);
 
+      if (kpiRes.success && kpiRes.data) setDashboardKpis(kpiRes.data);
+      if (teamPerfRes.success && Array.isArray(teamPerfRes.data)) setTeamPerformances(teamPerfRes.data);
       if (soRes.success && Array.isArray(soRes.data)) setSalesOrders(soRes.data);
       if (poRes.success && Array.isArray(poRes.data)) setPurchaseOrders(poRes.data);
       if (prodRes.success && Array.isArray(prodRes.data)) setProductionOrders(prodRes.data);
@@ -87,6 +95,12 @@ export default function DashboardPage() {
             <RefreshCw className={isLoading ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />
             <span>Refresh</span>
           </Button>
+          <Link href="/sales-teams">
+            <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs text-blue-600 border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/40">
+              <Users className="h-3.5 w-3.5" />
+              <span>Sales Teams Portal →</span>
+            </Button>
+          </Link>
           <Link href="/sales">
             <Button variant="primary" size="sm" className="gap-1.5 h-8 text-xs">
               <Plus className="h-3.5 w-3.5" />
@@ -261,6 +275,54 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Sales Teams Performance Leaderboard Widget */}
+      {teamPerformances.length > 0 && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-blue-600" />
+              <div>
+                <CardTitle className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                  Sales Teams Performance Overview (အရောင်းအဖွဲ့များ စွမ်းဆောင်ရည် အကျဉ်း)
+                </CardTitle>
+                <p className="text-xs text-zinc-500">Live order fulfillment rate and active team capacities</p>
+              </div>
+            </div>
+            <Link href="/sales-teams" className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1">
+              <span>Open Sales Portal</span>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </CardHeader>
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {teamPerformances.slice(0, 3).map(team => (
+                <div
+                  key={team.teamId}
+                  className="p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 space-y-2 text-xs"
+                >
+                  <div className="flex items-center justify-between font-semibold">
+                    <span className="text-zinc-900 dark:text-zinc-100">{team.teamName}</span>
+                    <Badge variant="outline" className="text-[10px]">
+                      {team.activeMembers} member(s)
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between text-zinc-500 text-[11px]">
+                    <span>Orders: {team.totalAssignedOrders}</span>
+                    <span className="font-bold text-emerald-600">{team.fulfillmentRate}% fulfilled</span>
+                  </div>
+                  <div className="w-full bg-zinc-200 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="bg-emerald-500 h-1.5 rounded-full"
+                      style={{ width: `${Math.min(team.fulfillmentRate, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Core ERP Business Flow Architecture Guide */}
       <Card className="border-blue-200 bg-blue-50/40 dark:border-blue-900/60 dark:bg-blue-950/20">

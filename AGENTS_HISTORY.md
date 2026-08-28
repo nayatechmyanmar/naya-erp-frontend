@@ -66,3 +66,29 @@
 
 8. **Burmese (မြန်မာဘာသာ) UIUX Integration**:
    - Added bilingual Burmese labels, tooltips, and explanations throughout all forms, inspection sheets, and comments.
+
+---
+
+## Execution Log: 2026-08-28 — Phase 2: Dedicated Sales Teams & Salesman Operations Workspace, Analytical Reports & Full BFF Parity
+
+### Accomplishments:
+1. **Dedicated Sales Teams & Salesman Workspace (`/sales-teams`)**:
+   - **Salesman Quick Portal (`my-orders`)**: Focused self-view showing only orders assigned to the logged-in user's team (`/api/sales-teams/my-orders`), live KPIs (Assigned Orders, Pending Dispatch, Total Value), 1-click **Dispatch Shipment** and **Collect Customer Payment** direct actions.
+   - **Sales Teams Management (`teams`)**: Interactive team cards, deep sheet inspector with team members management (Add Member, Change Role `LEADER`/`MEMBER`, Toggle Active status, Remove member), team-scoped orders, team-scoped shipments, and live team fulfillment KPIs.
+   - **Team Performance Leaderboard (`leaderboard`)**: Real-time comparison table with Fulfillment Rate % progress bars, order count, and shipment volume across all teams (`/api/sales-teams/all-performance`).
+
+2. **Complete Next.js BFF API Proxy Layer (19 New API Routes)**:
+   - Sales Teams API: `my-orders`, `all-performance`, `[id]/members`, `[id]/members/[memberId]`, `[id]/orders`, `[id]/shipments`, `[id]/performance`.
+   - Reports API: `dashboard`, `stock-summary`, `sales-summary`, `purchase-summary`, `movement-audit`, `trial-balance`, `cashflow`, `shipment-summary`.
+   - Product UOMs & Actions: `products/[id]/uoms`, `products/[id]/uoms/[uomId]`, `warehouse-transfers/[id]/cancel`, `daily-closings/[id]/cancel`, `accounts/[id]`.
+
+3. **Enterprise Analytical Reports Upgrade (`/reports`)**:
+   - Integrated live backend analytics for Sales Summary (Top Customers, Daily Trends), Stock Summary & Low Stock alerts, Procurement spend & Top Suppliers, Cashflow inflow/outflow, and Double-entry balanced Trial Balance.
+
+4. **Global Navigation & Dashboard Enhancements**:
+   - Added `Sales Teams & Portal` to main sidebar navigation (`app-shell.tsx`).
+   - Integrated live backend KPI cards and Sales Teams performance preview widget on Dashboard (`/`).
+   - Added 1-Click shortcut to Sales Teams portal from Main Sales workspace (`/sales`).
+
+5. **Build & Quality Assurance**:
+   - Full Next.js production build (`npm run build`) succeeded with exit code 0 across all 50 routes.

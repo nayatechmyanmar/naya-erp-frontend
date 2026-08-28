@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import {
   TrendingUp,
   Plus,
@@ -14,6 +15,7 @@ import {
   PackageCheck,
   Building2,
   UserCheck,
+  DollarSign,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api/bff-client';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -480,7 +482,13 @@ export default function SalesPage() {
             <RefreshCw className={isLoading ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />
             <span>Refresh</span>
           </Button>
-          <Button variant="primary" size="sm" onClick={() => setSoDialogOpen(true)} className="gap-1.5 h-8 text-xs">
+          <Link href="/sales-teams">
+            <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs text-blue-600 border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/40">
+              <Users className="h-3.5 w-3.5" />
+              <span>Sales Teams Portal (အရောင်းအဖွဲ့ လုပ်ငန်းခွင်) →</span>
+            </Button>
+          </Link>
+          <Button variant="primary" size="sm" onClick={() => setSoDialogOpen(true)} className="gap-1.5 h-8 text-xs bg-blue-600 hover:bg-blue-700">
             <Plus className="h-3.5 w-3.5" />
             <span>+ New Sales Order (အရောင်းအမှာစာသစ်)</span>
           </Button>

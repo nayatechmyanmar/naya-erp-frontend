@@ -10,6 +10,7 @@ import {
   Boxes,
   Factory,
   TrendingUp,
+  Users,
   Landmark,
   FileBarChart,
   Moon,
@@ -40,7 +41,8 @@ const navItems: NavItem[] = [
   { title: 'Purchasing', href: '/purchasing', icon: ShoppingCart },
   { title: 'Inventory', href: '/inventory', icon: Boxes },
   { title: 'Manufacturing', href: '/manufacturing', icon: Factory },
-  { title: 'Sales', href: '/sales', icon: TrendingUp },
+  { title: 'Sales & Orders', href: '/sales', icon: TrendingUp },
+  { title: 'Sales Teams & Portal', href: '/sales-teams', icon: Users },
   { title: 'Accounting', href: '/accounting', icon: Landmark },
   { title: 'Reports', href: '/reports', icon: FileBarChart },
 ];

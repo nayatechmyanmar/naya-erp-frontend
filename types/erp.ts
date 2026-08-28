@@ -16,9 +16,14 @@ export type UserProfile = {
   id: number;
   name: string;
   email: string;
+  phoneNumber?: string;
+  address?: string;
   roleId?: number;
   tenantId: number;
   branchId?: number;
+  branch?: Branch;
+  isActive?: boolean;
+  createdAt?: string;
 };
 
 export type LoginResponseData = {
@@ -127,8 +132,51 @@ export type SaleTeam = {
   tenantId: number;
   branchId?: number;
   name: string;
+  branch?: Branch;
+  members?: SaleTeamMember[];
   createdAt?: string;
   updatedAt?: string;
+};
+
+export type SaleTeamMemberRole = 'LEADER' | 'MEMBER';
+
+export type SaleTeamMember = {
+  id: number;
+  tenantId: number;
+  saleTeamId: number;
+  userId: number;
+  role: SaleTeamMemberRole;
+  isActive: boolean;
+  joinedDate: string;
+  user?: UserProfile;
+  saleTeam?: SaleTeam;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type SaleTeamPerformanceSummary = {
+  activeMembers: number;
+  totalAssignedOrders: number;
+  fullyShippedOrders: number;
+  cancelledOrders: number;
+  totalShipments: number;
+  postedShipments: number;
+  fulfillmentRate: number;
+};
+
+export type SaleTeamPerformance = {
+  team: { id: number; name: string };
+  summary: SaleTeamPerformanceSummary;
+};
+
+export type TeamPerformanceOverview = {
+  teamId: number;
+  teamName: string;
+  activeMembers: number;
+  totalAssignedOrders: number;
+  fullyShippedOrders: number;
+  totalShipments: number;
+  fulfillmentRate: number;
 };
 
 // ─── PURCHASING ──────────────────────────────────────────────────
@@ -476,4 +524,102 @@ export type JournalEntry = {
   status: 'POSTED' | 'DRAFT';
   lines?: JournalEntryLine[];
   createdAt?: string;
+};
+
+// ─── ANALYTICAL REPORTS (Phase 2) ─────────────────────────────────
+export type DashboardKpis = {
+  totalStockQty: number;
+  pendingSalesOrders: number;
+  pendingPurchaseOrders: number;
+  lowStockAlerts: number;
+};
+
+export type StockSummaryItem = {
+  warehouseId: number;
+  warehouseName: string;
+  productId: number;
+  productName: string;
+  sku: string;
+  productType: ProductType;
+  onHandQty: number;
+  uomName?: string;
+};
+
+export type StockSummaryReport = {
+  totalValuation?: number;
+  totalItems: number;
+  lowStockCount: number;
+  items: StockSummaryItem[];
+};
+
+export type TopCustomerSale = {
+  customerId: number;
+  customerName: string;
+  orderCount: number;
+  totalAmount: number;
+};
+
+export type DailySalesTrend = {
+  date: string;
+  orderCount: number;
+  totalAmount: number;
+};
+
+export type SalesSummaryReport = {
+  totalRevenue: number;
+  totalOrders: number;
+  shippedOrders: number;
+  topCustomers: TopCustomerSale[];
+  dailySales: DailySalesTrend[];
+};
+
+export type TopSupplierPurchase = {
+  supplierId: number;
+  supplierName: string;
+  orderCount: number;
+  totalAmount: number;
+};
+
+export type PurchaseSummaryReport = {
+  totalSpend: number;
+  totalOrders: number;
+  receivedOrders: number;
+  topSuppliers: TopSupplierPurchase[];
+};
+
+export type CashflowReport = {
+  inflow: number;
+  outflow: number;
+  net: number;
+  payments: Payment[];
+};
+
+export type AccountTrialBalance = {
+  accountId: number;
+  accountCode: string;
+  accountName: string;
+  accountType: AccountType;
+  totalDebit: number;
+  totalCredit: number;
+  balance: number;
+};
+
+export type TrialBalanceReport = {
+  accounts: AccountTrialBalance[];
+  totalDebit: number;
+  totalCredit: number;
+  isBalanced: boolean;
+};
+
+export type TeamShipmentSummary = {
+  teamId: number;
+  teamName: string;
+  shipmentCount: number;
+  postedCount: number;
+};
+
+export type ShipmentSummaryReport = {
+  totalShipments: number;
+  postedShipments: number;
+  teams: TeamShipmentSummary[];
 };
