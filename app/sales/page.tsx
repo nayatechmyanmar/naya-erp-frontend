@@ -7,11 +7,13 @@ import {
   Truck,
   Users,
   CheckCircle2,
+  XCircle,
   Eye,
   Trash2,
   RefreshCw,
   PackageCheck,
   Building2,
+  UserCheck,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api/bff-client';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -23,6 +25,7 @@ import { Dialog } from '@/components/ui/dialog';
 import { Sheet } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { formatCurrency, formatQuantity, formatDate } from '@/lib/utils';
 import {
@@ -55,6 +58,7 @@ export default function SalesPage() {
   const [assignDialogOpen, setAssignDialogOpen] = React.useState(false);
   const [shipmentDialogOpen, setShipmentDialogOpen] = React.useState(false);
   const [postShipmentDialogOpen, setPostShipmentDialogOpen] = React.useState(false);
+  const [cancelSoConfirmOpen, setCancelSoConfirmOpen] = React.useState(false);
   const [selectedSo, setSelectedSo] = React.useState<SalesOrder | null>(null);
   const [selectedShipment, setSelectedShipment] = React.useState<SalesShipment | null>(null);
   const [soSheetOpen, setSoSheetOpen] = React.useState(false);
@@ -142,8 +146,10 @@ export default function SalesPage() {
         const prod = products.find(p => p.id === Number(value));
         if (prod) item.uomId = String(prod.baseUomId);
       }
-      if (field === 'qty' || field === 'rate') {
-        item.amount = Number(item.qty || 0) * Number(item.rate || 0);
+      if (field === 'qty' || field === 'rate' || field === 'isFoc') {
+        const q = Number(item.qty || 0);
+        const r = Number(item.rate || 0);
+        item.amount = item.isFoc ? 0 : q * r;
       }
       updated[index] = item;
       return { ...prev, items: updated };
@@ -155,8 +161,8 @@ export default function SalesPage() {
   // Submit SO
   const handleCreateSo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!soForm.customerId || soForm.items.some(i => !i.productId || !i.uomId || i.qty <= 0)) {
-      error('Please select customer and valid items');
+    if (!soForm.customerId || soForm.items.some(i => !i.productId || !i.uomId || Number(i.qty) <= 0)) {
+      error('Please select customer and valid items (ဝယ်သူနှင့် ပစ္စည်းများ သေချာစွာ ရွေးချယ်ပါ)');
       return;
     }
 
@@ -170,8 +176,8 @@ export default function SalesPage() {
         uomId: Number(it.uomId),
         qty: Number(it.qty),
         rate: Number(it.rate),
-        amount: Number(it.amount),
-        isFoc: it.isFoc,
+        amount: it.isFoc ? 0 : Number(it.amount),
+        isFoc: Boolean(it.isFoc),
       })),
     };
 
@@ -181,7 +187,7 @@ export default function SalesPage() {
     });
 
     if (res.success) {
-      success('Sales Order Created');
+      success('Sales Order Created (အရောင်းအမှာစာ ဖွင့်ပြီးပါပြီ)');
       setSoDialogOpen(false);
       setSoForm({
         customerId: '',
@@ -195,23 +201,55 @@ export default function SalesPage() {
     }
   };
 
+  // Inspect SO
+  const inspectSo = async (so: SalesOrder) => {
+    const detailRes = await apiFetch<SalesOrder>(`/api/sales/sales-orders/${so.id}`);
+    setSelectedSo(detailRes.success && detailRes.data ? detailRes.data : so);
+    setSoSheetOpen(true);
+  };
+
   // Confirm SO
   const handleConfirmSo = async (id: number) => {
     const res = await apiFetch(`/api/sales/sales-orders/${id}/confirm`, { method: 'PUT' });
     if (res.success) {
-      success('Sales Order Confirmed', `Order #${id} status is now CONFIRMED`);
+      success('Sales Order Confirmed (အရောင်းအမှာစာ အတည်ပြုပြီးပါပြီ)');
       loadSalesData();
-      if (selectedSo?.id === id) setSoSheetOpen(false);
+      if (selectedSo?.id === id) inspectSo(selectedSo);
     } else {
       error('Confirmation failed', res.message);
     }
   };
 
-  // Assign SO to team
+  // Cancel SO
+  const handleCancelSo = async () => {
+    if (!selectedSo) return;
+    const res = await apiFetch(`/api/sales/sales-orders/${selectedSo.id}/cancel`, { method: 'PUT' });
+    if (res.success) {
+      success('Sales Order Cancelled (အရောင်းအမှာစာ ဖျက်သိမ်းပြီးပါပြီ)');
+      setCancelSoConfirmOpen(false);
+      setSoSheetOpen(false);
+      loadSalesData();
+    } else {
+      error('Cancel failed', res.message);
+    }
+  };
+
+  // Open Assign Team Dialog
+  const handleOpenAssignModal = (so: SalesOrder) => {
+    setSelectedSo(so);
+    setAssignForm({
+      salesOrderId: String(so.id),
+      salesTeamId: saleTeams[0]?.id ? String(saleTeams[0].id) : '',
+      assignedDate: new Date().toISOString().split('T')[0],
+    });
+    setAssignDialogOpen(true);
+  };
+
+  // Submit Assign Team
   const handleAssignSo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!assignForm.salesOrderId || !assignForm.salesTeamId) {
-      error('Please select sales order and team');
+      error('Please select sales team (အရောင်းအဖွဲ့ ရွေးချယ်ပါ)');
       return;
     }
 
@@ -225,9 +263,10 @@ export default function SalesPage() {
     });
 
     if (res.success) {
-      success('Order Assigned', 'Sales order assigned to delivery team');
+      success('Order Assigned to Team (အရောင်းအဖွဲ့သို့ လွှဲအပ်ပြီးပါပြီ)');
       setAssignDialogOpen(false);
       loadSalesData();
+      if (selectedSo?.id === Number(assignForm.salesOrderId)) inspectSo(selectedSo);
     } else {
       error('Assignment failed', res.message);
     }
@@ -284,12 +323,19 @@ export default function SalesPage() {
     });
 
     if (res.success) {
-      success('Sales Shipment Created', 'Saved draft shipment');
+      success('Sales Shipment Saved (အရောင်းပို့ဆောင်လွှာ မူကြမ်း သိမ်းဆည်းပြီးပါပြီ)');
       setShipmentDialogOpen(false);
       loadSalesData();
     } else {
       error('Shipment creation failed', res.message);
     }
+  };
+
+  // Inspect Shipment
+  const inspectShipment = async (sh: SalesShipment) => {
+    const detailRes = await apiFetch<SalesShipment>(`/api/sales/sales-shipments/${sh.id}`);
+    setSelectedShipment(detailRes.success && detailRes.data ? detailRes.data : sh);
+    setShipmentSheetOpen(true);
   };
 
   // Post Shipment (Checks stock, creates movement, posts AR / Revenue / COGS / Inventory GL entries!)
@@ -313,8 +359,8 @@ export default function SalesPage() {
 
     if (res.success) {
       success(
-        'Shipment Posted & GL Updated!',
-        'Stock deducted, AR Dr, Revenue Cr, COGS Dr, and Inventory Cr recorded.'
+        'Shipment Posted & GL Updated! (ပစ္စည်းပို့ဆောင်ပြီး စာရင်းချုပ်သွင်းပြီးပါပြီ)',
+        'Stock deducted, Accounts Receivable & Revenue recorded.'
       );
       setPostShipmentDialogOpen(false);
       loadSalesData();
@@ -327,7 +373,7 @@ export default function SalesPage() {
   // SO Columns
   const soColumns: Column<SalesOrder>[] = [
     { header: 'Order No', accessorKey: 'orderNo', sortable: true, className: 'font-mono font-bold text-blue-600' },
-    { header: 'Customer', cell: r => r.customer?.name || `Customer #${r.customerId}` },
+    { header: 'Customer (ဝယ်ယူသူ)', cell: r => r.customer?.name || `Customer #${r.customerId}` },
     { header: 'Order Date', cell: r => formatDate(r.orderDate), sortable: true },
     { header: 'Status', cell: r => <StatusBadge status={r.status} /> },
     {
@@ -338,11 +384,7 @@ export default function SalesPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={async () => {
-              const detailRes = await apiFetch<SalesOrder>(`/api/sales/sales-orders/${r.id}`);
-              setSelectedSo(detailRes.success && detailRes.data ? detailRes.data : r);
-              setSoSheetOpen(true);
-            }}
+            onClick={() => inspectSo(r)}
             className="h-7 text-xs"
           >
             <Eye className="h-3.5 w-3.5" />
@@ -360,14 +402,24 @@ export default function SalesPage() {
           )}
 
           {(r.status === 'CONFIRMED' || r.status === 'PARTIALLY_SHIPPED') && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => handleOpenCreateShipment(r)}
-              className="h-7 text-xs gap-1 bg-blue-600 hover:bg-blue-700"
-            >
-              <Truck className="h-3.5 w-3.5" /> Dispatch
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleOpenAssignModal(r)}
+                className="h-7 text-xs gap-1 text-purple-600"
+              >
+                <UserCheck className="h-3.5 w-3.5" /> Assign
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => handleOpenCreateShipment(r)}
+                className="h-7 text-xs gap-1 bg-blue-600 hover:bg-blue-700"
+              >
+                <Truck className="h-3.5 w-3.5" /> Dispatch
+              </Button>
+            </>
           )}
         </div>
       ),
@@ -389,11 +441,7 @@ export default function SalesPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={async () => {
-              const detailRes = await apiFetch<SalesShipment>(`/api/sales/sales-shipments/${r.id}`);
-              setSelectedShipment(detailRes.success && detailRes.data ? detailRes.data : r);
-              setShipmentSheetOpen(true);
-            }}
+            onClick={() => inspectShipment(r)}
             className="h-7 text-xs"
           >
             <Eye className="h-3.5 w-3.5" />
@@ -420,7 +468,7 @@ export default function SalesPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Sales & Order Fulfillment
+            Sales & Order Fulfillment (အရောင်းနှင့် ပို့ဆောင်ရေး လုပ်ငန်းစဉ်)
           </h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Customer sales lifecycle: Sales Orders → Sales Team Routing → Shipments → Auto COGS & Revenue Journals.
@@ -434,7 +482,7 @@ export default function SalesPage() {
           </Button>
           <Button variant="primary" size="sm" onClick={() => setSoDialogOpen(true)} className="gap-1.5 h-8 text-xs">
             <Plus className="h-3.5 w-3.5" />
-            <span>+ New Sales Order</span>
+            <span>+ New Sales Order (အရောင်းအမှာစာသစ်)</span>
           </Button>
         </div>
       </div>
@@ -443,10 +491,10 @@ export default function SalesPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-zinc-100 dark:bg-zinc-800">
           <TabsTrigger value="orders" count={salesOrders.length}>
-            Sales Orders
+            Sales Orders (အရောင်းအမှာစာများ)
           </TabsTrigger>
           <TabsTrigger value="shipments" count={shipments.length}>
-            Shipments & Deliveries
+            Shipments & Deliveries (ပို့ဆောင်မှုများ)
           </TabsTrigger>
         </TabsList>
 
@@ -455,14 +503,10 @@ export default function SalesPage() {
           <DataTable
             data={salesOrders}
             columns={soColumns}
-            searchPlaceholder="Search sales orders..."
+            searchPlaceholder="Search sales orders by SO# or customer..."
             searchKey="orderNo"
             isLoading={isLoading}
-            onRowClick={async r => {
-              const detailRes = await apiFetch<SalesOrder>(`/api/sales/sales-orders/${r.id}`);
-              setSelectedSo(detailRes.success && detailRes.data ? detailRes.data : r);
-              setSoSheetOpen(true);
-            }}
+            onRowClick={r => inspectSo(r)}
           />
         </TabsContent>
 
@@ -471,24 +515,20 @@ export default function SalesPage() {
           <DataTable
             data={shipments}
             columns={shipmentColumns}
-            searchPlaceholder="Search shipments..."
+            searchPlaceholder="Search shipments by SHP# or SO#..."
             searchKey="shipmentNo"
             isLoading={isLoading}
-            onRowClick={async r => {
-              const detailRes = await apiFetch<SalesShipment>(`/api/sales/sales-shipments/${r.id}`);
-              setSelectedShipment(detailRes.success && detailRes.data ? detailRes.data : r);
-              setShipmentSheetOpen(true);
-            }}
+            onRowClick={r => inspectShipment(r)}
           />
         </TabsContent>
       </Tabs>
 
       {/* ─── MODAL: NEW SALES ORDER ─────────────────────────────────── */}
-      <Dialog open={soDialogOpen} onOpenChange={setSoDialogOpen} title="Create Sales Order" maxWidth="2xl">
+      <Dialog open={soDialogOpen} onOpenChange={setSoDialogOpen} title="Create Sales Order (အရောင်းအမှာစာ အသစ်ဖွင့်ရန်)" maxWidth="2xl">
         <form onSubmit={handleCreateSo} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Select
-              label="Customer *"
+              label="Customer (ဝယ်ယူသူ) *"
               value={soForm.customerId}
               onChange={e => setSoForm({ ...soForm, customerId: e.target.value })}
               required
@@ -503,7 +543,7 @@ export default function SalesPage() {
 
             <Input
               type="date"
-              label="Order Date *"
+              label="Order Date (မှာယူသည့်ရက်) *"
               value={soForm.orderDate}
               onChange={e => setSoForm({ ...soForm, orderDate: e.target.value })}
               required
@@ -511,7 +551,7 @@ export default function SalesPage() {
 
             <Input
               type="date"
-              label="Delivery Date"
+              label="Delivery Date (ပို့ဆောင်ရမည့်ရက်)"
               value={soForm.deliveryDate}
               onChange={e => setSoForm({ ...soForm, deliveryDate: e.target.value })}
             />
@@ -520,7 +560,7 @@ export default function SalesPage() {
           {/* Line items table */}
           <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold uppercase text-zinc-500">Order Items</h4>
+              <h4 className="text-xs font-bold uppercase text-zinc-500">Order Items (ရောင်းချမည့် ပစ္စည်းများ)</h4>
               <Button type="button" variant="outline" size="sm" onClick={addSoItem} className="h-7 text-xs gap-1">
                 <Plus className="h-3 w-3" /> Add Item
               </Button>
@@ -577,12 +617,23 @@ export default function SalesPage() {
                       placeholder="Rate"
                       value={item.rate}
                       onChange={e => updateSoItem(idx, 'rate', e.target.value)}
-                      required
+                      disabled={item.isFoc}
+                      required={!item.isFoc}
                     />
                   </div>
 
-                  <div className="w-28 text-right font-semibold text-xs text-zinc-800 dark:text-zinc-200">
-                    {formatCurrency(item.amount)}
+                  <div className="flex items-center gap-1">
+                    <label className="text-[11px] font-semibold text-zinc-500">FOC</label>
+                    <input
+                      type="checkbox"
+                      checked={item.isFoc}
+                      onChange={e => updateSoItem(idx, 'isFoc', e.target.checked)}
+                      className="rounded border-zinc-300"
+                    />
+                  </div>
+
+                  <div className="w-24 text-right font-semibold text-xs text-zinc-800 dark:text-zinc-200">
+                    {item.isFoc ? <Badge variant="secondary">FOC</Badge> : formatCurrency(item.amount)}
                   </div>
 
                   <Button
@@ -601,8 +652,8 @@ export default function SalesPage() {
 
             {/* Total Footer */}
             <div className="flex justify-between items-center p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800/80 font-bold text-sm">
-              <span>Order Grand Total:</span>
-              <span className="text-blue-600 dark:text-blue-400">{formatCurrency(soTotal)}</span>
+              <span>Order Grand Total (စုစုပေါင်း ကျသင့်ငွေ):</span>
+              <span className="text-blue-600 dark:text-blue-400 font-mono">{formatCurrency(soTotal)}</span>
             </div>
           </div>
 
@@ -617,12 +668,48 @@ export default function SalesPage() {
         </form>
       </Dialog>
 
+      {/* ─── MODAL: ASSIGN TEAM ─────────────────────────────────────── */}
+      <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen} title="Assign Sales Order to Team (အရောင်းအဖွဲ့သို့ လွှဲအပ်ရန်)" maxWidth="md">
+        <form onSubmit={handleAssignSo} className="space-y-4">
+          <Select
+            label="Assigned Sales Team *"
+            value={assignForm.salesTeamId}
+            onChange={e => setAssignForm({ ...assignForm, salesTeamId: e.target.value })}
+            required
+          >
+            <option value="">Select Delivery Team...</option>
+            {saleTeams.map(t => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </Select>
+
+          <Input
+            type="date"
+            label="Assigned Date *"
+            value={assignForm.assignedDate}
+            onChange={e => setAssignForm({ ...assignForm, assignedDate: e.target.value })}
+            required
+          />
+
+          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setAssignDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary">
+              Confirm Assignment
+            </Button>
+          </div>
+        </form>
+      </Dialog>
+
       {/* ─── MODAL: NEW SHIPMENT ────────────────────────────────────── */}
-      <Dialog open={shipmentDialogOpen} onOpenChange={setShipmentDialogOpen} title="Create Sales Dispatch" maxWidth="xl">
+      <Dialog open={shipmentDialogOpen} onOpenChange={setShipmentDialogOpen} title="Create Sales Dispatch (ပစ္စည်းပို့ဆောင်လွှာ ဖွင့်ရန်)" maxWidth="xl">
         <form onSubmit={handleCreateShipment} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Select
-              label="Source Warehouse *"
+              label="Source Warehouse (ထုတ်ယူမည့် ကုန်လှောင်ရုံ) *"
               value={shipmentForm.warehouseId}
               onChange={e => setShipmentForm({ ...shipmentForm, warehouseId: e.target.value })}
               required
@@ -650,7 +737,7 @@ export default function SalesPage() {
 
             <Input
               type="date"
-              label="Shipment Date *"
+              label="Shipment Date (ပို့ဆောင်သည့်ရက်) *"
               value={shipmentForm.shipmentDate}
               onChange={e => setShipmentForm({ ...shipmentForm, shipmentDate: e.target.value })}
               required
@@ -658,7 +745,7 @@ export default function SalesPage() {
           </div>
 
           <div className="space-y-2">
-            <h4 className="text-xs font-bold uppercase text-zinc-500">Dispatch Items</h4>
+            <h4 className="text-xs font-bold uppercase text-zinc-500">Dispatch Items (ပို့ဆောင်မည့် ပစ္စည်းများ)</h4>
             <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-800">
               {shipmentForm.items.map((it, idx) => {
                 const prod = products.find(p => p.id === it.productId);
@@ -669,7 +756,7 @@ export default function SalesPage() {
                       <p className="font-semibold text-zinc-900 dark:text-zinc-100">{prod?.name || `Item #${it.productId}`}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <label className="text-[11px] text-zinc-500">Qty:</label>
+                      <label className="text-[11px] text-zinc-500">Dispatch Qty:</label>
                       <input
                         type="number"
                         step="any"
@@ -680,7 +767,7 @@ export default function SalesPage() {
                           updated[idx] = { ...it, qty: val };
                           setShipmentForm({ ...shipmentForm, items: updated });
                         }}
-                        className="w-20 rounded border border-zinc-300 p-1 text-center font-bold dark:border-zinc-700"
+                        className="w-20 rounded border border-zinc-300 p-1 text-center font-bold font-mono dark:border-zinc-700"
                       />
                       <span>{uom?.symbol}</span>
                     </div>
@@ -705,16 +792,16 @@ export default function SalesPage() {
       <Dialog
         open={postShipmentDialogOpen}
         onOpenChange={setPostShipmentDialogOpen}
-        title="Post Sales Shipment"
+        title="Post Sales Shipment (ပစ္စည်းပို့ဆောင်မှု အတည်ပြုပြီး စာရင်းချုပ်သွင်းရန်)"
         maxWidth="md"
       >
         <form onSubmit={handlePostShipment} className="space-y-4">
           <p className="text-xs text-zinc-600 dark:text-zinc-400">
-            Posting this shipment will verify on-hand stock, deduct items from the warehouse, and create automated double-entry GL journal entries (AR, Revenue, COGS, Inventory).
+            Posting this shipment will verify on-hand stock, deduct items from warehouse, and create automated double-entry GL journal entries (Accounts Receivable & Revenue).
           </p>
 
           <Select
-            label="Confirm Outbound Warehouse *"
+            label="Confirm Outbound Warehouse (ထုတ်ယူမည့် ကုန်လှောင်ရုံ) *"
             value={postWhId}
             onChange={e => setPostWhId(e.target.value)}
             required
@@ -738,33 +825,74 @@ export default function SalesPage() {
         </form>
       </Dialog>
 
+      {/* ─── MODAL: CANCEL SO CONFIRMATION ──────────────────────────── */}
+      <Dialog open={cancelSoConfirmOpen} onOpenChange={setCancelSoConfirmOpen} title="Cancel Sales Order">
+        <div className="space-y-4">
+          <p className="text-xs text-zinc-600 dark:text-zinc-300">
+            Are you sure you want to cancel Sales Order <span className="font-bold">{selectedSo?.orderNo}</span>?
+          </p>
+          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setCancelSoConfirmOpen(false)}>
+              No, Keep Active
+            </Button>
+            <Button type="button" variant="destructive" onClick={handleCancelSo}>
+              Yes, Cancel Order
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
       {/* ─── CONTEXTUAL SHEET: SALES ORDER INSPECTION ────────────────── */}
       <Sheet
         open={soSheetOpen}
         onOpenChange={setSoSheetOpen}
-        title={`Sales Order ${selectedSo?.orderNo || ''}`}
+        title={`Sales Order: ${selectedSo?.orderNo || ''}`}
         description={`Customer: ${selectedSo?.customer?.name || ''}`}
         footer={
           selectedSo && (
-            <div className="flex justify-end gap-2 w-full">
-              {selectedSo.status === 'DRAFT' && (
-                <Button variant="primary" size="sm" onClick={() => handleConfirmSo(selectedSo.id)}>
-                  Confirm Order
-                </Button>
-              )}
-              {(selectedSo.status === 'CONFIRMED' || selectedSo.status === 'PARTIALLY_SHIPPED') && (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => {
-                    setSoSheetOpen(false);
-                    handleOpenCreateShipment(selectedSo);
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 gap-1.5"
-                >
-                  <Truck className="h-4 w-4" /> Create Shipment Dispatch
-                </Button>
-              )}
+            <div className="flex items-center justify-between w-full">
+              <div>
+                {selectedSo.status === 'DRAFT' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCancelSoConfirmOpen(true)}
+                    className="text-rose-600"
+                  >
+                    Cancel Order
+                  </Button>
+                )}
+              </div>
+              <div className="flex gap-2">
+                {selectedSo.status === 'DRAFT' && (
+                  <Button variant="primary" size="sm" onClick={() => handleConfirmSo(selectedSo.id)}>
+                    Confirm Order
+                  </Button>
+                )}
+                {(selectedSo.status === 'CONFIRMED' || selectedSo.status === 'PARTIALLY_SHIPPED') && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenAssignModal(selectedSo)}
+                      className="text-purple-600"
+                    >
+                      <UserCheck className="h-4 w-4 mr-1" /> Assign Team
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => {
+                        setSoSheetOpen(false);
+                        handleOpenCreateShipment(selectedSo);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 gap-1.5"
+                    >
+                      <Truck className="h-4 w-4" /> Create Shipment Dispatch
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
           )
         }
@@ -773,7 +901,7 @@ export default function SalesPage() {
           <div className="space-y-6 text-xs">
             <div className="grid grid-cols-2 gap-3 p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Status</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Order Status</p>
                 <div className="mt-1">
                   <StatusBadge status={selectedSo.status} />
                 </div>
@@ -792,9 +920,10 @@ export default function SalesPage() {
               </div>
             </div>
 
+            {/* Line Items */}
             <div className="space-y-2">
               <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs">
-                Line Items
+                Ordered Products (ရောင်းချထားသော ပစ္စည်းများ)
               </h4>
               <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
                 {(selectedSo.items || []).map((it, idx) => (
@@ -802,13 +931,37 @@ export default function SalesPage() {
                     <div>
                       <p className="font-semibold text-zinc-900 dark:text-zinc-100">{it.product?.name || `Product #${it.productId}`}</p>
                       <p className="text-[11px] text-zinc-500">
-                        {it.qty} {it.uom?.symbol || ''} @ {formatCurrency(it.rate)}
+                        {it.qty} {it.uom?.symbol || ''} @ {formatCurrency(it.rate)} {it.isFoc && <Badge variant="secondary" className="ml-1">FOC</Badge>}
                       </p>
                     </div>
-                    <span className="font-bold text-zinc-900 dark:text-zinc-100">{formatCurrency(it.amount)}</span>
+                    <span className="font-bold font-mono text-zinc-900 dark:text-zinc-100">
+                      {it.isFoc ? '0.00' : formatCurrency(it.amount)}
+                    </span>
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Linked Shipments */}
+            <div className="space-y-2">
+              <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs">
+                Fulfillment Shipments (ပို့ဆောင်ပြီးမှု မှတ်တမ်းများ)
+              </h4>
+              {(selectedSo.shipments || []).length > 0 ? (
+                <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                  {selectedSo.shipments?.map((sh, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3">
+                      <div>
+                        <p className="font-mono font-bold text-emerald-600">{sh.shipmentNo}</p>
+                        <p className="text-[11px] text-zinc-500">{formatDate(sh.shipmentDate)}</p>
+                      </div>
+                      <StatusBadge status={sh.status} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-zinc-400 italic">No shipments dispatched yet.</p>
+              )}
             </div>
           </div>
         )}
@@ -818,8 +971,8 @@ export default function SalesPage() {
       <Sheet
         open={shipmentSheetOpen}
         onOpenChange={setShipmentSheetOpen}
-        title={`Sales Shipment ${selectedShipment?.shipmentNo || ''}`}
-        description={`SO: ${selectedShipment?.salesOrder?.orderNo || ''}`}
+        title={`Sales Shipment: ${selectedShipment?.shipmentNo || ''}`}
+        description={`SO Reference: ${selectedShipment?.salesOrder?.orderNo || ''}`}
         footer={
           selectedShipment && selectedShipment.status === 'DRAFT' && (
             <div className="flex justify-end gap-2 w-full">
@@ -856,22 +1009,22 @@ export default function SalesPage() {
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedShipment.salesTeam?.name || '-'}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">GL Status</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">GL Double-Entry Sync</p>
                 <p className="font-semibold text-emerald-600 mt-1">
-                  {selectedShipment.status === 'POSTED' ? '✓ Auto-Posted to GL' : 'Pending Post'}
+                  {selectedShipment.status === 'SHIPPED' ? '✓ Auto-Posted (AR DR / Revenue CR)' : 'Pending Post'}
                 </p>
               </div>
             </div>
 
             <div className="space-y-2">
               <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs">
-                Dispatched Items
+                Dispatched Items (ပို့ဆောင်သော ပစ္စည်းများ)
               </h4>
               <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
                 {(selectedShipment.items || []).map((it, idx) => (
                   <div key={idx} className="flex items-center justify-between p-3">
                     <span className="font-semibold">{it.product?.name || `Product #${it.productId}`}</span>
-                    <span className="font-bold">{it.qty} {it.uom?.symbol || ''}</span>
+                    <span className="font-bold font-mono">{it.qty} {it.uom?.symbol || ''}</span>
                   </div>
                 ))}
               </div>

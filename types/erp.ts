@@ -62,6 +62,7 @@ export type ProductCategory = {
   id: number;
   tenantId: number;
   name: string;
+  description?: string;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -374,7 +375,7 @@ export type SalesOrder = {
   createdAt?: string;
 };
 
-export type SalesShipmentStatus = 'DRAFT' | 'POSTED' | 'CANCELLED';
+export type SalesShipmentStatus = 'DRAFT' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'POSTED' | 'CANCELLED';
 
 export type SalesShipmentItem = {
   id?: number;

@@ -10,7 +10,11 @@ import {
   Eye,
   Trash2,
   RefreshCw,
-  FileSpreadsheet,
+  Building2,
+  Calendar,
+  Truck,
+  Scale,
+  Receipt,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api/bff-client';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -22,13 +26,13 @@ import { Dialog } from '@/components/ui/dialog';
 import { Sheet } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { formatCurrency, formatQuantity, formatDate } from '@/lib/utils';
 import {
   PurchaseOrder,
   PurchaseOrderItem,
   PurchaseReceipt,
-  PurchaseReceiptItem,
   Supplier,
   Product,
   UOM,
@@ -56,6 +60,7 @@ export default function PurchasingPage() {
   const [selectedReceipt, setSelectedReceipt] = React.useState<PurchaseReceipt | null>(null);
   const [poSheetOpen, setPoSheetOpen] = React.useState(false);
   const [receiptSheetOpen, setReceiptSheetOpen] = React.useState(false);
+  const [cancelConfirmOpen, setCancelConfirmOpen] = React.useState(false);
 
   // PO Form State
   const [poForm, setPoForm] = React.useState({
@@ -127,13 +132,13 @@ export default function PurchasingPage() {
 
       if (field === 'productId') {
         const prod = products.find(p => p.id === Number(value));
-        if (prod) {
-          item.uomId = String(prod.baseUomId);
-        }
+        if (prod) item.uomId = String(prod.baseUomId);
       }
 
-      if (field === 'qty' || field === 'rate') {
-        item.amount = Number(item.qty || 0) * Number(item.rate || 0);
+      if (field === 'qty' || field === 'rate' || field === 'isFoc') {
+        const q = Number(item.qty || 0);
+        const r = Number(item.rate || 0);
+        item.amount = item.isFoc ? 0 : q * r;
       }
 
       updated[index] = item;
@@ -146,7 +151,7 @@ export default function PurchasingPage() {
   // Submit New PO
   const handleCreatePo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!poForm.supplierId || poForm.items.some(i => !i.productId || !i.uomId || i.qty <= 0)) {
+    if (!poForm.supplierId || poForm.items.some(i => !i.productId || !i.uomId || Number(i.qty) <= 0)) {
       error('Please select supplier and valid items with positive quantity');
       return;
     }
@@ -161,8 +166,8 @@ export default function PurchasingPage() {
         uomId: Number(it.uomId),
         qty: Number(it.qty),
         rate: Number(it.rate),
-        amount: Number(it.amount),
-        isFoc: it.isFoc,
+        amount: it.isFoc ? 0 : Number(it.amount),
+        isFoc: Boolean(it.isFoc),
       })),
     };
 
@@ -172,7 +177,7 @@ export default function PurchasingPage() {
     });
 
     if (res.success) {
-      success('Purchase Order Created', `Created PO successfully`);
+      success('Purchase Order Created (အမှာစာ ဖန်တီးပြီးပါပြီ)');
       setPoDialogOpen(false);
       setPoForm({
         supplierId: '',
@@ -186,34 +191,46 @@ export default function PurchasingPage() {
     }
   };
 
+  // Inspect PO Full Details
+  const inspectPo = async (po: PurchaseOrder) => {
+    const detailRes = await apiFetch<PurchaseOrder>(`/api/purchase/purchase-orders/${po.id}`);
+    setSelectedPo(detailRes.success && detailRes.data ? detailRes.data : po);
+    setPoSheetOpen(true);
+  };
+
   // Confirm PO
   const handleConfirmPo = async (poId: number) => {
     const res = await apiFetch(`/api/purchase/purchase-orders/${poId}/confirm`, { method: 'PUT' });
     if (res.success) {
-      success('PO Confirmed', `Purchase order #${poId} status updated to CONFIRMED`);
+      success('PO Confirmed (အမှာစာ အတည်ပြုပြီးပါပြီ)');
       loadPurchasingData();
-      if (selectedPo?.id === poId) setPoSheetOpen(false);
+      if (selectedPo?.id === poId) inspectPo(selectedPo);
     } else {
       error('Confirmation failed', res.message);
     }
   };
 
   // Cancel PO
-  const handleCancelPo = async (poId: number) => {
-    const res = await apiFetch(`/api/purchase/purchase-orders/${poId}/cancel`, { method: 'PUT' });
+  const handleCancelPo = async () => {
+    if (!selectedPo) return;
+    const res = await apiFetch(`/api/purchase/purchase-orders/${selectedPo.id}/cancel`, { method: 'PUT' });
     if (res.success) {
-      success('PO Cancelled', `Purchase order #${poId} has been cancelled`);
+      success('PO Cancelled (အမှာစာ ဖျက်သိမ်းပြီးပါပြီ)');
+      setCancelConfirmOpen(false);
+      setPoSheetOpen(false);
       loadPurchasingData();
-      if (selectedPo?.id === poId) setPoSheetOpen(false);
     } else {
       error('Cancel failed', res.message);
     }
   };
 
-  // Open Receipt Modal from a confirmed PO
-  const handleOpenCreateReceipt = (po: PurchaseOrder) => {
-    setSelectedPo(po);
-    const receiptItems = (po.items || []).map(it => ({
+  // Open Receipt Modal from PO
+  const handleOpenCreateReceipt = async (po: PurchaseOrder) => {
+    const detailRes = await apiFetch<PurchaseOrder>(`/api/purchase/purchase-orders/${po.id}`);
+    const fullPo = detailRes.success && detailRes.data ? detailRes.data : po;
+    setSelectedPo(fullPo);
+
+    const receiptItems = (fullPo.items || []).map(it => ({
       purchaseOrderItemId: it.id!,
       productId: it.productId,
       uomId: it.uomId,
@@ -224,7 +241,7 @@ export default function PurchasingPage() {
     }));
 
     setReceiptForm({
-      purchaseOrderId: String(po.id),
+      purchaseOrderId: String(fullPo.id),
       warehouseId: warehouses[0]?.id ? String(warehouses[0].id) : '',
       receivedDate: new Date().toISOString().split('T')[0],
       items: receiptItems,
@@ -251,8 +268,8 @@ export default function PurchasingPage() {
         uomId: it.uomId,
         qty: Number(it.qty),
         rate: Number(it.rate),
-        amount: Number(it.amount),
-        isFoc: it.isFoc,
+        amount: it.isFoc ? 0 : Number(it.amount),
+        isFoc: Boolean(it.isFoc),
       })),
     };
 
@@ -262,7 +279,7 @@ export default function PurchasingPage() {
     });
 
     if (res.success) {
-      success('Purchase Receipt Created', 'Draft Goods Receipt saved');
+      success('Goods Receipt Saved (ကုန်လက်ခံလွှာ မူကြမ်းသိမ်းဆည်းပြီးပါပြီ)');
       setReceiptDialogOpen(false);
       loadPurchasingData();
     } else {
@@ -270,16 +287,23 @@ export default function PurchasingPage() {
     }
   };
 
+  // Inspect Receipt Details
+  const inspectReceipt = async (receipt: PurchaseReceipt) => {
+    const detailRes = await apiFetch<PurchaseReceipt>(`/api/purchase/purchase-receipts/${receipt.id}`);
+    setSelectedReceipt(detailRes.success && detailRes.data ? detailRes.data : receipt);
+    setReceiptSheetOpen(true);
+  };
+
   // Post Receipt (Triggers Inventory Stock + GL Double Entry Journal Entry!)
   const handlePostReceipt = async (receiptId: number) => {
     const res = await apiFetch(`/api/purchase/purchase-receipts/${receiptId}/post`, { method: 'PUT' });
     if (res.success) {
       success(
-        'Receipt Posted & GL Synced!',
+        'Receipt Posted & GL Synced! (စတော့စာရင်း တိုးပြီး စာရင်းချုပ်သွင်းပြီးပါပြီ)',
         'Inventory stock increased and double-entry AP journal entry auto-generated.'
       );
       loadPurchasingData();
-      if (selectedReceipt?.id === receiptId) setReceiptSheetOpen(false);
+      if (selectedReceipt?.id === receiptId) inspectReceipt(selectedReceipt);
     } else {
       error('Post failed', res.message);
     }
@@ -288,7 +312,7 @@ export default function PurchasingPage() {
   // PO Table Columns
   const poColumns: Column<PurchaseOrder>[] = [
     { header: 'PO Number', accessorKey: 'poNo', sortable: true, className: 'font-mono font-bold text-blue-600' },
-    { header: 'Supplier', cell: r => r.supplier?.name || `Supplier #${r.supplierId}` },
+    { header: 'Supplier (ကုန်သွင်းသူ)', cell: r => r.supplier?.name || `Supplier #${r.supplierId}` },
     { header: 'Order Date', cell: r => formatDate(r.orderDate), sortable: true },
     { header: 'Delivery Date', cell: r => formatDate(r.deliveryDate) },
     { header: 'Status', cell: r => <StatusBadge status={r.status} /> },
@@ -300,10 +324,7 @@ export default function PurchasingPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
-              setSelectedPo(r);
-              setPoSheetOpen(true);
-            }}
+            onClick={() => inspectPo(r)}
             className="h-7 text-xs"
           >
             <Eye className="h-3.5 w-3.5" />
@@ -327,7 +348,7 @@ export default function PurchasingPage() {
               onClick={() => handleOpenCreateReceipt(r)}
               className="h-7 text-xs gap-1"
             >
-              <PackageCheck className="h-3.5 w-3.5" /> Receive
+              <PackageCheck className="h-3.5 w-3.5" /> Receive Goods
             </Button>
           )}
         </div>
@@ -350,10 +371,7 @@ export default function PurchasingPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
-              setSelectedReceipt(r);
-              setReceiptSheetOpen(true);
-            }}
+            onClick={() => inspectReceipt(r)}
             className="h-7 text-xs"
           >
             <Eye className="h-3.5 w-3.5" />
@@ -380,10 +398,10 @@ export default function PurchasingPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Purchasing & Goods Receipts
+            Purchasing & Goods Receipts (အဝယ်နှင့် ကုန်လက်ခံလွှာများ)
           </h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Procurement workflow: Purchase Orders → Goods Receipts → Real-time Stock increment & AP GL entries.
+            Procurement workflow: Purchase Orders → Goods Receipts → Real-time Stock increment & AP General Ledger entries.
           </p>
         </div>
 
@@ -394,7 +412,7 @@ export default function PurchasingPage() {
           </Button>
           <Button variant="primary" size="sm" onClick={() => setPoDialogOpen(true)} className="gap-1.5 h-8 text-xs">
             <Plus className="h-3.5 w-3.5" />
-            <span>+ New Purchase Order</span>
+            <span>+ New Purchase Order (အမှာစာအသစ်)</span>
           </Button>
         </div>
       </div>
@@ -403,10 +421,10 @@ export default function PurchasingPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-zinc-100 dark:bg-zinc-800">
           <TabsTrigger value="orders" count={orders.length}>
-            Purchase Orders
+            Purchase Orders (အဝယ်အမှာစာများ)
           </TabsTrigger>
           <TabsTrigger value="receipts" count={receipts.length}>
-            Goods Receipts
+            Goods Receipts (ကုန်လက်ခံလွှာများ)
           </TabsTrigger>
         </TabsList>
 
@@ -415,13 +433,10 @@ export default function PurchasingPage() {
           <DataTable
             data={orders}
             columns={poColumns}
-            searchPlaceholder="Search purchase orders..."
+            searchPlaceholder="Search purchase orders by PO# or supplier..."
             searchKey="poNo"
             isLoading={isLoading}
-            onRowClick={r => {
-              setSelectedPo(r);
-              setPoSheetOpen(true);
-            }}
+            onRowClick={r => inspectPo(r)}
           />
         </TabsContent>
 
@@ -430,23 +445,20 @@ export default function PurchasingPage() {
           <DataTable
             data={receipts}
             columns={receiptColumns}
-            searchPlaceholder="Search receipts..."
+            searchPlaceholder="Search receipts by GR# or PO#..."
             searchKey="receiptNo"
             isLoading={isLoading}
-            onRowClick={r => {
-              setSelectedReceipt(r);
-              setReceiptSheetOpen(true);
-            }}
+            onRowClick={r => inspectReceipt(r)}
           />
         </TabsContent>
       </Tabs>
 
       {/* ─── MODAL: NEW PURCHASE ORDER ──────────────────────────────── */}
-      <Dialog open={poDialogOpen} onOpenChange={setPoDialogOpen} title="Create Purchase Order" maxWidth="2xl">
+      <Dialog open={poDialogOpen} onOpenChange={setPoDialogOpen} title="Create Purchase Order (အဝယ်အမှာစာအသစ်ဖွင့်ရန်)" maxWidth="2xl">
         <form onSubmit={handleCreatePo} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Select
-              label="Supplier *"
+              label="Supplier (ကုန်သွင်းသူ) *"
               value={poForm.supplierId}
               onChange={e => setPoForm({ ...poForm, supplierId: e.target.value })}
               required
@@ -461,7 +473,7 @@ export default function PurchasingPage() {
 
             <Input
               type="date"
-              label="Order Date *"
+              label="Order Date (မှာယူသည့်ရက်) *"
               value={poForm.orderDate}
               onChange={e => setPoForm({ ...poForm, orderDate: e.target.value })}
               required
@@ -469,7 +481,7 @@ export default function PurchasingPage() {
 
             <Input
               type="date"
-              label="Expected Delivery Date"
+              label="Expected Delivery Date (မျှော်မှန်းရက်)"
               value={poForm.deliveryDate}
               onChange={e => setPoForm({ ...poForm, deliveryDate: e.target.value })}
             />
@@ -478,7 +490,9 @@ export default function PurchasingPage() {
           {/* Line items table */}
           <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">Order Items</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                Order Items (မှာယူမည့်ပစ္စည်းများ)
+              </h4>
               <Button type="button" variant="outline" size="sm" onClick={addPoItem} className="h-7 text-xs gap-1">
                 <Plus className="h-3 w-3" /> Add Item
               </Button>
@@ -535,12 +549,23 @@ export default function PurchasingPage() {
                       placeholder="Rate"
                       value={item.rate}
                       onChange={e => updatePoItem(idx, 'rate', e.target.value)}
-                      required
+                      disabled={item.isFoc}
+                      required={!item.isFoc}
                     />
                   </div>
 
-                  <div className="w-28 text-right font-semibold text-xs text-zinc-800 dark:text-zinc-200">
-                    {formatCurrency(item.amount)}
+                  <div className="flex items-center gap-1">
+                    <label className="text-[11px] font-semibold text-zinc-500">FOC</label>
+                    <input
+                      type="checkbox"
+                      checked={item.isFoc}
+                      onChange={e => updatePoItem(idx, 'isFoc', e.target.checked)}
+                      className="rounded border-zinc-300"
+                    />
+                  </div>
+
+                  <div className="w-24 text-right font-semibold text-xs text-zinc-800 dark:text-zinc-200">
+                    {item.isFoc ? <Badge variant="secondary">FOC</Badge> : formatCurrency(item.amount)}
                   </div>
 
                   <Button
@@ -559,8 +584,8 @@ export default function PurchasingPage() {
 
             {/* Total Footer */}
             <div className="flex justify-between items-center p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800/80 font-bold text-sm">
-              <span>Total Estimated Amount:</span>
-              <span className="text-blue-600 dark:text-blue-400">{formatCurrency(poTotalAmount)}</span>
+              <span>Total Estimated Amount (စုစုပေါင်း ကျသင့်ငွေ):</span>
+              <span className="text-blue-600 dark:text-blue-400 font-mono">{formatCurrency(poTotalAmount)}</span>
             </div>
           </div>
 
@@ -576,11 +601,11 @@ export default function PurchasingPage() {
       </Dialog>
 
       {/* ─── MODAL: NEW PURCHASE RECEIPT ────────────────────────────── */}
-      <Dialog open={receiptDialogOpen} onOpenChange={setReceiptDialogOpen} title="Create Goods Receipt" maxWidth="xl">
+      <Dialog open={receiptDialogOpen} onOpenChange={setReceiptDialogOpen} title="Create Goods Receipt (ကုန်လက်ခံလွှာ ဖန်တီးရန်)" maxWidth="xl">
         <form onSubmit={handleCreateReceipt} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <Select
-              label="Receiving Warehouse *"
+              label="Receiving Warehouse (လက်ခံမည့် ကုန်လှောင်ရုံ) *"
               value={receiptForm.warehouseId}
               onChange={e => setReceiptForm({ ...receiptForm, warehouseId: e.target.value })}
               required
@@ -595,7 +620,7 @@ export default function PurchasingPage() {
 
             <Input
               type="date"
-              label="Received Date *"
+              label="Received Date (လက်ခံသည့်ရက်) *"
               value={receiptForm.receivedDate}
               onChange={e => setReceiptForm({ ...receiptForm, receivedDate: e.target.value })}
               required
@@ -603,7 +628,7 @@ export default function PurchasingPage() {
           </div>
 
           <div className="space-y-2">
-            <h4 className="text-xs font-bold uppercase text-zinc-500">Items to Receive</h4>
+            <h4 className="text-xs font-bold uppercase text-zinc-500">Items to Receive (လက်ခံမည့် ပစ္စည်းများ)</h4>
             <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-800">
               {receiptForm.items.map((it, idx) => {
                 const prod = products.find(p => p.id === it.productId);
@@ -612,10 +637,12 @@ export default function PurchasingPage() {
                   <div key={idx} className="flex items-center justify-between p-3 text-xs">
                     <div>
                       <p className="font-semibold text-zinc-900 dark:text-zinc-100">{prod?.name || `Item #${it.productId}`}</p>
-                      <p className="text-[11px] text-zinc-500">Rate: {formatCurrency(it.rate)} / {uom?.symbol}</p>
+                      <p className="text-[11px] text-zinc-500">
+                        {it.isFoc ? 'FOC Free Item' : `Rate: ${formatCurrency(it.rate)} / ${uom?.symbol}`}
+                      </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <label className="text-[11px] text-zinc-500">Qty:</label>
+                      <label className="text-[11px] text-zinc-500">Received Qty:</label>
                       <input
                         type="number"
                         step="any"
@@ -623,7 +650,7 @@ export default function PurchasingPage() {
                         onChange={e => {
                           const val = Number(e.target.value);
                           const updated = [...receiptForm.items];
-                          updated[idx] = { ...it, qty: val, amount: val * it.rate };
+                          updated[idx] = { ...it, qty: val, amount: it.isFoc ? 0 : val * it.rate };
                           setReceiptForm({ ...receiptForm, items: updated });
                         }}
                         className="w-20 rounded border border-zinc-300 p-1 text-center font-bold dark:border-zinc-700"
@@ -647,21 +674,38 @@ export default function PurchasingPage() {
         </form>
       </Dialog>
 
+      {/* ─── MODAL: CANCEL PO CONFIRMATION ──────────────────────────── */}
+      <Dialog open={cancelConfirmOpen} onOpenChange={setCancelConfirmOpen} title="Cancel Purchase Order">
+        <div className="space-y-4">
+          <p className="text-xs text-zinc-600 dark:text-zinc-300">
+            Are you sure you want to cancel Purchase Order <span className="font-bold">{selectedPo?.poNo}</span>?
+          </p>
+          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setCancelConfirmOpen(false)}>
+              No, Keep Active
+            </Button>
+            <Button type="button" variant="destructive" onClick={handleCancelPo}>
+              Yes, Cancel PO
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
       {/* ─── CONTEXTUAL SHEET: PURCHASE ORDER INSPECTION ─────────────── */}
       <Sheet
         open={poSheetOpen}
         onOpenChange={setPoSheetOpen}
-        title={`Purchase Order ${selectedPo?.poNo || ''}`}
+        title={`Purchase Order: ${selectedPo?.poNo || ''}`}
         description={`Supplier: ${selectedPo?.supplier?.name || ''}`}
         footer={
           selectedPo && (
             <div className="flex items-center justify-between w-full">
-              <div className="flex gap-2">
+              <div>
                 {selectedPo.status === 'DRAFT' && (
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleCancelPo(selectedPo.id)}
+                    onClick={() => setCancelConfirmOpen(true)}
                     className="text-rose-600"
                   >
                     Cancel PO
@@ -697,7 +741,7 @@ export default function PurchasingPage() {
             {/* Overview cards */}
             <div className="grid grid-cols-2 gap-3 p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Status</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Order Status</p>
                 <div className="mt-1">
                   <StatusBadge status={selectedPo.status} />
                 </div>
@@ -707,19 +751,19 @@ export default function PurchasingPage() {
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{formatDate(selectedPo.orderDate)}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Supplier Phone</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Supplier Contact</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedPo.supplier?.phoneNumber || '-'}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Supplier Location</p>
-                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedPo.supplier?.location || '-'}</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Delivery Target</p>
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{formatDate(selectedPo.deliveryDate)}</p>
               </div>
             </div>
 
             {/* Line items list */}
             <div className="space-y-2">
               <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs">
-                Ordered Products
+                Ordered Products (မှာယူထားသော ပစ္စည်းများ)
               </h4>
               <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
                 {(selectedPo.items || []).map((it, idx) => (
@@ -727,13 +771,37 @@ export default function PurchasingPage() {
                     <div>
                       <p className="font-semibold text-zinc-900 dark:text-zinc-100">{it.product?.name || `Product #${it.productId}`}</p>
                       <p className="text-[11px] text-zinc-500">
-                        {it.qty} {it.uom?.symbol || ''} @ {formatCurrency(it.rate)}
+                        {it.qty} {it.uom?.symbol || ''} @ {formatCurrency(it.rate)} {it.isFoc && <Badge variant="secondary" className="ml-1">FOC</Badge>}
                       </p>
                     </div>
-                    <span className="font-bold text-zinc-900 dark:text-zinc-100">{formatCurrency(it.amount)}</span>
+                    <span className="font-bold font-mono text-zinc-900 dark:text-zinc-100">
+                      {it.isFoc ? '0.00' : formatCurrency(it.amount)}
+                    </span>
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Linked Receipts */}
+            <div className="space-y-2">
+              <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs">
+                Linked Goods Receipts (လက်ခံရရှိမှု မှတ်တမ်းများ)
+              </h4>
+              {(selectedPo.receipts || []).length > 0 ? (
+                <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                  {selectedPo.receipts?.map((r, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3">
+                      <div>
+                        <p className="font-mono font-bold text-emerald-600">{r.receiptNo}</p>
+                        <p className="text-[11px] text-zinc-500">{formatDate(r.receivedDate)}</p>
+                      </div>
+                      <StatusBadge status={r.status} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-zinc-400 italic">No goods receipts posted yet.</p>
+              )}
             </div>
           </div>
         )}
@@ -743,8 +811,8 @@ export default function PurchasingPage() {
       <Sheet
         open={receiptSheetOpen}
         onOpenChange={setReceiptSheetOpen}
-        title={`Goods Receipt ${selectedReceipt?.receiptNo || ''}`}
-        description={`PO: ${selectedReceipt?.purchaseOrder?.poNo || ''}`}
+        title={`Goods Receipt: ${selectedReceipt?.receiptNo || ''}`}
+        description={`PO Reference: ${selectedReceipt?.purchaseOrder?.poNo || ''}`}
         footer={
           selectedReceipt && selectedReceipt.status === 'DRAFT' && (
             <div className="flex justify-end gap-2 w-full">
@@ -778,16 +846,16 @@ export default function PurchasingPage() {
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{formatDate(selectedReceipt.receivedDate)}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">GL Synchronization</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">GL Double-Entry Sync</p>
                 <p className="font-semibold text-emerald-600 mt-1">
-                  {selectedReceipt.status === 'POSTED' ? '✓ Auto-Posted to AP' : 'Pending Post'}
+                  {selectedReceipt.status === 'POSTED' ? '✓ Auto-Posted (Inventory DR / AP CR)' : 'Pending Post'}
                 </p>
               </div>
             </div>
 
             <div className="space-y-2">
               <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs">
-                Received Products
+                Received Products (လက်ခံရရှိသော ပစ္စည်းများ)
               </h4>
               <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
                 {(selectedReceipt.items || []).map((it, idx) => (
@@ -795,10 +863,12 @@ export default function PurchasingPage() {
                     <div>
                       <p className="font-semibold text-zinc-900 dark:text-zinc-100">{it.product?.name || `Product #${it.productId}`}</p>
                       <p className="text-[11px] text-zinc-500">
-                        {it.qty} {it.uom?.symbol || ''} @ {formatCurrency(it.rate)}
+                        {it.qty} {it.uom?.symbol || ''} @ {formatCurrency(it.rate)} {it.isFoc && <Badge variant="secondary" className="ml-1">FOC</Badge>}
                       </p>
                     </div>
-                    <span className="font-bold text-zinc-900 dark:text-zinc-100">{formatCurrency(it.amount)}</span>
+                    <span className="font-bold font-mono text-zinc-900 dark:text-zinc-100">
+                      {it.isFoc ? '0.00' : formatCurrency(it.amount)}
+                    </span>
                   </div>
                 ))}
               </div>

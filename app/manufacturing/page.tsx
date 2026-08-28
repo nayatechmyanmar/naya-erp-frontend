@@ -11,6 +11,8 @@ import {
   RefreshCw,
   Layers,
   Sparkles,
+  ArrowRight,
+  Package,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api/bff-client';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -22,6 +24,7 @@ import { Dialog } from '@/components/ui/dialog';
 import { Sheet } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { formatQuantity, formatDate } from '@/lib/utils';
 import {
@@ -49,7 +52,10 @@ export default function ManufacturingPage() {
   const [bomDialogOpen, setBomDialogOpen] = React.useState(false);
   const [prodDialogOpen, setProdDialogOpen] = React.useState(false);
   const [completeDialogOpen, setCompleteDialogOpen] = React.useState(false);
+  const [deleteBomConfirmOpen, setDeleteBomConfirmOpen] = React.useState(false);
+  const [selectedBom, setSelectedBom] = React.useState<BOM | null>(null);
   const [selectedProd, setSelectedProd] = React.useState<ProductionOrder | null>(null);
+  const [bomSheetOpen, setBomSheetOpen] = React.useState(false);
   const [prodSheetOpen, setProdSheetOpen] = React.useState(false);
 
   // BOM Form State
@@ -138,7 +144,7 @@ export default function ManufacturingPage() {
   const handleCreateBom = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!bomForm.name || !bomForm.outputProductId || !bomForm.outputUomId) {
-      error('Please complete all required fields');
+      error('Please complete all required fields (အချက်အလက်များ ပြည့်စုံစွာ ဖြည့်ပါ)');
       return;
     }
 
@@ -160,7 +166,7 @@ export default function ManufacturingPage() {
     });
 
     if (res.success) {
-      success('BOM Created', `Added recipe for ${bomForm.name}`);
+      success('BOM Recipe Created (ကုန်ကြမ်းဖော်စပ်နည်း သိမ်းဆည်းပြီးပါပြီ)');
       setBomDialogOpen(false);
       setBomForm({
         name: '',
@@ -175,6 +181,34 @@ export default function ManufacturingPage() {
     }
   };
 
+  // Delete BOM
+  const handleDeleteBom = async () => {
+    if (!selectedBom) return;
+    const res = await apiFetch(`/api/manufacturing/boms/${selectedBom.id}`, { method: 'DELETE' });
+    if (res.success) {
+      success('BOM Deleted', `${selectedBom.name} removed`);
+      setDeleteBomConfirmOpen(false);
+      setBomSheetOpen(false);
+      loadManufacturingData();
+    } else {
+      error('Delete failed', res.message);
+    }
+  };
+
+  // Open Production Modal directly from a BOM
+  const launchProductionFromBom = (bom: BOM) => {
+    setBomSheetOpen(false);
+    setProdForm({
+      bomId: String(bom.id),
+      outputProductId: String(bom.outputProductId),
+      outputUomId: String(bom.outputUomId),
+      plannedQty: bom.outputQty,
+      outputWarehouseId: warehouses[0]?.id ? String(warehouses[0].id) : '',
+      productionDate: new Date().toISOString().split('T')[0],
+    });
+    setProdDialogOpen(true);
+  };
+
   // Submit Production Order
   const handleCreateProdOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -183,13 +217,13 @@ export default function ManufacturingPage() {
       return;
     }
 
-    const selectedBom = boms.find(b => b.id === Number(prodForm.bomId));
-    if (!selectedBom) return;
+    const b = boms.find(item => item.id === Number(prodForm.bomId));
+    if (!b) return;
 
     const payload = {
       bomId: Number(prodForm.bomId),
-      outputProductId: selectedBom.outputProductId,
-      outputUomId: selectedBom.outputUomId,
+      outputProductId: b.outputProductId,
+      outputUomId: b.outputUomId,
       plannedQty: Number(prodForm.plannedQty),
       outputWarehouseId: Number(prodForm.outputWarehouseId),
       productionDate: prodForm.productionDate,
@@ -202,7 +236,7 @@ export default function ManufacturingPage() {
     });
 
     if (res.success) {
-      success('Production Order Created', 'Calculated required raw materials from BOM automatically');
+      success('Production Order Launched (ထုတ်လုပ်မှု အမှာစာ ဖွင့်ပြီးပါပြီ)');
       setProdDialogOpen(false);
       loadManufacturingData();
     } else {
@@ -214,17 +248,30 @@ export default function ManufacturingPage() {
   const handleStartProdOrder = async (id: number) => {
     const res = await apiFetch(`/api/manufacturing/production-orders/${id}/start`, { method: 'PUT' });
     if (res.success) {
-      success('Production Started', `Order #${id} is now IN PROGRESS`);
+      success('Production Started (ထုတ်လုပ်မှု စတင်ပါပြီ)');
       loadManufacturingData();
-      if (selectedProd?.id === id) setProdSheetOpen(false);
+      if (selectedProd?.id === id) inspectProd(selectedProd);
     } else {
       error('Failed to start order', res.message);
     }
   };
 
+  // Inspect Production Order
+  const inspectProd = async (prod: ProductionOrder) => {
+    const detailRes = await apiFetch<ProductionOrder>(`/api/manufacturing/production-orders/${prod.id}`);
+    setSelectedProd(detailRes.success && detailRes.data ? detailRes.data : prod);
+    setProdSheetOpen(true);
+  };
+
+  // Inspect BOM
+  const inspectBom = async (bom: BOM) => {
+    const detailRes = await apiFetch<BOM>(`/api/manufacturing/boms/${bom.id}`);
+    setSelectedBom(detailRes.success && detailRes.data ? detailRes.data : bom);
+    setBomSheetOpen(true);
+  };
+
   // Open Complete Dialog
   const handleOpenCompleteDialog = async (prod: ProductionOrder) => {
-    // Fetch full order details to get materials and outputs
     const detailRes = await apiFetch<ProductionOrder>(`/api/manufacturing/production-orders/${prod.id}`);
     const fullOrder = detailRes.success && detailRes.data ? detailRes.data : prod;
     setSelectedProd(fullOrder);
@@ -258,7 +305,7 @@ export default function ManufacturingPage() {
   const handleCompleteProdOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedProd || !completeForm.inputWarehouseId) {
-      error('Please select raw material input warehouse');
+      error('Please select raw material input warehouse (ကုန်ကြမ်းထုတ်ယူမည့် ကုန်လှောင်ရုံရွေးပါ)');
       return;
     }
 
@@ -282,8 +329,8 @@ export default function ManufacturingPage() {
 
     if (res.success) {
       success(
-        'Production Completed!',
-        'Materials consumed from warehouse & finished goods added to finished warehouse.'
+        'Production Completed & Stock Updated! (ထုတ်လုပ်မှု အောင်မြင်ပြီး စတော့စာရင်း ဖြည့်သွင်းပြီးပါပြီ)',
+        'Raw materials consumed & finished goods added to warehouse stock.'
       );
       setCompleteDialogOpen(false);
       loadManufacturingData();
@@ -296,8 +343,8 @@ export default function ManufacturingPage() {
   // Production Order Columns
   const prodColumns: Column<ProductionOrder>[] = [
     { header: 'Order No', accessorKey: 'productionNo', sortable: true, className: 'font-mono font-bold text-purple-600' },
-    { header: 'Output Product', cell: r => r.outputProduct?.name || `Product #${r.outputProductId}` },
-    { header: 'BOM', cell: r => r.bom?.name || `BOM #${r.bomId}` },
+    { header: 'Output Product (ထွက်ရှိမည့်ပစ္စည်း)', cell: r => r.outputProduct?.name || `Product #${r.outputProductId}` },
+    { header: 'BOM Recipe', cell: r => r.bom?.name || `BOM #${r.bomId}` },
     {
       header: 'Planned Quantity',
       cell: r => `${formatQuantity(r.plannedQty)} ${r.outputUom?.symbol || ''}`,
@@ -314,11 +361,7 @@ export default function ManufacturingPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={async () => {
-              const detailRes = await apiFetch<ProductionOrder>(`/api/manufacturing/production-orders/${r.id}`);
-              setSelectedProd(detailRes.success && detailRes.data ? detailRes.data : r);
-              setProdSheetOpen(true);
-            }}
+            onClick={() => inspectProd(r)}
             className="h-7 text-xs"
           >
             <Eye className="h-3.5 w-3.5" />
@@ -353,18 +396,42 @@ export default function ManufacturingPage() {
   // BOM Columns
   const bomColumns: Column<BOM>[] = [
     { header: 'ID', accessorKey: 'id', sortable: true },
-    { header: 'BOM / Recipe Name', accessorKey: 'name', sortable: true, className: 'font-semibold' },
+    { header: 'BOM / Recipe Name (ဖော်စပ်နည်းအမည်)', accessorKey: 'name', sortable: true, className: 'font-semibold' },
     { header: 'Target Output Product', cell: r => r.outputProduct?.name || `Product #${r.outputProductId}` },
     {
       header: 'Batch Yield',
       cell: r => `${formatQuantity(r.outputQty)} ${r.outputUom?.symbol || ''}`,
     },
     {
-      header: 'Ingredients',
+      header: 'Ingredients (ပါဝင်သော ကုန်ကြမ်းများ)',
       cell: r => (
-        <span className="text-xs text-zinc-500">
+        <span className="text-xs text-zinc-500 font-medium">
           {(r.ingredients || []).length} components
         </span>
+      ),
+    },
+    {
+      header: 'Actions',
+      className: 'text-right',
+      cell: r => (
+        <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => inspectBom(r)}
+            className="h-7 text-xs"
+          >
+            <Eye className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => launchProductionFromBom(r)}
+            className="h-7 text-xs gap-1 text-purple-600"
+          >
+            <Play className="h-3 w-3" /> Run
+          </Button>
+        </div>
       ),
     },
   ];
@@ -375,7 +442,7 @@ export default function ManufacturingPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Manufacturing & Production
+            Manufacturing & Production (ထုတ်လုပ်မှု လုပ်ငန်းစဉ်များ)
           </h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Bill of Materials (BOM) recipes, production runs, raw material consumption, and finished goods stock output.
@@ -389,11 +456,11 @@ export default function ManufacturingPage() {
           </Button>
           <Button variant="outline" size="sm" onClick={() => setBomDialogOpen(true)} className="gap-1.5 h-8 text-xs">
             <Layers className="h-3.5 w-3.5" />
-            <span>+ New BOM</span>
+            <span>+ New BOM (ဖော်စပ်နည်းအသစ်)</span>
           </Button>
           <Button variant="primary" size="sm" onClick={() => setProdDialogOpen(true)} className="gap-1.5 h-8 text-xs">
             <Plus className="h-3.5 w-3.5" />
-            <span>+ Production Run</span>
+            <span>+ Production Run (ထုတ်လုပ်မှုစတင်ရန်)</span>
           </Button>
         </div>
       </div>
@@ -402,10 +469,10 @@ export default function ManufacturingPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-zinc-100 dark:bg-zinc-800">
           <TabsTrigger value="orders" count={productionOrders.length}>
-            Production Orders
+            Production Orders (ထုတ်လုပ်မှု အမှာစာများ)
           </TabsTrigger>
           <TabsTrigger value="boms" count={boms.length}>
-            Bill of Materials (BOM)
+            Bill of Materials (BOM ဖော်စပ်နည်းများ)
           </TabsTrigger>
         </TabsList>
 
@@ -414,14 +481,10 @@ export default function ManufacturingPage() {
           <DataTable
             data={productionOrders}
             columns={prodColumns}
-            searchPlaceholder="Search production orders..."
+            searchPlaceholder="Search production orders by PROD# or output product..."
             searchKey="productionNo"
             isLoading={isLoading}
-            onRowClick={async r => {
-              const detailRes = await apiFetch<ProductionOrder>(`/api/manufacturing/production-orders/${r.id}`);
-              setSelectedProd(detailRes.success && detailRes.data ? detailRes.data : r);
-              setProdSheetOpen(true);
-            }}
+            onRowClick={r => inspectProd(r)}
           />
         </TabsContent>
 
@@ -433,15 +496,16 @@ export default function ManufacturingPage() {
             searchPlaceholder="Search recipes & BOMs..."
             searchKey="name"
             isLoading={isLoading}
+            onRowClick={r => inspectBom(r)}
           />
         </TabsContent>
       </Tabs>
 
       {/* ─── MODAL: NEW BOM ─────────────────────────────────────────── */}
-      <Dialog open={bomDialogOpen} onOpenChange={setBomDialogOpen} title="Create Bill of Materials (BOM)" maxWidth="xl">
+      <Dialog open={bomDialogOpen} onOpenChange={setBomDialogOpen} title="Create Bill of Materials (BOM ဖော်စပ်နည်းအသစ်)" maxWidth="xl">
         <form onSubmit={handleCreateBom} className="space-y-4">
           <Input
-            label="BOM Name *"
+            label="BOM Recipe Name (ဖော်စပ်နည်းအမည်) *"
             placeholder="e.g. Bean Cake 100 pcs Standard Batch"
             value={bomForm.name}
             onChange={e => setBomForm({ ...bomForm, name: e.target.value })}
@@ -450,7 +514,7 @@ export default function ManufacturingPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Select
-              label="Output Finished Product *"
+              label="Output Finished Product (ထွက်ရှိမည့် အချောထည်) *"
               value={bomForm.outputProductId}
               onChange={e => {
                 const pId = e.target.value;
@@ -472,7 +536,7 @@ export default function ManufacturingPage() {
             </Select>
 
             <Select
-              label="Output Unit *"
+              label="Output Unit (ယူနစ်) *"
               value={bomForm.outputUomId}
               onChange={e => setBomForm({ ...bomForm, outputUomId: e.target.value })}
               required
@@ -488,7 +552,7 @@ export default function ManufacturingPage() {
             <Input
               type="number"
               step="any"
-              label="Batch Output Qty *"
+              label="Batch Output Qty (အရေအတွက်) *"
               value={bomForm.outputQty}
               onChange={e => setBomForm({ ...bomForm, outputQty: Number(e.target.value) })}
               required
@@ -498,7 +562,7 @@ export default function ManufacturingPage() {
           {/* Ingredients list */}
           <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold uppercase text-zinc-500">Required Ingredients / Raw Materials</h4>
+              <h4 className="text-xs font-bold uppercase text-zinc-500">Required Ingredients (ပါဝင်သော ကုန်ကြမ်းများ)</h4>
               <Button type="button" variant="outline" size="sm" onClick={addBomIngredient} className="h-7 text-xs gap-1">
                 <Plus className="h-3 w-3" /> Add Ingredient
               </Button>
@@ -513,7 +577,7 @@ export default function ManufacturingPage() {
                       onChange={e => updateBomIngredient(idx, 'productId', e.target.value)}
                       required
                     >
-                      <option value="">Select Material...</option>
+                      <option value="">Select Raw Material...</option>
                       {products.map(p => (
                         <option key={p.id} value={p.id}>
                           {p.name} ({p.sku})
@@ -575,10 +639,10 @@ export default function ManufacturingPage() {
       </Dialog>
 
       {/* ─── MODAL: NEW PRODUCTION ORDER ────────────────────────────── */}
-      <Dialog open={prodDialogOpen} onOpenChange={setProdDialogOpen} title="Launch Production Run" maxWidth="lg">
+      <Dialog open={prodDialogOpen} onOpenChange={setProdDialogOpen} title="Launch Production Run (ထုတ်လုပ်မှု အမှာစာသစ်)" maxWidth="lg">
         <form onSubmit={handleCreateProdOrder} className="space-y-4">
           <Select
-            label="Bill of Materials (BOM) *"
+            label="Bill of Materials (BOM Recipe) *"
             value={prodForm.bomId}
             onChange={e => setProdForm({ ...prodForm, bomId: e.target.value })}
             required
@@ -586,7 +650,7 @@ export default function ManufacturingPage() {
             <option value="">Select BOM Recipe...</option>
             {boms.map(b => (
               <option key={b.id} value={b.id}>
-                {b.name} (Outputs: {b.outputProduct?.name || b.outputProductId})
+                {b.name} (Output: {b.outputProduct?.name || b.outputProductId})
               </option>
             ))}
           </Select>
@@ -595,14 +659,14 @@ export default function ManufacturingPage() {
             <Input
               type="number"
               step="any"
-              label="Planned Output Quantity *"
+              label="Planned Output Quantity (ထုတ်လုပ်မည့် အရေအတွက်) *"
               value={prodForm.plannedQty}
               onChange={e => setProdForm({ ...prodForm, plannedQty: Number(e.target.value) })}
               required
             />
 
             <Select
-              label="Destination Warehouse *"
+              label="Destination Finished Goods WH (သိမ်းဆည်းမည့် ကုန်လှောင်ရုံ) *"
               value={prodForm.outputWarehouseId}
               onChange={e => setProdForm({ ...prodForm, outputWarehouseId: e.target.value })}
               required
@@ -618,7 +682,7 @@ export default function ManufacturingPage() {
 
           <Input
             type="date"
-            label="Production Date *"
+            label="Production Date (ထုတ်လုပ်မည့် ရက်စွဲ) *"
             value={prodForm.productionDate}
             onChange={e => setProdForm({ ...prodForm, productionDate: e.target.value })}
             required
@@ -636,10 +700,10 @@ export default function ManufacturingPage() {
       </Dialog>
 
       {/* ─── MODAL: COMPLETE PRODUCTION RUN ─────────────────────────── */}
-      <Dialog open={completeDialogOpen} onOpenChange={setCompleteDialogOpen} title="Complete Production Order" maxWidth="xl">
+      <Dialog open={completeDialogOpen} onOpenChange={setCompleteDialogOpen} title="Complete Production Order (ထုတ်လုပ်မှု အပြီးသတ်ခြင်း)" maxWidth="xl">
         <form onSubmit={handleCompleteProdOrder} className="space-y-4">
           <Select
-            label="Raw Material Input Warehouse *"
+            label="Raw Material Input Warehouse (ကုန်ကြမ်း ထုတ်ယူသည့် ကုန်လှောင်ရုံ) *"
             value={completeForm.inputWarehouseId}
             onChange={e => setCompleteForm({ ...completeForm, inputWarehouseId: e.target.value })}
             required
@@ -654,7 +718,7 @@ export default function ManufacturingPage() {
 
           {/* Consumed Materials Actuals */}
           <div className="space-y-2">
-            <h4 className="text-xs font-bold uppercase text-zinc-500">Actual Materials Consumed (Stock Out)</h4>
+            <h4 className="text-xs font-bold uppercase text-zinc-500">Actual Materials Consumed (အမှန်တကယ် သုံးစွဲခဲ့သော ကုန်ကြမ်းများ)</h4>
             <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-800">
               {completeForm.materials.map((m, idx) => (
                 <div key={idx} className="flex items-center justify-between p-3 text-xs">
@@ -670,7 +734,7 @@ export default function ManufacturingPage() {
                         updated[idx] = { ...m, actualQty: val };
                         setCompleteForm({ ...completeForm, materials: updated });
                       }}
-                      className="w-24 rounded border border-zinc-300 p-1 text-center font-bold dark:border-zinc-700"
+                      className="w-24 rounded border border-zinc-300 p-1 text-center font-bold font-mono dark:border-zinc-700"
                     />
                     <span>{m.uom}</span>
                   </div>
@@ -681,7 +745,7 @@ export default function ManufacturingPage() {
 
           {/* Produced Output Actuals */}
           <div className="space-y-2">
-            <h4 className="text-xs font-bold uppercase text-zinc-500">Actual Finished Output (Stock In)</h4>
+            <h4 className="text-xs font-bold uppercase text-zinc-500">Actual Finished Output (အမှန်တကယ် ထွက်ရှိလာသော အချောထည်)</h4>
             <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-800">
               {completeForm.outputs.map((o, idx) => (
                 <div key={idx} className="flex items-center justify-between p-3 text-xs">
@@ -697,7 +761,7 @@ export default function ManufacturingPage() {
                         updated[idx] = { ...o, qty: val };
                         setCompleteForm({ ...completeForm, outputs: updated });
                       }}
-                      className="w-24 rounded border border-zinc-300 p-1 text-center font-bold dark:border-zinc-700"
+                      className="w-24 rounded border border-zinc-300 p-1 text-center font-bold font-mono dark:border-zinc-700"
                     />
                     <span>{o.uom}</span>
                   </div>
@@ -711,17 +775,97 @@ export default function ManufacturingPage() {
               Cancel
             </Button>
             <Button type="submit" variant="primary" className="bg-emerald-600 hover:bg-emerald-700">
-              Complete & Post Movements
+              Complete & Update Inventory
             </Button>
           </div>
         </form>
       </Dialog>
 
+      {/* ─── MODAL: DELETE BOM CONFIRMATION ─────────────────────────── */}
+      <Dialog open={deleteBomConfirmOpen} onOpenChange={setDeleteBomConfirmOpen} title="Delete BOM Recipe">
+        <div className="space-y-4">
+          <p className="text-xs text-zinc-600 dark:text-zinc-300">
+            Are you sure you want to delete BOM recipe <span className="font-bold">{selectedBom?.name}</span>?
+          </p>
+          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setDeleteBomConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" variant="destructive" onClick={handleDeleteBom}>
+              Delete BOM
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* ─── CONTEXTUAL SHEET: BOM INSPECTION ───────────────────────── */}
+      <Sheet
+        open={bomSheetOpen}
+        onOpenChange={setBomSheetOpen}
+        title={selectedBom?.name || 'BOM Recipe'}
+        description={`Target Output: ${selectedBom?.outputProduct?.name || ''}`}
+        footer={
+          selectedBom && (
+            <div className="flex items-center justify-between w-full">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setDeleteBomConfirmOpen(true)}
+                className="text-rose-600"
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete BOM
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => launchProductionFromBom(selectedBom)}
+                className="bg-purple-600 hover:bg-purple-700 gap-1"
+              >
+                <Play className="h-3.5 w-3.5" /> Launch Production Run
+              </Button>
+            </div>
+          )
+        }
+      >
+        {selectedBom && (
+          <div className="space-y-6 text-xs">
+            <div className="grid grid-cols-2 gap-3 p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
+              <div>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Batch Yield Output</p>
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1 font-mono">
+                  {formatQuantity(selectedBom.outputQty)} {selectedBom.outputUom?.symbol || ''}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Finished Product</p>
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedBom.outputProduct?.name}</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs">
+                Ingredients Formula (ကုန်ကြမ်း ပါဝင်မှုနှုန်းထား)
+              </h4>
+              <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                {(selectedBom.ingredients || []).map((ing, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-3">
+                    <span className="font-semibold">{ing.product?.name || `Material #${ing.productId}`}</span>
+                    <span className="font-bold font-mono">
+                      {formatQuantity(ing.qty)} {ing.uom?.symbol || ''}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </Sheet>
+
       {/* ─── CONTEXTUAL SHEET: PRODUCTION ORDER INSPECTION ──────────── */}
       <Sheet
         open={prodSheetOpen}
         onOpenChange={setProdSheetOpen}
-        title={`Production Run ${selectedProd?.productionNo || ''}`}
+        title={`Production Order: ${selectedProd?.productionNo || ''}`}
         description={`Output: ${selectedProd?.outputProduct?.name || ''}`}
         footer={
           selectedProd && (
@@ -757,14 +901,14 @@ export default function ManufacturingPage() {
           <div className="space-y-6 text-xs">
             <div className="grid grid-cols-2 gap-3 p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Status</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Order Status</p>
                 <div className="mt-1">
                   <StatusBadge status={selectedProd.status} />
                 </div>
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase text-zinc-400">Planned Output</p>
-                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1 font-mono">
                   {formatQuantity(selectedProd.plannedQty)} {selectedProd.outputUom?.symbol || ''}
                 </p>
               </div>
@@ -781,13 +925,13 @@ export default function ManufacturingPage() {
             {/* Consumed Materials */}
             <div className="space-y-2">
               <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs">
-                Material Consumption Breakdown
+                Material Consumption Breakdown (ကုန်ကြမ်း သုံးစွဲမှု အခြေအနေ)
               </h4>
               <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
                 {(selectedProd.materials || []).map((m, idx) => (
                   <div key={idx} className="flex items-center justify-between p-3">
                     <span className="font-semibold">{m.product?.name || `Material #${m.productId}`}</span>
-                    <div className="text-right">
+                    <div className="text-right font-mono">
                       <span className="font-bold">
                         Planned: {formatQuantity(m.plannedQty)} {m.uom?.symbol}
                       </span>

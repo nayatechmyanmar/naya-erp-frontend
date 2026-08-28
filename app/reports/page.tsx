@@ -11,6 +11,9 @@ import {
   Calendar,
   Filter,
   RefreshCw,
+  Printer,
+  TrendingDown,
+  AlertTriangle,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api/bff-client';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -73,6 +76,7 @@ export default function ReportsPage() {
   // Aggregate Calculations
   const totalStockQty = stock.reduce((sum, s) => sum + Number(s.onHandQty || 0), 0);
   const totalMovementCost = movements.reduce((sum, m) => sum + Number(m.totalCost || 0), 0);
+  const lowStockCount = stock.filter(s => Number(s.onHandQty) <= 10).length;
 
   return (
     <div className="space-y-6">
@@ -80,10 +84,10 @@ export default function ReportsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Enterprise Analytical Reports
+            Enterprise Analytical Reports (လုပ်ငန်းသုံး စာရင်းအစီရင်ခံစာများ)
           </h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Decision-making reports grouped by domain: Sales Performance, Stock Valuation, Procurement, and Financial Ledger.
+            Domain-specific analytics: Sales Performance, Stock Valuation, Procurement, and Financial Ledger.
           </p>
         </div>
 
@@ -98,8 +102,8 @@ export default function ReportsPage() {
             onClick={() => window.print()}
             className="gap-1.5 h-8 text-xs"
           >
-            <Download className="h-3.5 w-3.5" />
-            <span>Export / Print</span>
+            <Printer className="h-3.5 w-3.5" />
+            <span>Print / PDF ထုတ်ရန်</span>
           </Button>
         </div>
       </div>
@@ -108,16 +112,16 @@ export default function ReportsPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-zinc-100 dark:bg-zinc-800">
           <TabsTrigger value="sales">
-            Sales Analysis
+            Sales Analysis (အရောင်းပိုင်း)
           </TabsTrigger>
           <TabsTrigger value="inventory">
-            Inventory & Valuation
+            Inventory Valuation (စတော့တန်ဖိုး)
           </TabsTrigger>
           <TabsTrigger value="purchasing">
-            Purchasing & Suppliers
+            Purchasing & Procurement (အဝယ်ပိုင်း)
           </TabsTrigger>
           <TabsTrigger value="accounting">
-            Financials & Trial Balance
+            Financials & Trial Balance (ဘဏ္ဍာရေး)
           </TabsTrigger>
         </TabsList>
 
@@ -126,17 +130,17 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
               <CardContent className="p-4">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Total Sales Orders</p>
-                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">{sales.length}</p>
+                <p className="text-xs font-semibold text-zinc-500 uppercase">Total Sales Orders (အရောင်းအမှာစာစုစုပေါင်း)</p>
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mt-1 font-mono">{sales.length}</p>
                 <p className="text-[11px] text-emerald-600 mt-1">
-                  {sales.filter(s => s.status === 'FULLY_SHIPPED').length} fulfilled orders
+                  {sales.filter(s => s.status === 'FULLY_SHIPPED').length} fulfilled orders (ပို့ဆောင်ပြီး)
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Pending Shipment Orders</p>
-                <p className="text-2xl font-bold text-amber-600 mt-1">
+                <p className="text-xs font-semibold text-zinc-500 uppercase">Pending Fulfillment (ပို့ဆောင်ရန် ကျန်ရှိ)</p>
+                <p className="text-2xl font-bold text-amber-600 mt-1 font-mono">
                   {sales.filter(s => s.status === 'CONFIRMED' || s.status === 'PARTIALLY_SHIPPED').length}
                 </p>
                 <p className="text-[11px] text-zinc-400 mt-1">Awaiting dispatch fulfillment</p>
@@ -144,25 +148,25 @@ export default function ReportsPage() {
             </Card>
             <Card>
               <CardContent className="p-4">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Active Customers</p>
-                <p className="text-2xl font-bold text-blue-600 mt-1">
+                <p className="text-xs font-semibold text-zinc-500 uppercase">Active Buying Customers (ဝယ်ယူသူအရေအတွက်)</p>
+                <p className="text-2xl font-bold text-blue-600 mt-1 font-mono">
                   {new Set(sales.map(s => s.customerId)).size}
                 </p>
-                <p className="text-[11px] text-zinc-400 mt-1">Unique buying accounts</p>
+                <p className="text-[11px] text-zinc-400 mt-1">Unique buying customer accounts</p>
               </CardContent>
             </Card>
           </div>
 
           <Card>
             <CardHeader className="pb-3 border-b border-zinc-100 dark:border-zinc-800">
-              <CardTitle>Sales Orders Log</CardTitle>
+              <CardTitle>Sales Orders Log (အရောင်းအမှာစာ မှတ်တမ်းများ)</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
                 {sales.map(s => (
                   <div key={s.id} className="flex items-center justify-between p-3.5 text-xs">
                     <div>
-                      <p className="font-bold text-zinc-900 dark:text-zinc-100">{s.orderNo}</p>
+                      <p className="font-bold text-zinc-900 dark:text-zinc-100 font-mono">{s.orderNo}</p>
                       <p className="text-zinc-500 text-[11px]">{s.customer?.name || 'Walk-in'} • {formatDate(s.orderDate)}</p>
                     </div>
                     <Badge variant={s.status === 'FULLY_SHIPPED' ? 'success' : 'default'}>{s.status}</Badge>
@@ -178,32 +182,32 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
               <CardContent className="p-4">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Total Stock Units</p>
-                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">{totalStockQty.toLocaleString()}</p>
-                <p className="text-[11px] text-zinc-400 mt-1">Across all warehouses</p>
+                <p className="text-xs font-semibold text-zinc-500 uppercase">Total Stock Units (စုစုပေါင်း လက်ကျန်ယူနစ်)</p>
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mt-1 font-mono">{totalStockQty.toLocaleString()}</p>
+                <p className="text-[11px] text-zinc-400 mt-1">Across all enterprise warehouses</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Low Stock Alerts</p>
-                <p className="text-2xl font-bold text-rose-600 mt-1">
-                  {stock.filter(s => Number(s.onHandQty) <= 10).length}
+                <p className="text-xs font-semibold text-zinc-500 uppercase">Low Stock Alerts (လက်ကျန်နည်း သတိပေးချက်)</p>
+                <p className="text-2xl font-bold text-rose-600 mt-1 font-mono">
+                  {lowStockCount}
                 </p>
-                <p className="text-[11px] text-zinc-400 mt-1">Items at or below threshold</p>
+                <p className="text-[11px] text-zinc-400 mt-1">Items at or below critical threshold</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Total Movement Value</p>
-                <p className="text-2xl font-bold text-blue-600 mt-1">{formatCurrency(totalMovementCost)}</p>
-                <p className="text-[11px] text-zinc-400 mt-1">Cumulative movement valuation</p>
+                <p className="text-xs font-semibold text-zinc-500 uppercase">Total Movement Valuations</p>
+                <p className="text-2xl font-bold text-blue-600 mt-1 font-mono">{formatCurrency(totalMovementCost)}</p>
+                <p className="text-[11px] text-zinc-400 mt-1">Cumulative movement ledger value</p>
               </CardContent>
             </Card>
           </div>
 
           <Card>
             <CardHeader className="pb-3 border-b border-zinc-100 dark:border-zinc-800">
-              <CardTitle>Warehouse Stock Breakdown</CardTitle>
+              <CardTitle>Warehouse Stock Breakdown (ကုန်လှောင်ရုံအလိုက် လက်ကျန်စာရင်း)</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -213,7 +217,7 @@ export default function ReportsPage() {
                       <p className="font-bold text-zinc-900 dark:text-zinc-100">{st.product?.name || `Product #${st.productId}`}</p>
                       <p className="text-zinc-500 text-[11px]">Warehouse: {st.warehouse?.name}</p>
                     </div>
-                    <span className="font-bold text-sm text-emerald-600">{Number(st.onHandQty).toLocaleString()}</span>
+                    <span className="font-bold font-mono text-sm text-emerald-600">{Number(st.onHandQty).toLocaleString()}</span>
                   </div>
                 ))}
               </div>
@@ -225,14 +229,14 @@ export default function ReportsPage() {
         <TabsContent value="purchasing" className="space-y-4">
           <Card>
             <CardHeader className="pb-3 border-b border-zinc-100 dark:border-zinc-800">
-              <CardTitle>Supplier Procurement Summary</CardTitle>
+              <CardTitle>Supplier Procurement Summary (ကုန်သွင်းသူများထံမှ ဝယ်ယူမှုစာရင်း)</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
                 {purchases.map(p => (
                   <div key={p.id} className="flex items-center justify-between p-3.5 text-xs">
                     <div>
-                      <p className="font-bold text-zinc-900 dark:text-zinc-100">{p.poNo}</p>
+                      <p className="font-bold text-zinc-900 dark:text-zinc-100 font-mono">{p.poNo}</p>
                       <p className="text-zinc-500 text-[11px]">Supplier: {p.supplier?.name || `Supplier #${p.supplierId}`} • {formatDate(p.orderDate)}</p>
                     </div>
                     <Badge variant={p.status === 'FULLY_RECEIVED' ? 'success' : 'default'}>{p.status}</Badge>
@@ -247,7 +251,7 @@ export default function ReportsPage() {
         <TabsContent value="accounting" className="space-y-4">
           <Card>
             <CardHeader className="pb-3 border-b border-zinc-100 dark:border-zinc-800">
-              <CardTitle>Chart of Accounts Summary</CardTitle>
+              <CardTitle>Chart of Accounts Summary (စာရင်းခေါင်းစဉ်များ အကျဉ်းချုပ်)</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y divide-zinc-200 dark:divide-zinc-800">

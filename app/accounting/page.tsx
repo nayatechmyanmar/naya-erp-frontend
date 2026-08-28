@@ -13,6 +13,8 @@ import {
   RefreshCw,
   TrendingDown,
   TrendingUp,
+  Filter,
+  DollarSign,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api/bff-client';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -53,14 +55,19 @@ export default function AccountingPage() {
   const [customers, setCustomers] = React.useState<Customer[]>([]);
   const [suppliers, setSuppliers] = React.useState<Supplier[]>([]);
 
+  // Filter States
+  const [accountTypeFilter, setAccountTypeFilter] = React.useState<string>('ALL');
+
   // Dialog & Sheet States
   const [accountDialogOpen, setAccountDialogOpen] = React.useState(false);
   const [paymentDialogOpen, setPaymentDialogOpen] = React.useState(false);
   const [closingDialogOpen, setClosingDialogOpen] = React.useState(false);
   const [closeRegisterDialogOpen, setCloseRegisterDialogOpen] = React.useState(false);
   const [selectedClosing, setSelectedClosing] = React.useState<DailyClosing | null>(null);
+  const [selectedPayment, setSelectedPayment] = React.useState<Payment | null>(null);
   const [selectedJe, setSelectedJe] = React.useState<JournalEntry | null>(null);
   const [jeSheetOpen, setJeSheetOpen] = React.useState(false);
+  const [paymentSheetOpen, setPaymentSheetOpen] = React.useState(false);
 
   // Form States
   const [accountForm, setAccountForm] = React.useState({
@@ -132,7 +139,7 @@ export default function AccountingPage() {
     });
 
     if (res.success) {
-      success('Account Created', `Added ${accountForm.accountCode} - ${accountForm.accountName}`);
+      success('Account Created (စာရင်းခေါင်းစဉ် အသစ်ဖွင့်ပြီးပါပြီ)', `${accountForm.accountCode} - ${accountForm.accountName}`);
       setAccountDialogOpen(false);
       setAccountForm({ accountCode: '', accountName: '', accountType: 'ASSET' });
       loadAccountingData();
@@ -145,7 +152,7 @@ export default function AccountingPage() {
   const handleRecordPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!paymentForm.amount || Number(paymentForm.amount) <= 0) {
-      error('Please specify valid positive amount');
+      error('Please specify valid positive amount (ငွေပမာဏ မှန်ကန်စွာ ထည့်ပါ)');
       return;
     }
 
@@ -166,7 +173,7 @@ export default function AccountingPage() {
     });
 
     if (res.success) {
-      success('Payment Recorded & GL Entry Posted', 'Double-entry journal auto-generated');
+      success('Payment Recorded & GL Entry Posted (ငွေပေးချေမှု မှတ်တမ်းတင်ပြီး စာရင်းသွင်းပြီးပါပြီ)');
       setPaymentDialogOpen(false);
       setPaymentForm({
         paymentType: 'CUSTOMER_PAYMENT',
@@ -198,7 +205,7 @@ export default function AccountingPage() {
     });
 
     if (res.success) {
-      success('Daily Cash Register Opened');
+      success('Daily Cash Register Opened (မနက်ပိုင်း ငွေစာရင်း ဖွင့်ပြီးပါပြီ)');
       setClosingDialogOpen(false);
       loadAccountingData();
     } else {
@@ -220,7 +227,7 @@ export default function AccountingPage() {
     });
 
     if (res.success) {
-      success('Daily Cash Register Closed', `Closing Cash: ${formatCurrency(res.data?.closingCash)}`);
+      success('Daily Cash Register Closed (နေ့စဉ် ငွေစာရင်း ချုပ်ပြီးပါပြီ)', `Closing Cash: ${formatCurrency(res.data?.closingCash)}`);
       setCloseRegisterDialogOpen(false);
       loadAccountingData();
     } else {
@@ -228,12 +235,25 @@ export default function AccountingPage() {
     }
   };
 
+  // Inspect Journal Entry
+  const inspectJe = async (je: JournalEntry) => {
+    const detailRes = await apiFetch<JournalEntry>(`/api/finance/journal-entries/${je.id}`);
+    setSelectedJe(detailRes.success && detailRes.data ? detailRes.data : je);
+    setJeSheetOpen(true);
+  };
+
+  // Filtered Accounts
+  const filteredAccounts = React.useMemo(() => {
+    if (accountTypeFilter === 'ALL') return accounts;
+    return accounts.filter(a => a.accountType === accountTypeFilter);
+  }, [accounts, accountTypeFilter]);
+
   // Account Columns
   const accountColumns: Column<Account>[] = [
-    { header: 'Code', accessorKey: 'accountCode', sortable: true, className: 'font-mono font-bold text-blue-600' },
-    { header: 'Account Name', accessorKey: 'accountName', sortable: true, className: 'font-semibold' },
+    { header: 'Account Code', accessorKey: 'accountCode', sortable: true, className: 'font-mono font-bold text-blue-600' },
+    { header: 'Account Name (စာရင်းခေါင်းစဉ်)', accessorKey: 'accountName', sortable: true, className: 'font-semibold' },
     {
-      header: 'Type',
+      header: 'Type (အမျိုးအစား)',
       accessorKey: 'accountType',
       cell: r => {
         const typeVariants: Record<string, 'default' | 'secondary' | 'success' | 'warning' | 'destructive' | 'info'> = {
@@ -256,41 +276,58 @@ export default function AccountingPage() {
   const paymentColumns: Column<Payment>[] = [
     { header: 'Payment No', accessorKey: 'paymentNo', sortable: true, className: 'font-mono font-bold' },
     {
-      header: 'Type',
+      header: 'Payment Type',
       accessorKey: 'paymentType',
       cell: r => {
         const typeMap: Record<string, { label: string; variant: 'success' | 'destructive' | 'secondary' }> = {
-          CUSTOMER_PAYMENT: { label: 'Customer Payment (Inflow)', variant: 'success' },
-          SUPPLIER_PAYMENT: { label: 'Supplier Payment (Outflow)', variant: 'destructive' },
-          EXPENSE_PAYMENT: { label: 'Expense Payment', variant: 'secondary' },
+          CUSTOMER_PAYMENT: { label: 'Customer Payment (ငွေရ)', variant: 'success' },
+          SUPPLIER_PAYMENT: { label: 'Supplier Payment (ငွေပေး)', variant: 'destructive' },
+          EXPENSE_PAYMENT: { label: 'Expense Payment (အသုံးစရိတ်)', variant: 'secondary' },
         };
         const item = typeMap[r.paymentType] || { label: r.paymentType, variant: 'secondary' };
         return <Badge variant={item.variant}>{item.label}</Badge>;
       },
     },
     {
-      header: 'Partner',
+      header: 'Partner / Memo',
       cell: r => r.customer?.name || r.supplier?.name || (r.description ? r.description : '-'),
     },
     {
-      header: 'Amount',
-      cell: r => <span className="font-bold text-zinc-900 dark:text-zinc-100">{formatCurrency(r.amount)}</span>,
+      header: 'Amount (ကျသင့်ငွေ)',
+      cell: r => <span className="font-bold font-mono text-zinc-900 dark:text-zinc-100">{formatCurrency(r.amount)}</span>,
       sortable: true,
     },
     { header: 'Method', cell: r => <Badge variant="outline">{r.paymentMethod}</Badge> },
     { header: 'Date', cell: r => formatDate(r.paymentDate), sortable: true },
+    {
+      header: 'Actions',
+      className: 'text-right',
+      cell: r => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setSelectedPayment(r);
+            setPaymentSheetOpen(true);
+          }}
+          className="h-7 text-xs"
+        >
+          <Eye className="h-3.5 w-3.5 mr-1" /> View
+        </Button>
+      ),
+    },
   ];
 
   // Daily Closing Columns
   const closingColumns: Column<DailyClosing>[] = [
-    { header: 'Closing Date', cell: r => formatDate(r.closingDate), sortable: true, className: 'font-bold' },
-    { header: 'Opening Cash', cell: r => formatCurrency(r.openingCash) },
-    { header: 'Cash Received', cell: r => formatCurrency(r.cashReceived ?? 0) },
-    { header: 'Cash Paid', cell: r => formatCurrency(r.cashPaid ?? 0) },
+    { header: 'Closing Date (ရက်စွဲ)', cell: r => formatDate(r.closingDate), sortable: true, className: 'font-bold' },
+    { header: 'Opening Cash (မနက်ပိုင်း မူလလက်ကျန်)', cell: r => formatCurrency(r.openingCash) },
+    { header: 'Cash Received (ရငွေပေါင်း)', cell: r => formatCurrency(r.cashReceived ?? 0) },
+    { header: 'Cash Paid (ပေးငွေပေါင်း)', cell: r => formatCurrency(r.cashPaid ?? 0) },
     {
-      header: 'Closing Cash',
+      header: 'Closing Cash (ချုပ်ငွေ)',
       cell: r => (
-        <span className="font-bold text-blue-600 dark:text-blue-400">
+        <span className="font-bold font-mono text-blue-600 dark:text-blue-400">
           {r.closingCash !== null && r.closingCash !== undefined ? formatCurrency(r.closingCash) : 'In Session'}
         </span>
       ),
@@ -311,7 +348,7 @@ export default function AccountingPage() {
             }}
             className="h-7 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40"
           >
-            <Lock className="h-3 w-3 mr-1" /> Close Register
+            <Lock className="h-3 w-3 mr-1" /> Close Register (စာရင်းချုပ်ရန်)
           </Button>
         ) : (
           <span className="text-[11px] text-zinc-400">Closed</span>
@@ -322,9 +359,9 @@ export default function AccountingPage() {
   // Journal Entry Columns
   const jeColumns: Column<JournalEntry>[] = [
     { header: 'Entry No', accessorKey: 'entryNo', sortable: true, className: 'font-mono font-bold text-blue-600' },
-    { header: 'Date', cell: r => formatDate(r.entryDate), sortable: true },
-    { header: 'Description', accessorKey: 'description' },
-    { header: 'Reference', cell: r => r.referenceType ? `${r.referenceType} #${r.referenceId || ''}` : 'Direct' },
+    { header: 'Date (ရက်စွဲ)', cell: r => formatDate(r.entryDate), sortable: true },
+    { header: 'Description (ဖော်ပြချက်)', accessorKey: 'description' },
+    { header: 'Reference Document', cell: r => r.referenceType ? `${r.referenceType} #${r.referenceId || ''}` : 'Direct' },
     { header: 'Status', cell: r => <StatusBadge status={r.status} /> },
     {
       header: 'Actions',
@@ -333,13 +370,10 @@ export default function AccountingPage() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => {
-            setSelectedJe(r);
-            setJeSheetOpen(true);
-          }}
+          onClick={() => inspectJe(r)}
           className="h-7 text-xs"
         >
-          <Eye className="h-3.5 w-3.5" /> Inspect
+          <Eye className="h-3.5 w-3.5 mr-1" /> Inspect GL
         </Button>
       ),
     },
@@ -351,7 +385,7 @@ export default function AccountingPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Accounting & General Ledger
+            Accounting & General Ledger (ဘဏ္ဍာရေးနှင့် စာရင်းကိုင်)
           </h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Full double-entry general ledger, chart of accounts, payment reconciliation, and cashier daily closing registers.
@@ -365,15 +399,15 @@ export default function AccountingPage() {
           </Button>
           <Button variant="outline" size="sm" onClick={() => setAccountDialogOpen(true)} className="gap-1.5 h-8 text-xs">
             <Plus className="h-3.5 w-3.5" />
-            <span>+ New Account</span>
+            <span>+ New Account (စာရင်းသစ်ဖွင့်ရန်)</span>
           </Button>
           <Button variant="outline" size="sm" onClick={() => setClosingDialogOpen(true)} className="gap-1.5 h-8 text-xs">
             <CalendarDays className="h-3.5 w-3.5" />
-            <span>Open Daily Closing</span>
+            <span>Open Register (မနက်ပိုင်းဖွင့်ရန်)</span>
           </Button>
           <Button variant="primary" size="sm" onClick={() => setPaymentDialogOpen(true)} className="gap-1.5 h-8 text-xs">
             <Receipt className="h-3.5 w-3.5" />
-            <span>+ Record Payment</span>
+            <span>+ Record Payment (ငွေပေး/ငွေရ သွင်းရန်)</span>
           </Button>
         </div>
       </div>
@@ -381,24 +415,40 @@ export default function AccountingPage() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-zinc-100 dark:bg-zinc-800">
-          <TabsTrigger value="accounts" count={accounts.length}>
-            Chart of Accounts
+          <TabsTrigger value="accounts" count={filteredAccounts.length}>
+            Chart of Accounts (စာရင်းခေါင်းစဉ်များ)
           </TabsTrigger>
           <TabsTrigger value="payments" count={payments.length}>
-            Payments
+            Payments (ငွေပေး/ငွေရ မှတ်တမ်းများ)
           </TabsTrigger>
           <TabsTrigger value="closings" count={dailyClosings.length}>
-            Daily Closings
+            Daily Closings (နေ့စဉ် ငွေစာရင်းချုပ်)
           </TabsTrigger>
           <TabsTrigger value="journal" count={journalEntries.length}>
-            General Ledger (Journal)
+            General Ledger (Double-Entry စာရင်းများ)
           </TabsTrigger>
         </TabsList>
 
         {/* ─── TAB 1: CHART OF ACCOUNTS ───────────────────────────────── */}
-        <TabsContent value="accounts">
+        <TabsContent value="accounts" className="space-y-4">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="font-semibold text-zinc-500">Account Type Filter:</span>
+            <select
+              value={accountTypeFilter}
+              onChange={e => setAccountTypeFilter(e.target.value)}
+              className="rounded border border-zinc-300 bg-white px-2.5 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-800"
+            >
+              <option value="ALL">All Account Types (အားလုံး)</option>
+              <option value="ASSET">ASSET (ပိုင်ဆိုင်မှုများ)</option>
+              <option value="LIABILITY">LIABILITY (ကြွေးမြီနှင့် ပေးရန်များ)</option>
+              <option value="EQUITY">EQUITY (မတည်ရင်းနှီးငွေ)</option>
+              <option value="REVENUE">REVENUE (အရောင်းရငွေ)</option>
+              <option value="EXPENSE">EXPENSE (အသုံးစရိတ်များ)</option>
+            </select>
+          </div>
+
           <DataTable
-            data={accounts}
+            data={filteredAccounts}
             columns={accountColumns}
             searchPlaceholder="Search accounts by code or name..."
             searchKey="accountName"
@@ -435,16 +485,13 @@ export default function AccountingPage() {
             searchPlaceholder="Search journal entries..."
             searchKey="entryNo"
             isLoading={isLoading}
-            onRowClick={r => {
-              setSelectedJe(r);
-              setJeSheetOpen(true);
-            }}
+            onRowClick={r => inspectJe(r)}
           />
         </TabsContent>
       </Tabs>
 
       {/* ─── MODAL: NEW ACCOUNT ─────────────────────────────────────── */}
-      <Dialog open={accountDialogOpen} onOpenChange={setAccountDialogOpen} title="Add Chart of Account">
+      <Dialog open={accountDialogOpen} onOpenChange={setAccountDialogOpen} title="Add Chart of Account (စာရင်းခေါင်းစဉ် အသစ်ဖွင့်ရန်)">
         <form onSubmit={handleCreateAccount} className="space-y-4">
           <Input
             label="Account Code *"
@@ -466,11 +513,11 @@ export default function AccountingPage() {
             onChange={e => setAccountForm({ ...accountForm, accountType: e.target.value as AccountType })}
             required
           >
-            <option value="ASSET">ASSET (Current / Fixed Assets)</option>
-            <option value="LIABILITY">LIABILITY (Payables / Obligations)</option>
-            <option value="EQUITY">EQUITY (Capital / Retained Earnings)</option>
-            <option value="REVENUE">REVENUE (Sales / Other Income)</option>
-            <option value="EXPENSE">EXPENSE (Cost of Goods / Operational)</option>
+            <option value="ASSET">ASSET (Current / Fixed Assets - ပိုင်ဆိုင်မှုများ)</option>
+            <option value="LIABILITY">LIABILITY (Payables / Obligations - ပေးရန်ရှိများ)</option>
+            <option value="EQUITY">EQUITY (Capital / Retained Earnings - အရင်းအနှီး)</option>
+            <option value="REVENUE">REVENUE (Sales / Other Income - ဝင်ငွေ)</option>
+            <option value="EXPENSE">EXPENSE (Cost of Goods / Operational - အသုံးစရိတ်)</option>
           </Select>
 
           <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
@@ -485,22 +532,22 @@ export default function AccountingPage() {
       </Dialog>
 
       {/* ─── MODAL: RECORD PAYMENT ──────────────────────────────────── */}
-      <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen} title="Record Payment & Sync GL" maxWidth="lg">
+      <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen} title="Record Payment & Sync GL (ငွေပေး/ငွေရ မှတ်တမ်းတင်ရန်)" maxWidth="lg">
         <form onSubmit={handleRecordPayment} className="space-y-4">
           <Select
-            label="Payment Type *"
+            label="Payment Type (အမျိုးအစား) *"
             value={paymentForm.paymentType}
             onChange={e => setPaymentForm({ ...paymentForm, paymentType: e.target.value as PaymentType })}
             required
           >
-            <option value="CUSTOMER_PAYMENT">Customer Payment (Accounts Receivable Inflow)</option>
-            <option value="SUPPLIER_PAYMENT">Supplier Payment (Accounts Payable Outflow)</option>
-            <option value="EXPENSE_PAYMENT">Direct Expense Payment</option>
+            <option value="CUSTOMER_PAYMENT">Customer Payment (Accounts Receivable Inflow - ဝယ်သူထံမှ ရငွေ)</option>
+            <option value="SUPPLIER_PAYMENT">Supplier Payment (Accounts Payable Outflow - ကုန်သွင်းသူသို့ ပေးငွေ)</option>
+            <option value="EXPENSE_PAYMENT">Direct Expense Payment (အထွေထွေ အသုံးစရိတ် ပေးချေမှု)</option>
           </Select>
 
           {paymentForm.paymentType === 'CUSTOMER_PAYMENT' && (
             <Select
-              label="Customer *"
+              label="Customer (ဝယ်ယူသူ) *"
               value={paymentForm.customerId}
               onChange={e => setPaymentForm({ ...paymentForm, customerId: e.target.value })}
               required
@@ -516,7 +563,7 @@ export default function AccountingPage() {
 
           {paymentForm.paymentType === 'SUPPLIER_PAYMENT' && (
             <Select
-              label="Supplier *"
+              label="Supplier (ကုန်သွင်းသူ) *"
               value={paymentForm.supplierId}
               onChange={e => setPaymentForm({ ...paymentForm, supplierId: e.target.value })}
               required
@@ -534,7 +581,7 @@ export default function AccountingPage() {
             <Input
               type="number"
               step="any"
-              label="Payment Amount *"
+              label="Payment Amount (ငွေပမာဏ) *"
               placeholder="e.g. 500000"
               value={paymentForm.amount}
               onChange={e => setPaymentForm({ ...paymentForm, amount: e.target.value })}
@@ -542,27 +589,27 @@ export default function AccountingPage() {
             />
 
             <Select
-              label="Payment Method *"
+              label="Payment Method (ပေးချေသည့် နည်းလမ်း) *"
               value={paymentForm.paymentMethod}
               onChange={e => setPaymentForm({ ...paymentForm, paymentMethod: e.target.value as PaymentMethod })}
               required
             >
-              <option value="CASH">Cash</option>
-              <option value="BANK">Bank Transfer / Check</option>
-              <option value="OTHER">Other / Mobile Pay</option>
+              <option value="CASH">Cash (လက်ငင်းငွေသား)</option>
+              <option value="BANK">Bank Transfer / Check (ဘဏ်လွှဲ/ချက်လက်မှတ်)</option>
+              <option value="OTHER">Other / Mobile Pay (အခြား / မိုဘိုင်းပေးချေမှု)</option>
             </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <Input
               type="date"
-              label="Payment Date *"
+              label="Payment Date (ရက်စွဲ) *"
               value={paymentForm.paymentDate}
               onChange={e => setPaymentForm({ ...paymentForm, paymentDate: e.target.value })}
               required
             />
             <Input
-              label="Description / Memo"
+              label="Description / Memo (မှတ်ချက်)"
               placeholder="e.g. Invoice settlement"
               value={paymentForm.description}
               onChange={e => setPaymentForm({ ...paymentForm, description: e.target.value })}
@@ -581,7 +628,7 @@ export default function AccountingPage() {
       </Dialog>
 
       {/* ─── MODAL: OPEN DAILY CLOSING ──────────────────────────────── */}
-      <Dialog open={closingDialogOpen} onOpenChange={setClosingDialogOpen} title="Open Daily Cash Register">
+      <Dialog open={closingDialogOpen} onOpenChange={setClosingDialogOpen} title="Open Daily Cash Register (မနက်ပိုင်း ငွေစာရင်းဖွင့်ရန်)">
         <form onSubmit={handleOpenDailyClosing} className="space-y-4">
           <Input
             type="date"
@@ -593,7 +640,7 @@ export default function AccountingPage() {
           <Input
             type="number"
             step="any"
-            label="Opening Cash Float *"
+            label="Opening Cash Float (မနက်ပိုင်း မူလလက်ကျန်) *"
             value={openClosingForm.openingCash}
             onChange={e => setOpenClosingForm({ ...openClosingForm, openingCash: e.target.value })}
             required
@@ -610,11 +657,11 @@ export default function AccountingPage() {
       </Dialog>
 
       {/* ─── MODAL: CLOSE DAILY CLOSING REGISTER ─────────────────────── */}
-      <Dialog open={closeRegisterDialogOpen} onOpenChange={setCloseRegisterDialogOpen} title="Close Cash Register">
+      <Dialog open={closeRegisterDialogOpen} onOpenChange={setCloseRegisterDialogOpen} title="Close Cash Register (ညနေပိုင်း ငွေစာရင်းချုပ်ရန်)">
         <form onSubmit={handleCloseDailyClosing} className="space-y-4">
           <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 text-xs">
-            <p className="text-zinc-500">Opening Balance:</p>
-            <p className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
+            <p className="text-zinc-500">Opening Balance (မနက်ပိုင်း မူလလက်ကျန်):</p>
+            <p className="font-bold text-sm text-zinc-900 dark:text-zinc-100 font-mono">
               {formatCurrency(selectedClosing?.openingCash)}
             </p>
           </div>
@@ -622,7 +669,7 @@ export default function AccountingPage() {
           <Input
             type="number"
             step="any"
-            label="Total Cash Received Today"
+            label="Total Cash Received Today (ယနေ့ ရငွေစုစုပေါင်း)"
             value={closeRegisterForm.cashReceived}
             onChange={e => setCloseRegisterForm({ ...closeRegisterForm, cashReceived: e.target.value })}
             required
@@ -631,7 +678,7 @@ export default function AccountingPage() {
           <Input
             type="number"
             step="any"
-            label="Total Cash Disbursed / Paid Today"
+            label="Total Cash Disbursed / Paid Today (ယနေ့ ပေးငွေစုစုပေါင်း)"
             value={closeRegisterForm.cashPaid}
             onChange={e => setCloseRegisterForm({ ...closeRegisterForm, cashPaid: e.target.value })}
             required
@@ -642,17 +689,48 @@ export default function AccountingPage() {
               Cancel
             </Button>
             <Button type="submit" variant="primary" className="bg-amber-600 hover:bg-amber-700">
-              Confirm Daily Close
+              Confirm Daily Close (အတည်ပြု ချုပ်မည်)
             </Button>
           </div>
         </form>
       </Dialog>
 
+      {/* ─── CONTEXTUAL SHEET: PAYMENT INSPECTION ────────────────────── */}
+      <Sheet
+        open={paymentSheetOpen}
+        onOpenChange={setPaymentSheetOpen}
+        title={`Payment: ${selectedPayment?.paymentNo || ''}`}
+        description={`Amount: ${formatCurrency(selectedPayment?.amount)} • Method: ${selectedPayment?.paymentMethod || ''}`}
+      >
+        {selectedPayment && (
+          <div className="space-y-4 text-xs">
+            <div className="grid grid-cols-2 gap-3 p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
+              <div>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Payment Type</p>
+                <p className="font-semibold mt-1">{selectedPayment.paymentType}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Payment Date</p>
+                <p className="font-semibold mt-1">{formatDate(selectedPayment.paymentDate)}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Partner</p>
+                <p className="font-semibold mt-1">{selectedPayment.customer?.name || selectedPayment.supplier?.name || '-'}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">GL Status</p>
+                <p className="font-semibold text-emerald-600 mt-1">✓ Double-Entry Auto-Posted</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </Sheet>
+
       {/* ─── CONTEXTUAL SHEET: DOUBLE ENTRY GENERAL LEDGER INSPECTION ── */}
       <Sheet
         open={jeSheetOpen}
         onOpenChange={setJeSheetOpen}
-        title={`Journal Entry ${selectedJe?.entryNo || ''}`}
+        title={`Journal Entry: ${selectedJe?.entryNo || ''}`}
         description={`Date: ${formatDate(selectedJe?.entryDate)} • Ref: ${selectedJe?.referenceType || 'Direct'} #${selectedJe?.referenceId || ''}`}
       >
         {selectedJe && (
@@ -667,7 +745,7 @@ export default function AccountingPage() {
               <div className="flex items-center justify-between">
                 <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs flex items-center gap-1.5">
                   <Scale className="h-4 w-4 text-blue-600" />
-                  <span>Double-Entry General Ledger Lines</span>
+                  <span>Double-Entry General Ledger Lines (စာရင်းကိုင် နှစ်ဖက်မျှ စာရင်းများ)</span>
                 </h4>
                 <Badge variant="success" className="gap-1">
                   <CheckCircle2 className="h-3 w-3" /> Balanced ✓
@@ -703,7 +781,7 @@ export default function AccountingPage() {
                   </tbody>
                   <tfoot className="bg-zinc-100 dark:bg-zinc-800/80 font-bold border-t border-zinc-200 dark:border-zinc-800">
                     <tr>
-                      <td className="px-3 py-2.5">Total</td>
+                      <td className="px-3 py-2.5">Total (စုစုပေါင်း)</td>
                       <td className="px-3 py-2.5 text-right font-mono text-emerald-600">
                         {formatCurrency(
                           (selectedJe.lines || []).reduce((acc, l) => acc + (Number(l.debit) || 0), 0)
