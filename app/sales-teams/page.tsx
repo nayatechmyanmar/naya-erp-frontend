@@ -651,6 +651,93 @@ export default function SalesTeamsPage() {
     },
   ];
 
+  // ─── LEADERBOARD MOBILE CARD RENDERER ───────────────────────────
+  const renderLeaderboardCard = (r: TeamPerformanceOverview, index?: number) => {
+    const teamObj = saleTeams.find(t => t.id === r.teamId);
+    const rank = (index ?? 0) + 1;
+    const rankMedal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+
+    return (
+      <div className="rounded-2xl border border-zinc-200/90 bg-white p-3.5 sm:p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 space-y-3 transition-all hover:border-zinc-300 dark:hover:border-zinc-700">
+        {/* Top Header: Rank + Team Name + Action */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+              {rankMedal}
+            </span>
+            <div className="min-w-0">
+              <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                {r.teamName}
+              </h4>
+              <p className="text-[11px] text-zinc-500 truncate">
+                {r.activeMembers} active member{r.activeMembers !== 1 ? 's' : ''}
+              </p>
+            </div>
+          </div>
+
+          <Badge
+            variant={r.fulfillmentRate >= 80 ? 'default' : 'secondary'}
+            className={`text-[10px] px-2 py-0.5 shrink-0 ${
+              r.fulfillmentRate >= 80 ? 'bg-emerald-600 text-white' : ''
+            }`}
+          >
+            {r.fulfillmentRate}% Fulfilled
+          </Badge>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="space-y-1">
+          <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
+            <div
+              className={`h-2 rounded-full transition-all ${
+                r.fulfillmentRate >= 80
+                  ? 'bg-emerald-500'
+                  : r.fulfillmentRate >= 50
+                  ? 'bg-blue-500'
+                  : 'bg-amber-500'
+              }`}
+              style={{ width: `${Math.min(r.fulfillmentRate, 100)}%` }}
+            />
+          </div>
+        </div>
+
+        {/* 3-Column Metrics Grid */}
+        <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800 text-center text-xs">
+          <div className="space-y-0.5">
+            <span className="text-[10px] uppercase font-semibold text-zinc-400">Assigned</span>
+            <p className="font-mono font-bold text-zinc-800 dark:text-zinc-200">
+              {r.totalAssignedOrders}
+            </p>
+          </div>
+          <div className="space-y-0.5 border-x border-zinc-200 dark:border-zinc-700/60">
+            <span className="text-[10px] uppercase font-semibold text-zinc-400">Shipped</span>
+            <p className="font-mono font-bold text-blue-600 dark:text-blue-400">
+              {r.totalShipments}
+            </p>
+          </div>
+          <div className="space-y-0.5">
+            <span className="text-[10px] uppercase font-semibold text-zinc-400">Delivered</span>
+            <p className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+              {r.fullyShippedOrders}
+            </p>
+          </div>
+        </div>
+
+        {/* Action Button */}
+        <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => teamObj && inspectTeam(teamObj)}
+            className="h-8 w-full sm:w-auto text-xs gap-1.5 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+          >
+            <Eye className="h-3.5 w-3.5" /> Manage Team (အဖွဲ့စီမံရန်)
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   // Aggregate stats for My Orders
   const myTotalValue = myOrders.reduce((sum, o) => {
     const oTotal = (o.items || []).reduce((acc, it) => acc + (Number(it.amount) || 0), 0);
@@ -661,49 +748,53 @@ export default function SalesTeamsPage() {
   const myFulfilledOrders = myOrders.filter(o => o.status === 'FULLY_SHIPPED').length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-full overflow-x-hidden min-w-0">
       {/* ─── HEADER & TOP BAR ───────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-2.5">
-            <Users className="h-6 w-6 text-blue-600" />
-            <span>Sales Teams & Salesman Operations (အရောင်းအဖွဲ့နှင့် အရောင်းတာဝန်ခံ လုပ်ငန်းခွင်)</span>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-4 pb-1">
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-2.5 truncate">
+            <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 shrink-0" />
+            <span className="truncate">Sales Teams & Salesman Operations (အရောင်းအဖွဲ့နှင့် လုပ်ငန်းခွင်)</span>
           </h1>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Dedicated portal for Salesmen & Team Leaders: View assigned orders, dispatch deliveries, collect customer payments, and track performance.
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
+            Dedicated portal for Salesmen & Team Leaders: Orders, deliveries, collections & performance
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={loadPortalData} className="gap-1.5 h-8 text-xs">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <Button variant="outline" size="sm" onClick={loadPortalData} className="gap-1.5 h-8 text-xs shrink-0">
             <RefreshCw className={isLoading ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />
-            <span>Refresh</span>
+            <span className="hidden sm:inline">Refresh (ပြန်ဖွင့်)</span>
+            <span className="sm:hidden">Refresh</span>
           </Button>
           <Button
             variant="primary"
             size="sm"
             onClick={() => setCreateTeamDialogOpen(true)}
-            className="gap-1.5 h-8 text-xs bg-blue-600 hover:bg-blue-700"
+            className="gap-1.5 h-8 text-xs bg-blue-600 hover:bg-blue-700 shrink-0"
           >
             <Plus className="h-3.5 w-3.5" />
-            <span>+ New Sales Team (အရောင်းအဖွဲ့သစ်)</span>
+            <span className="hidden sm:inline">+ New Sales Team (အရောင်းအဖွဲ့သစ်)</span>
+            <span className="sm:hidden">+ Team</span>
           </Button>
         </div>
       </div>
 
       {/* ─── MAIN TABS ─────────────────────────────────────────────── */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-zinc-100 dark:bg-zinc-800">
-          <TabsTrigger value="my-orders" count={myOrders.length}>
-            My Assigned Orders (ကျွန်ုပ်တာဝန်ကျ အမှာစာများ)
-          </TabsTrigger>
-          <TabsTrigger value="teams" count={saleTeams.length}>
-            Sales Teams & Members (အရောင်းအဖွဲ့များ)
-          </TabsTrigger>
-          <TabsTrigger value="leaderboard" count={teamPerformances.length}>
-            Performance Leaderboard (စွမ်းဆောင်ရည် နှိုင်းယှဉ်ချက်)
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
+          <TabsList className="w-max sm:w-full justify-start">
+            <TabsTrigger value="my-orders" count={myOrders.length}>
+              📋 My Assigned Orders (ကျွန်ုပ်တာဝန်ကျ အမှာစာများ)
+            </TabsTrigger>
+            <TabsTrigger value="teams" count={saleTeams.length}>
+              👥 Sales Teams & Members (အရောင်းအဖွဲ့များ)
+            </TabsTrigger>
+            <TabsTrigger value="leaderboard" count={teamPerformances.length}>
+              🏆 Performance Leaderboard (စွမ်းဆောင်ရည် နှိုင်းယှဉ်ချက်)
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* ─── TAB 1: SALESMAN PORTAL (MY ORDERS) ───────────────────── */}
         <TabsContent value="my-orders" className="space-y-4">
@@ -921,9 +1012,10 @@ export default function SalesTeamsPage() {
           <DataTable
             data={teamPerformances}
             columns={leaderboardColumns}
-            searchPlaceholder="Search team performance..."
+            searchPlaceholder="Search team performance (စွမ်းဆောင်ရည်ရှာရန်)..."
             searchKey="teamName"
             isLoading={isLoading}
+            renderCard={renderLeaderboardCard}
           />
         </TabsContent>
       </Tabs>
@@ -1234,33 +1326,33 @@ export default function SalesTeamsPage() {
       <Dialog
         open={addMemberDialogOpen}
         onOpenChange={setAddMemberDialogOpen}
-        title={selectedTeam ? `Add Member to ${selectedTeam.name}` : 'Add Team Member'}
-        maxWidth="md"
+        title={selectedTeam ? `Add Member to ${selectedTeam.name} (အဖွဲ့ဝင်ထည့်ရန်)` : 'Add Team Member (အဖွဲ့ဝင်ထည့်ရန်)'}
+        maxWidth="lg"
       >
         <div className="space-y-4">
           {/* Sub-tabs for Add Member */}
-          <div className="flex border-b border-zinc-200 dark:border-zinc-800">
+          <div className="flex border-b border-zinc-200 dark:border-zinc-800 -mx-1 overflow-x-auto pb-0.5">
             <button
               type="button"
               onClick={() => setAddMemberTab('select')}
-              className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-colors ${
+              className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap ${
                 addMemberTab === 'select'
                   ? 'border-blue-600 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
               }`}
             >
-              Select Existing Staff (ရှိပြီးသား ဝန်ထမ်းရွေးရန်)
+              👥 Select Existing Staff (ရှိပြီးသား ဝန်ထမ်းရွေးရန်)
             </button>
             <button
               type="button"
               onClick={() => setAddMemberTab('register')}
-              className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-colors ${
+              className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap ${
                 addMemberTab === 'register'
                   ? 'border-blue-600 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
               }`}
             >
-              + Register New Salesman (အရောင်းဝန်ထမ်းသစ် ဖွင့်ရန်)
+              ✨ + Register New Salesman (အရောင်းဝန်ထမ်းသစ် ဖွင့်ရန်)
             </button>
           </div>
 
@@ -1281,7 +1373,7 @@ export default function SalesTeamsPage() {
                 ))}
               </Select>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Select
                   label="Team Role (တာဝန်/ရာထူး) *"
                   value={memberForm.role}
@@ -1301,12 +1393,12 @@ export default function SalesTeamsPage() {
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
-                <Button type="button" variant="outline" onClick={() => setAddMemberDialogOpen(false)}>
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
+                <Button type="button" variant="outline" onClick={() => setAddMemberDialogOpen(false)} className="w-full sm:w-auto">
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" className="bg-blue-600">
-                  Add to Team
+                <Button type="submit" variant="primary" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
+                  Add to Team (အဖွဲ့ထဲထည့်မည်)
                 </Button>
               </div>
             </form>
@@ -1314,20 +1406,26 @@ export default function SalesTeamsPage() {
 
           {/* TAB 2: REGISTER & ADD NEW SALESMAN USER */}
           {addMemberTab === 'register' && (
-            <form onSubmit={handleRegisterAndAddMember} className="space-y-3 pt-1">
-              <div className="p-2.5 rounded-md bg-blue-50/60 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-[11px] text-blue-700 dark:text-blue-300">
-                💡 ဤနေရာတွင် အကောင့်ဖွင့်ပေးလိုက်ပါက အဆိုပါ ဝန်ထမ်းသည် <strong>Tenant ID: {orgContext.tenantId}</strong>၊ ဖြည့်သွင်းခဲ့သော <strong>Email</strong> နှင့် <strong>Password</strong> ဖြင့် စနစ်ထဲသို့ တိုက်ရိုက် Login ဝင်ရောက်နိုင်မည် ဖြစ်သည်။
+            <form onSubmit={handleRegisterAndAddMember} className="space-y-3.5 pt-1">
+              <div className="p-3 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                <p className="font-bold flex items-center gap-1.5">
+                  <UserPlus className="h-4 w-4 shrink-0" />
+                  <span>Instant Account Creation & Login Access</span>
+                </p>
+                <p className="text-[11px] leading-relaxed text-blue-600 dark:text-blue-400">
+                  ဤနေရာတွင် အကောင့်ဖွင့်ပေးလိုက်ပါက အဆိုပါ ဝန်ထမ်းသည် <strong>Tenant ID: {orgContext.tenantId}</strong>၊ ဖြည့်သွင်းခဲ့သော <strong>Email</strong> နှင့် <strong>Password</strong> ဖြင့် စနစ်ထဲသို့ တိုက်ရိုက် Login ဝင်ရောက်နိုင်မည် ဖြစ်သည်။
+                </p>
               </div>
 
               <Input
-                label="Full Name (အမည်) *"
+                label="Full Name (ဝန်ထမ်းအမည်) *"
                 placeholder="e.g. Ko Kyaw Kyaw, Ma Hla Hla"
                 value={newSalesmanForm.name}
                 onChange={e => setNewSalesmanForm({ ...newSalesmanForm, name: e.target.value })}
                 required
               />
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Input
                   type="email"
                   label="Login Email (အီးမေးလ်) *"
@@ -1347,9 +1445,9 @@ export default function SalesTeamsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Input
-                  label="Phone (ဖုန်းနံပါတ်)"
+                  label="Phone Number (ဖုန်းနံပါတ်)"
                   placeholder="e.g. 09123456789"
                   value={newSalesmanForm.phoneNumber}
                   onChange={e => setNewSalesmanForm({ ...newSalesmanForm, phoneNumber: e.target.value })}
@@ -1363,7 +1461,20 @@ export default function SalesTeamsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <Select
+                  label="Branch (ဘဏ်ခွဲ / ဌာနခွဲ)"
+                  value={newSalesmanForm.branchId}
+                  onChange={e => setNewSalesmanForm({ ...newSalesmanForm, branchId: e.target.value })}
+                >
+                  <option value="">Default Branch ({orgContext.branchName})</option>
+                  {branches.map(b => (
+                    <option key={b.id} value={b.id}>
+                      {b.name} ({b.code})
+                    </option>
+                  ))}
+                </Select>
+
                 <Select
                   label="Role in Team (ရာထူး) *"
                   value={newSalesmanForm.role}
@@ -1383,12 +1494,12 @@ export default function SalesTeamsPage() {
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
-                <Button type="button" variant="outline" onClick={() => setAddMemberDialogOpen(false)}>
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
+                <Button type="button" variant="outline" onClick={() => setAddMemberDialogOpen(false)} className="w-full sm:w-auto">
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" className="bg-emerald-600 hover:bg-emerald-700">
-                  Register & Add to Team
+                <Button type="submit" variant="primary" className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700">
+                  Register & Add to Team (အကောင့်ဖွင့်၍ အဖွဲ့သွင်းမည်)
                 </Button>
               </div>
             </form>

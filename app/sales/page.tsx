@@ -716,15 +716,118 @@ export default function SalesPage() {
           </div>
 
           {/* Line items table */}
-          <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+          <div className="space-y-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold uppercase text-zinc-500">Order Items (ရောင်းချမည့် ပစ္စည်းများ)</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                Order Items (ရောင်းချမည့် ပစ္စည်းများ)
+              </h4>
               <Button type="button" variant="outline" size="sm" onClick={addSoItem} className="h-7 text-xs gap-1">
-                <Plus className="h-3 w-3" /> Add Item
+                <Plus className="h-3 w-3" /> Add Item (ပစ္စည်းထပ်ထည့်ရန်)
               </Button>
             </div>
 
-            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+            {/* Mobile View: Cards */}
+            <div className="block md:hidden space-y-2.5 max-h-72 overflow-y-auto pr-0.5">
+              {soForm.items.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-xl border border-zinc-200 p-3 bg-zinc-50/80 dark:border-zinc-800 dark:bg-zinc-900/80 space-y-2.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-bold font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md">
+                        Item #{idx + 1}
+                      </span>
+                      {item.isFoc && (
+                        <Badge variant="secondary" className="text-[10px]">FOC</Badge>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-xs text-blue-600 dark:text-blue-400">
+                        {item.isFoc ? '0.00' : formatCurrency(item.amount)}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeSoItem(idx)}
+                        disabled={soForm.items.length === 1}
+                        className="h-7 px-2 text-rose-500 hover:text-rose-700 text-xs gap-1"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <Select
+                    label="Product (ကုန်ပစ္စည်း) *"
+                    value={item.productId}
+                    onChange={e => updateSoItem(idx, 'productId', e.target.value)}
+                    required
+                  >
+                    <option value="">Select Product...</option>
+                    {products.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({p.sku})
+                      </option>
+                    ))}
+                  </Select>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <Select
+                      label="Unit *"
+                      value={item.uomId}
+                      onChange={e => updateSoItem(idx, 'uomId', e.target.value)}
+                      required
+                    >
+                      <option value="">Unit...</option>
+                      {uoms.map(u => (
+                        <option key={u.id} value={u.id}>
+                          {u.symbol || u.name}
+                        </option>
+                      ))}
+                    </Select>
+
+                    <Input
+                      type="number"
+                      step="any"
+                      label="Qty *"
+                      placeholder="Qty"
+                      value={item.qty}
+                      onChange={e => updateSoItem(idx, 'qty', e.target.value)}
+                      required
+                    />
+
+                    <Input
+                      type="number"
+                      step="any"
+                      label="Rate *"
+                      placeholder="Rate"
+                      value={item.rate}
+                      onChange={e => updateSoItem(idx, 'rate', e.target.value)}
+                      disabled={item.isFoc}
+                      required={!item.isFoc}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-zinc-100 dark:border-zinc-800 text-xs">
+                    <label className="flex items-center gap-1.5 cursor-pointer text-zinc-600 dark:text-zinc-400">
+                      <input
+                        type="checkbox"
+                        checked={item.isFoc}
+                        onChange={e => updateSoItem(idx, 'isFoc', e.target.checked)}
+                        className="rounded border-zinc-300 h-3.5 w-3.5 text-blue-600"
+                      />
+                      <span>Free of Charge (FOC အခမဲ့ပေးပစ္စည်း)</span>
+                    </label>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop View: Table Rows */}
+            <div className="hidden md:block space-y-2 max-h-60 overflow-y-auto pr-1">
               {soForm.items.map((item, idx) => (
                 <div key={idx} className="flex items-center gap-2 p-2 rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/60">
                   <div className="flex-1">
@@ -742,7 +845,7 @@ export default function SalesPage() {
                     </Select>
                   </div>
 
-                  <div className="w-24">
+                  <div className="w-28">
                     <Select
                       value={item.uomId}
                       onChange={e => updateSoItem(idx, 'uomId', e.target.value)}
@@ -757,7 +860,7 @@ export default function SalesPage() {
                     </Select>
                   </div>
 
-                  <div className="w-20">
+                  <div className="w-24">
                     <Input
                       type="number"
                       step="any"
@@ -768,7 +871,7 @@ export default function SalesPage() {
                     />
                   </div>
 
-                  <div className="w-24">
+                  <div className="w-28">
                     <Input
                       type="number"
                       step="any"
@@ -780,17 +883,17 @@ export default function SalesPage() {
                     />
                   </div>
 
-                  <div className="flex items-center gap-1">
-                    <label className="text-[11px] font-semibold text-zinc-500">FOC</label>
+                  <div className="flex items-center gap-1 shrink-0 px-1">
+                    <label className="text-[11px] font-semibold text-zinc-500 cursor-pointer">FOC</label>
                     <input
                       type="checkbox"
                       checked={item.isFoc}
                       onChange={e => updateSoItem(idx, 'isFoc', e.target.checked)}
-                      className="rounded border-zinc-300"
+                      className="rounded border-zinc-300 h-3.5 w-3.5 text-blue-600"
                     />
                   </div>
 
-                  <div className="w-24 text-right font-semibold text-xs text-zinc-800 dark:text-zinc-200">
+                  <div className="w-28 text-right font-semibold text-xs text-zinc-800 dark:text-zinc-200 shrink-0">
                     {item.isFoc ? <Badge variant="secondary">FOC</Badge> : formatCurrency(item.amount)}
                   </div>
 
@@ -800,7 +903,7 @@ export default function SalesPage() {
                     size="icon"
                     onClick={() => removeSoItem(idx)}
                     disabled={soForm.items.length === 1}
-                    className="h-8 w-8 text-rose-500 hover:text-rose-700"
+                    className="h-8 w-8 text-rose-500 hover:text-rose-700 shrink-0"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -809,18 +912,22 @@ export default function SalesPage() {
             </div>
 
             {/* Total Footer */}
-            <div className="flex justify-between items-center p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800/80 font-bold text-sm">
-              <span>Order Grand Total (စုစုပေါင်း ကျသင့်ငွေ):</span>
-              <span className="text-blue-600 dark:text-blue-400 font-mono">{formatCurrency(soTotal)}</span>
+            <div className="flex justify-between items-center p-3 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 font-bold text-xs sm:text-sm">
+              <span className="text-zinc-700 dark:text-zinc-300">
+                Order Grand Total (စုစုပေါင်း ကျသင့်ငွေ):
+              </span>
+              <span className="text-blue-600 dark:text-blue-400 font-mono text-sm sm:text-base">
+                {formatCurrency(soTotal)}
+              </span>
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={() => setSoDialogOpen(false)}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setSoDialogOpen(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button type="submit" variant="primary">
-              Save Sales Order
+            <Button type="submit" variant="primary" className="w-full sm:w-auto">
+              Create Sales Order (အမှာစာဖွင့်ရန်)
             </Button>
           </div>
         </form>
