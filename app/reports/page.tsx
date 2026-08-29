@@ -789,6 +789,24 @@ export default function ReportsPage() {
               </div>
             )}
 
+            {/* Procurement Spend Docket */}
+            {(printConfig.targetScope === 'ALL_EXECUTIVE' || activeTab === 'purchasing') && (
+              <div className="space-y-1 py-1 border-b border-dashed border-black">
+                <div className="flex justify-between font-bold">
+                  <span>PROCUREMENT SPEND:</span>
+                  <span>{formatCurrency(purchaseSummary?.totalSpend ?? 0)}</span>
+                </div>
+                <div className="flex justify-between text-[10px]">
+                  <span>Total PO Orders:</span>
+                  <span>{purchaseSummary?.totalOrders ?? 0}</span>
+                </div>
+                <div className="flex justify-between text-[10px]">
+                  <span>Received POs:</span>
+                  <span>{purchaseSummary?.receivedOrders ?? 0}</span>
+                </div>
+              </div>
+            )}
+
             {/* Cashflow Docket */}
             {(printConfig.targetScope === 'ALL_EXECUTIVE' || activeTab === 'cashflow') && (
               <div className="space-y-1 py-1 border-b border-dashed border-black">
@@ -821,6 +839,20 @@ export default function ReportsPage() {
                 <div className="flex justify-between text-[10px]">
                   <span>Low Stock Warnings:</span>
                   <span>{stockSummary?.lowStockCount ?? 0}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Team Shipments Docket */}
+            {(printConfig.targetScope === 'ALL_EXECUTIVE' || activeTab === 'shipments') && (
+              <div className="space-y-1 py-1 border-b border-dashed border-black">
+                <div className="flex justify-between font-bold">
+                  <span>TOTAL SHIPMENTS:</span>
+                  <span>{shipmentSummary?.totalShipments ?? 0}</span>
+                </div>
+                <div className="flex justify-between text-[10px]">
+                  <span>Delivered / Posted:</span>
+                  <span>{shipmentSummary?.postedShipments ?? 0}</span>
                 </div>
               </div>
             )}
@@ -973,12 +1005,56 @@ export default function ReportsPage() {
               </div>
             )}
 
-            {/* 3. CASH FLOW & TREASURY */}
+            {/* 3. PROCUREMENT & PURCHASING */}
+            {(printConfig.targetScope === 'ALL_EXECUTIVE' || activeTab === 'purchasing') && (
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider border-b border-gray-400 pb-1 flex items-center gap-1.5">
+                  <ShoppingCart className="h-4 w-4" />
+                  <span>3. Procurement & Supplier Spend Audit</span>
+                </h3>
+
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="p-3 border border-gray-300 rounded bg-gray-50">
+                    <span className="text-[10px] uppercase font-bold text-gray-600">Total Procurement Spend</span>
+                    <p className="text-base font-bold font-mono mt-1">{formatCurrency(purchaseSummary?.totalSpend ?? 0)}</p>
+                  </div>
+                  <div className="p-3 border border-gray-300 rounded bg-gray-50">
+                    <span className="text-[10px] uppercase font-bold text-gray-600">Received Purchase Orders</span>
+                    <p className="text-base font-bold font-mono mt-1">{purchaseSummary?.receivedOrders ?? 0} / {purchaseSummary?.totalOrders ?? 0}</p>
+                  </div>
+                </div>
+
+                {purchaseSummary?.topSuppliers && purchaseSummary.topSuppliers.length > 0 && (
+                  <table className="w-full text-xs border border-gray-300 mt-2">
+                    <thead className="bg-gray-100 border-b border-gray-300 text-[10px] uppercase">
+                      <tr>
+                        <th className="p-2 text-left">No</th>
+                        <th className="p-2 text-left">Supplier Name</th>
+                        <th className="p-2 text-right">Orders Count</th>
+                        <th className="p-2 text-right">Total Spend (MMK)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {purchaseSummary.topSuppliers.map((s, i) => (
+                        <tr key={i}>
+                          <td className="p-2 font-bold">{i + 1}</td>
+                          <td className="p-2 font-semibold">{s.supplierName}</td>
+                          <td className="p-2 text-right font-mono">{s.orderCount}</td>
+                          <td className="p-2 text-right font-mono font-bold">{formatCurrency(s.totalAmount)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
+
+            {/* 4. CASH FLOW & TREASURY */}
             {(printConfig.targetScope === 'ALL_EXECUTIVE' || activeTab === 'cashflow') && (
               <div className="space-y-3">
                 <h3 className="text-xs font-bold uppercase tracking-wider border-b border-gray-400 pb-1 flex items-center gap-1.5">
                   <DollarSign className="h-4 w-4" />
-                  <span>3. Cash Flow & Liquidity Statement</span>
+                  <span>4. Cash Flow & Liquidity Statement</span>
                 </h3>
 
                 <div className="grid grid-cols-3 gap-3 text-xs">
@@ -998,13 +1074,57 @@ export default function ReportsPage() {
               </div>
             )}
 
-            {/* 4. TRIAL BALANCE AUDIT */}
+            {/* 5. TEAM SHIPMENTS LOGISTICS */}
+            {(printConfig.targetScope === 'ALL_EXECUTIVE' || activeTab === 'shipments') && (
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider border-b border-gray-400 pb-1 flex items-center gap-1.5">
+                  <Truck className="h-4 w-4" />
+                  <span>5. Sales Team Logistics & Fulfillment Audit</span>
+                </h3>
+
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="p-3 border border-gray-300 rounded bg-gray-50">
+                    <span className="text-[10px] uppercase font-bold text-gray-600">Total Dispatches</span>
+                    <p className="text-base font-bold font-mono mt-1">{shipmentSummary?.totalShipments ?? 0}</p>
+                  </div>
+                  <div className="p-3 border border-gray-300 rounded bg-gray-50">
+                    <span className="text-[10px] uppercase font-bold text-gray-600">Delivered / Completed</span>
+                    <p className="text-base font-bold font-mono mt-1 text-emerald-700">{shipmentSummary?.postedShipments ?? 0}</p>
+                  </div>
+                </div>
+
+                {shipmentSummary?.teams && shipmentSummary.teams.length > 0 && (
+                  <table className="w-full text-xs border border-gray-300 mt-2">
+                    <thead className="bg-gray-100 border-b border-gray-300 text-[10px] uppercase">
+                      <tr>
+                        <th className="p-2 text-left">No</th>
+                        <th className="p-2 text-left">Sales Team Name</th>
+                        <th className="p-2 text-right">Total Shipments</th>
+                        <th className="p-2 text-right">Delivered / Posted</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {shipmentSummary.teams.map((t, i) => (
+                        <tr key={i}>
+                          <td className="p-2 font-bold">{i + 1}</td>
+                          <td className="p-2 font-semibold">{t.teamName}</td>
+                          <td className="p-2 text-right font-mono">{t.shipmentCount}</td>
+                          <td className="p-2 text-right font-mono font-bold text-emerald-700">{t.postedCount}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
+
+            {/* 6. TRIAL BALANCE AUDIT */}
             {(printConfig.targetScope === 'ALL_EXECUTIVE' || activeTab === 'trial-balance') && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between border-b border-gray-400 pb-1">
                   <h3 className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
                     <Scale className="h-4 w-4" />
-                    <span>4. General Ledger Double-Entry Trial Balance</span>
+                    <span>6. General Ledger Double-Entry Trial Balance</span>
                   </h3>
                   <span className="text-xs font-bold">
                     Status: {trialBalance?.isBalanced ? '✓ PERFECTLY BALANCED' : '⚠️ UNBALANCED'}
