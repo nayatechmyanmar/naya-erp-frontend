@@ -109,7 +109,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased font-sans">
+    <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased font-sans w-full max-w-full overflow-x-hidden">
       {/* ─── DESKTOP SIDEBAR ───────────────────────────────────────── */}
       <aside
         className={cn(
@@ -248,7 +248,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* ─── MAIN CONTENT AREA ─────────────────────────────────────── */}
       <div
         className={cn(
-          'flex flex-1 flex-col transition-all duration-200',
+          'flex flex-1 flex-col transition-all duration-200 w-full min-w-0 max-w-full overflow-x-hidden',
           sidebarOpen ? 'md:pl-60' : 'md:pl-16'
         )}
       >
@@ -368,7 +368,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page Body */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">{children}</main>
+        <main className="flex-1 p-3 sm:p-5 lg:p-8 max-w-7xl w-full mx-auto pb-28 md:pb-8 min-w-0 overflow-x-hidden">{children}</main>
       </div>
     </div>
   );

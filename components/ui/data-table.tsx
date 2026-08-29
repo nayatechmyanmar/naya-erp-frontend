@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Search, ChevronLeft, ChevronRight, ArrowUpDown, Inbox } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, ArrowUpDown, Inbox, X } from 'lucide-react';
 import { Input } from './input';
 import { Button } from './button';
 import { cn } from '@/lib/utils';
@@ -23,12 +23,13 @@ export interface DataTableProps<T> {
   actions?: React.ReactNode;
   isLoading?: boolean;
   onRowClick?: (row: T) => void;
+  renderCard?: (row: T, index: number) => React.ReactNode;
   emptyTitle?: string;
   emptyDescription?: string;
   pageSize?: number;
 }
 
-export function DataTable<T extends Record<string, any>>({
+export function DataTable<T extends Record<string, unknown>>({
   data,
   columns,
   searchPlaceholder = 'Search records...',
@@ -37,6 +38,7 @@ export function DataTable<T extends Record<string, any>>({
   actions,
   isLoading = false,
   onRowClick,
+  renderCard,
   emptyTitle = 'No records found',
   emptyDescription = 'Try adjusting your search or filters to find what you are looking for.',
   pageSize = 10,
@@ -68,8 +70,8 @@ export function DataTable<T extends Record<string, any>>({
   const sortedData = React.useMemo(() => {
     if (!sortKey) return filteredData;
     return [...filteredData].sort((a, b) => {
-      const aVal = a[sortKey];
-      const bVal = b[sortKey];
+      const aVal = (a as Record<string, unknown>)[sortKey];
+      const bVal = (b as Record<string, unknown>)[sortKey];
       if (aVal === bVal) return 0;
       if (aVal == null) return 1;
       if (bVal == null) return -1;
@@ -98,12 +100,17 @@ export function DataTable<T extends Record<string, any>>({
     }
   };
 
+  const handleClearSearch = () => {
+    setSearch('');
+    setCurrentPage(1);
+  };
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 w-full max-w-full min-w-0">
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="flex flex-1 items-center gap-2 max-w-md">
-          <div className="relative w-full">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 w-full min-w-0">
+        <div className="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-2 max-w-2xl w-full min-w-0">
+          <div className="relative w-full min-w-0">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
             <Input
               placeholder={searchPlaceholder}
@@ -112,16 +119,71 @@ export function DataTable<T extends Record<string, any>>({
                 setSearch(e.target.value);
                 setCurrentPage(1);
               }}
-              className="pl-9 h-9 text-xs"
+              className="pl-9 pr-8 h-9 text-xs"
             />
+            {search && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="absolute right-2.5 top-2.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
+                title="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
-          {filterComponent}
+          {filterComponent && <div className="shrink-0 max-w-full overflow-x-auto no-scrollbar">{filterComponent}</div>}
         </div>
         {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
       </div>
 
-      {/* Table Container */}
-      <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
+      {/* ─── MOBILE CARD VIEW (Active when renderCard is provided) ─── */}
+      {renderCard && (
+        <div className="block md:hidden space-y-2.5 w-full min-w-0">
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="rounded-xl border border-zinc-200 bg-white p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 animate-pulse space-y-2.5"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-1/2" />
+                  <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-16" />
+                </div>
+                <div className="h-3 bg-zinc-100 dark:bg-zinc-800 rounded w-3/4" />
+              </div>
+            ))
+          ) : paginatedData.length === 0 ? (
+            <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="flex flex-col items-center justify-center gap-2">
+                <div className="rounded-full bg-zinc-100 p-3 dark:bg-zinc-800">
+                  <Inbox className="h-6 w-6 text-zinc-400" />
+                </div>
+                <p className="font-semibold text-zinc-700 dark:text-zinc-300 text-sm">{emptyTitle}</p>
+                <p className="text-zinc-500 text-xs max-w-xs">{emptyDescription}</p>
+              </div>
+            </div>
+          ) : (
+            paginatedData.map((row, idx) => (
+              <div
+                key={idx}
+                onClick={() => onRowClick?.(row)}
+                className={cn(onRowClick && 'cursor-pointer active:scale-[0.99] transition-transform')}
+              >
+                {renderCard(row, idx)}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* ─── DESKTOP TABLE CONTAINER (or standard table if renderCard is not provided) ─── */}
+      <div
+        className={cn(
+          'rounded-xl border border-zinc-200 bg-white overflow-hidden shadow-xs dark:border-zinc-800 dark:bg-zinc-900',
+          renderCard ? 'hidden md:block' : 'block'
+        )}
+      >
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
@@ -187,7 +249,7 @@ export function DataTable<T extends Record<string, any>>({
                         {col.cell
                           ? col.cell(row)
                           : col.accessorKey
-                          ? String(row[col.accessorKey as keyof T] ?? '-')
+                          ? String((row as Record<string, unknown>)[col.accessorKey as string] ?? '-')
                           : '-'}
                       </td>
                     ))}
@@ -197,44 +259,44 @@ export function DataTable<T extends Record<string, any>>({
             </tbody>
           </table>
         </div>
-
-        {/* Pagination Footer */}
-        {!isLoading && sortedData.length > 0 && (
-          <div className="flex items-center justify-between border-t border-zinc-200 px-4 py-2.5 text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-            <div>
-              Showing <span className="font-medium text-zinc-800 dark:text-zinc-200">{(currentPage - 1) * pageSize + 1}</span> to{' '}
-              <span className="font-medium text-zinc-800 dark:text-zinc-200">
-                {Math.min(currentPage * pageSize, sortedData.length)}
-              </span>{' '}
-              of <span className="font-medium text-zinc-800 dark:text-zinc-200">{sortedData.length}</span> results
-            </div>
-
-            <div className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="icon"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                className="h-7 w-7"
-              >
-                <ChevronLeft className="h-3.5 w-3.5" />
-              </Button>
-              <span className="px-2">
-                Page {currentPage} of {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                className="h-7 w-7"
-              >
-                <ChevronRight className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Pagination Footer */}
+      {!isLoading && sortedData.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 shadow-xs">
+          <div>
+            Showing <span className="font-medium text-zinc-800 dark:text-zinc-200">{(currentPage - 1) * pageSize + 1}</span> to{' '}
+            <span className="font-medium text-zinc-800 dark:text-zinc-200">
+              {Math.min(currentPage * pageSize, sortedData.length)}
+            </span>{' '}
+            of <span className="font-medium text-zinc-800 dark:text-zinc-200">{sortedData.length}</span> results
+          </div>
+
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              className="h-8 w-8 sm:h-7 sm:w-7"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </Button>
+            <span className="px-2 font-medium">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              className="h-8 w-8 sm:h-7 sm:w-7"
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

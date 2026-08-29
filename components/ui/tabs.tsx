@@ -42,13 +42,15 @@ export function Tabs({
 
 export function TabsList({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
-    <div
-      className={cn(
-        'inline-flex h-10 items-center justify-start rounded-lg bg-zinc-100 p-1 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400 gap-1 overflow-x-auto max-w-full',
-        className
-      )}
-    >
-      {children}
+    <div className="w-full overflow-x-auto no-scrollbar py-0.5 min-w-0">
+      <div
+        className={cn(
+          'inline-flex h-11 sm:h-10 items-center justify-start rounded-xl sm:rounded-lg bg-zinc-100/90 p-1 text-zinc-600 dark:bg-zinc-800/90 dark:text-zinc-400 gap-1 min-w-full sm:min-w-0 w-max sm:w-auto',
+          className
+        )}
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -74,9 +76,9 @@ export function TabsTrigger({
       type="button"
       onClick={() => context.setActiveTab(value)}
       className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer gap-2',
+        'inline-flex items-center justify-center whitespace-nowrap rounded-lg sm:rounded-md px-3 sm:px-3 py-1.5 text-xs font-semibold ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer gap-2 shrink-0 select-none min-h-[34px]',
         isActive
-          ? 'bg-white text-zinc-950 shadow-xs dark:bg-zinc-900 dark:text-zinc-50'
+          ? 'bg-white text-zinc-950 shadow-xs dark:bg-zinc-900 dark:text-zinc-50 font-bold'
           : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100',
         className
       )}
