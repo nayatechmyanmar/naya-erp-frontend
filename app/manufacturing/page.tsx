@@ -594,7 +594,7 @@ export default function ManufacturingPage() {
           <div className="flex items-center gap-2">
             <Factory className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600 shrink-0" />
             <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 truncate">
-              Manufacturing & Production (ထုတ်လုပ်မှု လုပ်ငန်းစဉ်များ)
+              ထုတ်လုပ်မှု လုပ်ငန်းစဉ်များ
             </h1>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">

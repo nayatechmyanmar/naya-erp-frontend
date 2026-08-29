@@ -639,7 +639,7 @@ export default function PurchasingPage() {
           <div className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 shrink-0" />
             <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 truncate">
-              Purchasing & Receipts (အဝယ်နှင့် ကုန်လက်ခံလွှာ)
+              အဝယ်နှင့် ကုန်လက်ခံလွှာ
             </h1>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
@@ -1314,11 +1314,10 @@ export default function PurchasingPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div
                 onClick={() => setPrintConfig({ ...printConfig, paperSize: 'A4' })}
-                className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
-                  printConfig.paperSize === 'A4'
+                className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${printConfig.paperSize === 'A4'
                     ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200'
                     : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
                   <Scale className="h-4 w-4 text-blue-600" />
@@ -1331,11 +1330,10 @@ export default function PurchasingPage() {
 
               <div
                 onClick={() => setPrintConfig({ ...printConfig, paperSize: 'THERMAL_80MM' })}
-                className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
-                  printConfig.paperSize === 'THERMAL_80MM'
+                className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${printConfig.paperSize === 'THERMAL_80MM'
                     ? 'border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
                     : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
                   <Receipt className="h-4 w-4 text-emerald-600" />

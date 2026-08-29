@@ -182,7 +182,7 @@ export default function ReportsPage() {
           <div className="flex items-center gap-2">
             <FileBarChart className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 shrink-0" />
             <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 truncate">
-              Enterprise Analytical Reports (လုပ်ငန်းသုံး စာရင်းအစီရင်ခံစာများ)
+              လုပ်ငန်းသုံး စာရင်းအစီရင်ခံစာများ
             </h1>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
@@ -310,7 +310,7 @@ export default function ReportsPage() {
           <Card>
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Top Customers by Volume (အရောင်းရဆုံး ဖောက်သည်များ)
+                အရောင်းရဆုံး ဖောက်သည်များ
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-2">
@@ -377,7 +377,7 @@ export default function ReportsPage() {
           <Card>
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Warehouse Stock Breakdown (ဂိုဒေါင်အလိုက် စတော့လက်ကျန် စာရင်း)
+                ဂိုဒေါင်အလိုက် စတော့လက်ကျန် စာရင်း
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-2">
@@ -442,7 +442,7 @@ export default function ReportsPage() {
           <Card>
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Top Suppliers by Spend (အများဆုံး ဝယ်ယူခဲ့သော ကုန်ပေးသွင်းသူများ)
+                အများဆုံး ဝယ်ယူခဲ့သော ကုန်ပေးသွင်းသူများ
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-2">
@@ -510,7 +510,7 @@ export default function ReportsPage() {
           <Card>
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Recent Cash Transactions (လတ်တလော ငွေပေးငွေယူ စာရင်းများ)
+                လတ်တလော ငွေပေးငွေယူ စာရင်းများ
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-2">
@@ -556,7 +556,7 @@ export default function ReportsPage() {
           <Card>
             <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                General Ledger Trial Balance (စမ်းသပ်ရှင်းတမ်း - နှစ်ဖက်စာရင်းကိုက် စစ်ဆေးချက်)
+                General Ledger စမ်းသပ်ရှင်းတမ်း - နှစ်ဖက်စာရင်းကိုက် စစ်ဆေးချက်
               </CardTitle>
               <Badge variant={trialBalance?.isBalanced ? 'success' : 'destructive'}>
                 {trialBalance?.isBalanced ? '✓ PERFECTLY BALANCED' : '⚠️ UNBALANCED'}
@@ -639,7 +639,7 @@ export default function ReportsPage() {
           <Card>
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Shipment Breakdown by Sales Team (အရောင်းအဖွဲ့အလိုက် ပို့ဆောင်မှုပမာဏ)
+                အရောင်းအဖွဲ့အလိုက် ပို့ဆောင်မှုပမာဏ
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-2">
@@ -677,11 +677,10 @@ export default function ReportsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div
                 onClick={() => setPrintConfig({ ...printConfig, paperSize: 'A4_STANDARD' })}
-                className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                  printConfig.paperSize === 'A4_STANDARD'
-                    ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-100 ring-1 ring-blue-600'
-                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
-                }`}
+                className={`p-3 rounded-xl border cursor-pointer transition-all ${printConfig.paperSize === 'A4_STANDARD'
+                  ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-100 ring-1 ring-blue-600'
+                  : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                  }`}
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
                   <FileText className="h-4 w-4 text-blue-600" />
@@ -694,11 +693,10 @@ export default function ReportsPage() {
 
               <div
                 onClick={() => setPrintConfig({ ...printConfig, paperSize: 'THERMAL_80MM' })}
-                className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                  printConfig.paperSize === 'THERMAL_80MM'
-                    ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-100 ring-1 ring-blue-600'
-                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
-                }`}
+                className={`p-3 rounded-xl border cursor-pointer transition-all ${printConfig.paperSize === 'THERMAL_80MM'
+                  ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-100 ring-1 ring-blue-600'
+                  : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                  }`}
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
                   <Receipt className="h-4 w-4 text-emerald-600" />

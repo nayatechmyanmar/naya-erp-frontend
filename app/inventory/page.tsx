@@ -623,7 +623,7 @@ export default function InventoryPage() {
           <div className="flex items-center gap-2">
             <Boxes className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 shrink-0" />
             <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 truncate">
-              Inventory & Warehouses (စတော့နှင့် သိုလှောင်ရုံ)
+              စတော့နှင့် သိုလှောင်ရုံ
             </h1>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">

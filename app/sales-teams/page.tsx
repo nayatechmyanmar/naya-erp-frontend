@@ -674,9 +674,8 @@ export default function SalesTeamsPage() {
         <div className="flex items-center gap-2 min-w-[130px]">
           <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
             <div
-              className={`h-2 rounded-full ${
-                r.fulfillmentRate >= 80 ? 'bg-emerald-500' : r.fulfillmentRate >= 50 ? 'bg-amber-500' : 'bg-blue-500'
-              }`}
+              className={`h-2 rounded-full ${r.fulfillmentRate >= 80 ? 'bg-emerald-500' : r.fulfillmentRate >= 50 ? 'bg-amber-500' : 'bg-blue-500'
+                }`}
               style={{ width: `${Math.min(r.fulfillmentRate, 100)}%` }}
             />
           </div>
@@ -731,9 +730,8 @@ export default function SalesTeamsPage() {
 
           <Badge
             variant={r.fulfillmentRate >= 80 ? 'default' : 'secondary'}
-            className={`text-[10px] px-2 py-0.5 shrink-0 ${
-              r.fulfillmentRate >= 80 ? 'bg-emerald-600 text-white' : ''
-            }`}
+            className={`text-[10px] px-2 py-0.5 shrink-0 ${r.fulfillmentRate >= 80 ? 'bg-emerald-600 text-white' : ''
+              }`}
           >
             {r.fulfillmentRate}% Fulfilled
           </Badge>
@@ -743,13 +741,12 @@ export default function SalesTeamsPage() {
         <div className="space-y-1">
           <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
             <div
-              className={`h-2 rounded-full transition-all ${
-                r.fulfillmentRate >= 80
+              className={`h-2 rounded-full transition-all ${r.fulfillmentRate >= 80
                   ? 'bg-emerald-500'
                   : r.fulfillmentRate >= 50
-                  ? 'bg-blue-500'
-                  : 'bg-amber-500'
-              }`}
+                    ? 'bg-blue-500'
+                    : 'bg-amber-500'
+                }`}
               style={{ width: `${Math.min(r.fulfillmentRate, 100)}%` }}
             />
           </div>
@@ -808,7 +805,7 @@ export default function SalesTeamsPage() {
         <div className="min-w-0">
           <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-2.5 truncate">
             <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 shrink-0" />
-            <span className="truncate">Sales Teams & Salesman Operations (အရောင်းအဖွဲ့နှင့် လုပ်ငန်းခွင်)</span>
+            <span className="truncate">အရောင်းအဖွဲ့နှင့် လုပ်ငန်းခွင်</span>
           </h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
             Dedicated portal for Salesmen & Team Leaders: Orders, deliveries, collections & performance
@@ -1414,22 +1411,20 @@ export default function SalesTeamsPage() {
             <button
               type="button"
               onClick={() => setAddMemberTab('select')}
-              className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap ${
-                addMemberTab === 'select'
+              className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap ${addMemberTab === 'select'
                   ? 'border-blue-600 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
-              }`}
+                }`}
             >
               👥 Select Existing Staff (ရှိပြီးသား ဝန်ထမ်းရွေးရန်)
             </button>
             <button
               type="button"
               onClick={() => setAddMemberTab('register')}
-              className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap ${
-                addMemberTab === 'register'
+              className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap ${addMemberTab === 'register'
                   ? 'border-blue-600 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
-              }`}
+                }`}
             >
               ✨ + Register New Salesman (အရောင်းဝန်ထမ်းသစ် ဖွင့်ရန်)
             </button>
@@ -1769,11 +1764,10 @@ export default function SalesTeamsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div
                 onClick={() => setPrintConfig({ ...printConfig, paperSize: 'THERMAL_80MM' })}
-                className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
-                  printConfig.paperSize === 'THERMAL_80MM'
+                className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${printConfig.paperSize === 'THERMAL_80MM'
                     ? 'border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
                     : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
                   <Receipt className="h-4 w-4 text-emerald-600" />
@@ -1786,11 +1780,10 @@ export default function SalesTeamsPage() {
 
               <div
                 onClick={() => setPrintConfig({ ...printConfig, paperSize: 'A4' })}
-                className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
-                  printConfig.paperSize === 'A4'
+                className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${printConfig.paperSize === 'A4'
                     ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200'
                     : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
                   <Scale className="h-4 w-4 text-blue-600" />

@@ -251,11 +251,10 @@ export default function DashboardPage() {
                           {mov.product?.name || `Product #${mov.productId}`}
                         </span>
                         <span
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                            Number(mov.qty) > 0
+                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${Number(mov.qty) > 0
                               ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
                               : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
-                          }`}
+                            }`}
                         >
                           {Number(mov.qty) > 0 ? `+${mov.qty}` : mov.qty} {mov.uom?.symbol || ''}
                         </span>
@@ -284,7 +283,7 @@ export default function DashboardPage() {
               <Users className="h-4 w-4 text-blue-600" />
               <div>
                 <CardTitle className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                  Sales Teams Performance Overview (အရောင်းအဖွဲ့များ စွမ်းဆောင်ရည် အကျဉ်း)
+                  အရောင်းအဖွဲ့များ စွမ်းဆောင်ရည် အကျဉ်း
                 </CardTitle>
                 <p className="text-xs text-zinc-500">Live order fulfillment rate and active team capacities</p>
               </div>
