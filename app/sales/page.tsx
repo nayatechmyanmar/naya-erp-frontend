@@ -16,6 +16,10 @@ import {
   Building2,
   UserCheck,
   DollarSign,
+  Printer,
+  Receipt,
+  Scale,
+  Calendar,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api/bff-client';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -41,7 +45,7 @@ import {
 } from '@/types/erp';
 
 export default function SalesPage() {
-  const { orgContext } = useAuth();
+  const { user, orgContext } = useAuth();
   const { success, error } = useToast();
 
   const [activeTab, setActiveTab] = React.useState('orders');
@@ -65,6 +69,47 @@ export default function SalesPage() {
   const [selectedShipment, setSelectedShipment] = React.useState<SalesShipment | null>(null);
   const [soSheetOpen, setSoSheetOpen] = React.useState(false);
   const [shipmentSheetOpen, setShipmentSheetOpen] = React.useState(false);
+
+  // Document Printing States
+  const [printDialogOpen, setPrintDialogOpen] = React.useState(false);
+  const [printType, setPrintType] = React.useState<'INVOICE' | 'DELIVERY_ORDER'>('INVOICE');
+  const [selectedPrintSo, setSelectedPrintSo] = React.useState<SalesOrder | null>(null);
+  const [selectedPrintShipment, setSelectedPrintShipment] = React.useState<SalesShipment | null>(null);
+  const [printConfig, setPrintConfig] = React.useState<{
+    paperSize: 'A4' | 'THERMAL_80MM';
+    showLetterhead: boolean;
+    showSignatures: boolean;
+  }>({
+    paperSize: 'A4',
+    showLetterhead: true,
+    showSignatures: true,
+  });
+
+  const handleOpenPrintSo = async (so: SalesOrder) => {
+    if (!so.items || so.items.length === 0) {
+      const detailRes = await apiFetch<SalesOrder>(`/api/sales/sales-orders/${so.id}`);
+      setSelectedPrintSo(detailRes.success && detailRes.data ? detailRes.data : so);
+    } else {
+      setSelectedPrintSo(so);
+    }
+    setPrintType('INVOICE');
+    setPrintDialogOpen(true);
+  };
+
+  const handleOpenPrintShipment = async (sh: SalesShipment) => {
+    if (!sh.items || sh.items.length === 0) {
+      const detailRes = await apiFetch<SalesShipment>(`/api/sales/sales-shipments/${sh.id}`);
+      setSelectedPrintShipment(detailRes.success && detailRes.data ? detailRes.data : sh);
+    } else {
+      setSelectedPrintShipment(sh);
+    }
+    setPrintType('DELIVERY_ORDER');
+    setPrintDialogOpen(true);
+  };
+
+  const handleExecutePrint = () => {
+    window.print();
+  };
 
   // SO Form
   const [soForm, setSoForm] = React.useState({
@@ -386,8 +431,19 @@ export default function SalesPage() {
           <Button
             variant="ghost"
             size="sm"
+            onClick={() => handleOpenPrintSo(r)}
+            className="h-7 text-xs text-zinc-600 hover:text-blue-600"
+            title="Print Sales Invoice (အရောင်းပြေစာ ပရင့်ထုတ်ပါ)"
+          >
+            <Printer className="h-3.5 w-3.5" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => inspectSo(r)}
             className="h-7 text-xs"
+            title="Inspect"
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
@@ -443,8 +499,19 @@ export default function SalesPage() {
           <Button
             variant="ghost"
             size="sm"
+            onClick={() => handleOpenPrintShipment(r)}
+            className="h-7 text-xs text-zinc-600 hover:text-emerald-600"
+            title="Print Delivery Order (DO) (ပစ္စည်းပို့ဆောင်လွှာ ပရင့်ထုတ်ပါ)"
+          >
+            <Printer className="h-3.5 w-3.5" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => inspectShipment(r)}
             className="h-7 text-xs"
+            title="Inspect"
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
@@ -557,45 +624,60 @@ export default function SalesPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-end gap-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => inspectSo(so)}
-                        className="h-8 text-xs gap-1"
-                      >
-                        <Eye className="h-3.5 w-3.5" /> View
-                      </Button>
-                      {so.status === 'DRAFT' && (
+                    <div className="flex items-center justify-between gap-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
+                      <div className="flex items-center gap-1">
                         <Button
-                          variant="primary"
+                          variant="ghost"
                           size="sm"
-                          onClick={() => handleConfirmSo(so.id)}
-                          className="h-8 text-xs gap-1 bg-emerald-600 text-white"
+                          onClick={() => handleOpenPrintSo(so)}
+                          className="h-8 px-2 text-zinc-600 dark:text-zinc-300 gap-1 hover:text-blue-600"
+                          title="Print Invoice"
                         >
-                          <CheckCircle2 className="h-3.5 w-3.5" /> Confirm
+                          <Printer className="h-3.5 w-3.5" />
+                          <span className="text-xs">Print</span>
                         </Button>
-                      )}
-                      {(so.status === 'CONFIRMED' || so.status === 'PARTIALLY_SHIPPED') && (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleOpenAssignModal(so)}
-                            className="h-8 text-xs gap-1 text-blue-600"
-                          >
-                            <Users className="h-3.5 w-3.5" /> Assign
-                          </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => inspectSo(so)}
+                          className="h-8 text-xs gap-1"
+                        >
+                          <Eye className="h-3.5 w-3.5" /> View
+                        </Button>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        {so.status === 'DRAFT' && (
                           <Button
                             variant="primary"
                             size="sm"
-                            onClick={() => handleOpenCreateShipment(so)}
-                            className="h-8 text-xs gap-1 bg-blue-600 text-white"
+                            onClick={() => handleConfirmSo(so.id)}
+                            className="h-8 text-xs gap-1 bg-emerald-600 text-white"
                           >
-                            <Truck className="h-3.5 w-3.5" /> Dispatch
+                            <CheckCircle2 className="h-3.5 w-3.5" /> Confirm
                           </Button>
-                        </>
-                      )}
+                        )}
+                        {(so.status === 'CONFIRMED' || so.status === 'PARTIALLY_SHIPPED') && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOpenAssignModal(so)}
+                              className="h-8 text-xs gap-1 text-blue-600"
+                            >
+                              <Users className="h-3.5 w-3.5" /> Assign
+                            </Button>
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              onClick={() => handleOpenCreateShipment(so)}
+                              className="h-8 text-xs gap-1 bg-blue-600 text-white"
+                            >
+                              <Truck className="h-3.5 w-3.5" /> Dispatch
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -654,25 +736,38 @@ export default function SalesPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-end gap-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
+                  <div className="flex items-center justify-between gap-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
-                      onClick={() => inspectShipment(shp)}
-                      className="h-8 text-xs gap-1"
+                      onClick={() => handleOpenPrintShipment(shp)}
+                      className="h-8 px-2 text-zinc-600 dark:text-zinc-300 gap-1 hover:text-emerald-600"
+                      title="Print DO"
                     >
-                      <Eye className="h-3.5 w-3.5" /> View
+                      <Printer className="h-3.5 w-3.5" />
+                      <span className="text-xs">Print DO</span>
                     </Button>
-                    {shp.status === 'DRAFT' && (
+
+                    <div className="flex items-center gap-1">
                       <Button
-                        variant="primary"
+                        variant="outline"
                         size="sm"
-                        onClick={() => handleOpenPostShipmentDialog(shp)}
-                        className="h-8 text-xs gap-1 bg-emerald-600 text-white"
+                        onClick={() => inspectShipment(shp)}
+                        className="h-8 text-xs gap-1"
                       >
-                        <CheckCircle2 className="h-3.5 w-3.5" /> Post & GL Sync
+                        <Eye className="h-3.5 w-3.5" /> View
                       </Button>
-                    )}
+                      {shp.status === 'DRAFT' && (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleOpenPostShipmentDialog(shp)}
+                          className="h-8 text-xs gap-1 bg-emerald-600 text-white"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Post & GL Sync
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))
@@ -1115,22 +1210,30 @@ export default function SalesPage() {
         description={`Customer: ${selectedSo?.customer?.name || ''}`}
         footer={
           selectedSo && (
-            <div className="flex items-center justify-between w-full">
-              <div>
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2 w-full">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleOpenPrintSo(selectedSo)}
+                  className="gap-1.5 text-xs text-blue-600 hover:text-blue-700"
+                >
+                  <Printer className="h-4 w-4" /> Print Invoice (အရောင်းပြေစာ ပရင့်ထုတ်ပါ)
+                </Button>
                 {selectedSo.status === 'DRAFT' && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setCancelSoConfirmOpen(true)}
-                    className="text-rose-600"
+                    className="text-rose-600 w-full sm:w-auto text-xs"
                   >
                     Cancel Order
                   </Button>
                 )}
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 {selectedSo.status === 'DRAFT' && (
-                  <Button variant="primary" size="sm" onClick={() => handleConfirmSo(selectedSo.id)}>
+                  <Button variant="primary" size="sm" onClick={() => handleConfirmSo(selectedSo.id)} className="w-full sm:w-auto text-xs">
                     Confirm Order
                   </Button>
                 )}
@@ -1140,7 +1243,7 @@ export default function SalesPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleOpenAssignModal(selectedSo)}
-                      className="text-purple-600"
+                      className="text-purple-600 w-full sm:w-auto text-xs"
                     >
                       <UserCheck className="h-4 w-4 mr-1" /> Assign Team
                     </Button>
@@ -1151,7 +1254,7 @@ export default function SalesPage() {
                         setSoSheetOpen(false);
                         handleOpenCreateShipment(selectedSo);
                       }}
-                      className="bg-blue-600 hover:bg-blue-700 gap-1.5"
+                      className="bg-blue-600 hover:bg-blue-700 gap-1.5 w-full sm:w-auto text-xs"
                     >
                       <Truck className="h-4 w-4" /> Create Shipment Dispatch
                     </Button>
@@ -1239,19 +1342,29 @@ export default function SalesPage() {
         title={`Sales Shipment: ${selectedShipment?.shipmentNo || ''}`}
         description={`SO Reference: ${selectedShipment?.salesOrder?.orderNo || ''}`}
         footer={
-          selectedShipment && selectedShipment.status === 'DRAFT' && (
-            <div className="flex justify-end gap-2 w-full">
+          selectedShipment && (
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2 w-full">
               <Button
-                variant="primary"
+                variant="outline"
                 size="sm"
-                onClick={() => {
-                  setShipmentSheetOpen(false);
-                  handleOpenPostShipmentDialog(selectedShipment);
-                }}
-                className="bg-emerald-600 hover:bg-emerald-700 gap-1.5"
+                onClick={() => handleOpenPrintShipment(selectedShipment)}
+                className="gap-1.5 text-xs text-emerald-600 hover:text-emerald-700"
               >
-                <CheckCircle2 className="h-4 w-4" /> Post to Stock & GL
+                <Printer className="h-4 w-4" /> Print DO (ပစ္စည်းပို့လွှာ ပရင့်ထုတ်ပါ)
               </Button>
+              {selectedShipment.status === 'DRAFT' && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    setShipmentSheetOpen(false);
+                    handleOpenPostShipmentDialog(selectedShipment);
+                  }}
+                  className="bg-emerald-600 hover:bg-emerald-700 gap-1.5 w-full sm:w-auto text-xs"
+                >
+                  <CheckCircle2 className="h-4 w-4" /> Post to Stock & GL
+                </Button>
+              )}
             </div>
           )
         }
@@ -1297,6 +1410,526 @@ export default function SalesPage() {
           </div>
         )}
       </Sheet>
+
+      {/* ─── PRINT CUSTOMIZER DIALOG ─────────────────────────────────── */}
+      <Dialog
+        open={printDialogOpen}
+        onOpenChange={setPrintDialogOpen}
+        title={printType === 'INVOICE' ? 'Print Commercial Sales Invoice' : 'Print Delivery Order (DO)'}
+        maxWidth="lg"
+      >
+        <div className="space-y-4 text-xs">
+          <div className="space-y-2">
+            <label className="font-semibold text-zinc-700 dark:text-zinc-300">
+              Select Output Document Format (ပုံနှိပ်မည့် ပုံစံရွေးချယ်ပါ)
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div
+                onClick={() => setPrintConfig({ ...printConfig, paperSize: 'A4' })}
+                className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                  printConfig.paperSize === 'A4'
+                    ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200'
+                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                }`}
+              >
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Scale className="h-4 w-4 text-blue-600" />
+                  <span>📄 A4 Formal Commercial Document</span>
+                </div>
+                <p className="text-[11px] text-zinc-500 mt-1">
+                  Full standard page with enterprise letterhead, itemized pricing, tax breakdown, and 3-column verification seal.
+                </p>
+              </div>
+
+              <div
+                onClick={() => setPrintConfig({ ...printConfig, paperSize: 'THERMAL_80MM' })}
+                className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                  printConfig.paperSize === 'THERMAL_80MM'
+                    ? 'border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
+                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                }`}
+              >
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Receipt className="h-4 w-4 text-emerald-600" />
+                  <span>🧾 80mm POS Thermal Slip</span>
+                </div>
+                <p className="text-[11px] text-zinc-500 mt-1">
+                  Compact roll format for wireless bluetooth receipt printers, field salesmen, and sales delivery vans.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={printConfig.showLetterhead}
+                onChange={e => setPrintConfig({ ...printConfig, showLetterhead: e.target.checked })}
+                className="rounded border-zinc-300 h-4 w-4 text-blue-600"
+              />
+              <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                Include Official Enterprise Letterhead (လုပ်ငန်းခေါင်းစီးနှင့် လိပ်စာ)
+              </span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={printConfig.showSignatures}
+                onChange={e => setPrintConfig({ ...printConfig, showSignatures: e.target.checked })}
+                className="rounded border-zinc-300 h-4 w-4 text-blue-600"
+              />
+              <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                Include Signatures & Customer Acknowledgment Block (အရောင်း/ပို့ဆောင်/ဝယ်ယူသူ လက်မှတ်များ)
+              </span>
+            </label>
+          </div>
+
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setPrintDialogOpen(false)} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button type="button" variant="primary" onClick={handleExecutePrint} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 gap-1.5">
+              <Printer className="h-4 w-4" />
+              <span>Print Document (ပရင့်ထုတ်ပါ)</span>
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* ─── DEDICATED PRINT PAPER DOCUMENT ENGINE ───────────────────── */}
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+          #printable-sales-area,
+          #printable-sales-area * {
+            visibility: visible !important;
+          }
+          #printable-sales-area {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: block !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Pyidaungsu", "Myanmar3" !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+          @page {
+            size: ${printConfig.paperSize === 'THERMAL_80MM' ? '80mm auto' : 'A4 portrait'};
+            margin: ${printConfig.paperSize === 'THERMAL_80MM' ? '4mm' : '10mm 14mm'};
+          }
+        }
+      `}</style>
+
+      <div id="printable-sales-area" className="hidden">
+        {printType === 'INVOICE' && selectedPrintSo && (
+          printConfig.paperSize === 'THERMAL_80MM' ? (
+            /* 🧾 80MM THERMAL SALES INVOICE SLIP */
+            <div className="max-w-[76mm] mx-auto text-black font-mono text-[11px] leading-tight p-1 space-y-2">
+              <div className="text-center space-y-0.5 border-b border-dashed border-black pb-2">
+                <h2 className="text-sm font-bold uppercase">{orgContext.tenantName || 'NAYA-ERA ERP'}</h2>
+                <p className="text-[10px]">{orgContext.branchName || 'Head Office'}</p>
+                <p className="text-[10px] uppercase font-bold mt-1">*** CASH SALE / INVOICE ***</p>
+                <p className="text-[9px]">Invoice#: {selectedPrintSo.orderNo}</p>
+                <p className="text-[9px]">Date: {formatDate(selectedPrintSo.orderDate)}</p>
+              </div>
+
+              <div className="border-b border-dashed border-black py-1 space-y-0.5 text-[10px]">
+                <p>Customer: <span className="font-bold">{selectedPrintSo.customer?.name || 'Walk-in Customer'}</span></p>
+                {selectedPrintSo.customer?.phoneNumber && <p>Phone: {selectedPrintSo.customer.phoneNumber}</p>}
+                {selectedPrintSo.customer?.address && <p className="truncate">Address: {selectedPrintSo.customer.address}</p>}
+                <p>Team: {selectedPrintSo.assignments?.[0]?.salesTeam?.name || 'General Sales'}</p>
+              </div>
+
+              <div className="border-b border-dashed border-black py-1 space-y-1">
+                <div className="grid grid-cols-12 font-bold text-[10px] border-b border-dashed border-black pb-1">
+                  <span className="col-span-7">ITEM</span>
+                  <span className="col-span-2 text-right">QTY</span>
+                  <span className="col-span-3 text-right">AMOUNT</span>
+                </div>
+                {(selectedPrintSo.items || []).map((it, i) => (
+                  <div key={i} className="grid grid-cols-12 text-[10px] py-0.5">
+                    <div className="col-span-7 truncate">
+                      <p className="font-bold">{it.product?.name || `Item #${it.productId}`}</p>
+                      <p className="text-[9px] text-gray-700 font-normal">@{formatCurrency(it.rate)} {it.isFoc ? '(FOC)' : ''}</p>
+                    </div>
+                    <span className="col-span-2 text-right font-bold">{it.qty} {it.uom?.symbol || ''}</span>
+                    <span className="col-span-3 text-right font-bold">{it.isFoc ? '0' : formatCurrency(it.amount)}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-1 py-1 text-[10px]">
+                <div className="flex justify-between font-bold text-xs">
+                  <span>NET TOTAL:</span>
+                  <span>
+                    {formatCurrency(
+                      (selectedPrintSo.items || []).reduce((s, it) => s + (it.isFoc ? 0 : Number(it.amount || 0)), 0)
+                    )}
+                  </span>
+                </div>
+                <div className="flex justify-between text-[9px]">
+                  <span>Status:</span>
+                  <span className="uppercase font-bold">{selectedPrintSo.status}</span>
+                </div>
+              </div>
+
+              <div className="pt-3 text-[9px] space-y-4 border-t border-dashed border-black">
+                <div className="space-y-3">
+                  <div>
+                    <p>Salesperson Sign: _________________</p>
+                  </div>
+                  <div>
+                    <p>Customer Received: _________________</p>
+                  </div>
+                </div>
+                <div className="text-center text-[8px] pt-1">
+                  <p>Thank You For Your Business!</p>
+                  <p>NAYA-ERA Cloud ERP Point of Sale</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* 📄 A4 FORMAL COMMERCIAL SALES INVOICE */
+            <div className="p-8 text-black space-y-6 max-w-4xl mx-auto font-sans">
+              {printConfig.showLetterhead && (
+                <div className="flex items-start justify-between border-b-2 border-black pb-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-6 w-6 text-black" />
+                      <h1 className="text-xl font-bold uppercase tracking-wider">
+                        {orgContext.tenantName || 'NAYA-ERA ENTERPRISE RESOURCE PLANNING'}
+                      </h1>
+                    </div>
+                    <p className="text-xs text-gray-700 font-medium">
+                      Branch: {orgContext.branchName || 'Head Office'} • Commercial Sales Dept
+                    </p>
+                    <p className="text-[11px] text-gray-600">
+                      Official Tax & Commercial Sales Invoice
+                    </p>
+                  </div>
+
+                  <div className="text-right text-xs space-y-0.5">
+                    <p className="font-bold font-mono text-sm">INVOICE NO: {selectedPrintSo.orderNo}</p>
+                    <p className="text-gray-600">Invoice Date: {formatDate(selectedPrintSo.orderDate)}</p>
+                    <p className="text-gray-600">Delivery Date: {formatDate(selectedPrintSo.deliveryDate)}</p>
+                    <p className="text-gray-600">Status: <span className="font-bold uppercase">{selectedPrintSo.status}</span></p>
+                  </div>
+                </div>
+              )}
+
+              <div className="text-center py-2 bg-gray-100 border border-gray-300 rounded">
+                <h2 className="text-base font-bold uppercase tracking-wide">
+                  COMMERCIAL SALES INVOICE / အရောင်းပြေစာ
+                </h2>
+                <p className="text-xs text-gray-600 mt-0.5 font-medium">
+                  Official Bill of Sale & Accounts Receivable Document
+                </p>
+              </div>
+
+              {/* Customer & Billing Details */}
+              <div className="grid grid-cols-2 gap-4 text-xs p-3.5 border border-gray-300 rounded bg-gray-50">
+                <div className="space-y-1">
+                  <p className="font-bold uppercase text-[10px] text-gray-500">Billed To (ဝယ်ယူသူ ဖောက်သည်အချက်အလက်)</p>
+                  <p className="font-bold text-sm">{selectedPrintSo.customer?.name || 'Customer'}</p>
+                  <p className="text-gray-600">Phone: {selectedPrintSo.customer?.phoneNumber || '-'}</p>
+                  <p className="text-gray-600">Address: {selectedPrintSo.customer?.address || '-'}</p>
+                </div>
+                <div className="space-y-1 text-right">
+                  <p className="font-bold uppercase text-[10px] text-gray-500">Sales Distribution Team</p>
+                  <p className="font-bold text-sm">{selectedPrintSo.assignments?.[0]?.salesTeam?.name || 'Direct Sales Division'}</p>
+                  <p className="text-gray-600">Issued By: {user?.name || 'Sales Representative'}</p>
+                  <p className="text-gray-600">Payment Terms: Cash on Delivery / Net 30 Days</p>
+                </div>
+              </div>
+
+              {/* Line Items */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider border-b border-gray-300 pb-1">
+                  Itemized Order Lines (ရောင်းချသော ကုန်ပစ္စည်းစာရင်းများ)
+                </h3>
+                <table className="w-full text-xs border border-gray-300">
+                  <thead className="bg-gray-100 border-b border-gray-300 text-[10px] uppercase">
+                    <tr>
+                      <th className="p-2 text-left w-12">No.</th>
+                      <th className="p-2 text-left">Item Description / SKU</th>
+                      <th className="p-2 text-center">Unit</th>
+                      <th className="p-2 text-right">Qty</th>
+                      <th className="p-2 text-right">Unit Price (MMK)</th>
+                      <th className="p-2 text-right">Amount (MMK)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {(selectedPrintSo.items || []).map((it, idx) => (
+                      <tr key={idx}>
+                        <td className="p-2 font-bold text-center">{idx + 1}</td>
+                        <td className="p-2">
+                          <p className="font-semibold">{it.product?.name || `Product #${it.productId}`}</p>
+                          <p className="text-[10px] text-gray-500 font-mono">{it.product?.sku || '-'}</p>
+                        </td>
+                        <td className="p-2 text-center text-gray-600">{it.uom?.symbol || ''}</td>
+                        <td className="p-2 text-right font-mono font-bold">{formatQuantity(it.qty)}</td>
+                        <td className="p-2 text-right font-mono">{it.isFoc ? '0.00 (FOC Free)' : formatCurrency(it.rate)}</td>
+                        <td className="p-2 text-right font-mono font-bold">{it.isFoc ? '0.00' : formatCurrency(it.amount)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="bg-gray-100 font-bold border-t-2 border-black">
+                    <tr>
+                      <td colSpan={5} className="p-2 text-right uppercase">Net Total Payable (ကျသင့်ငွေ စုစုပေါင်း):</td>
+                      <td className="p-2 text-right font-mono text-sm">
+                        {formatCurrency(
+                          (selectedPrintSo.items || []).reduce((s, it) => s + (it.isFoc ? 0 : Number(it.amount || 0)), 0)
+                        )}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              {/* Signatures */}
+              {printConfig.showSignatures && (
+                <div className="pt-8 border-t border-gray-300 mt-8 space-y-6">
+                  <div className="grid grid-cols-3 gap-6 text-center text-xs">
+                    <div className="space-y-8">
+                      <p className="font-bold uppercase text-[10px] text-gray-600">Sales Executive (အရောင်းစာရေး)</p>
+                      <div className="border-b border-gray-400 mx-4"></div>
+                      <div>
+                        <p className="font-semibold">{user?.name || 'Authorized Staff'}</p>
+                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-8">
+                      <p className="font-bold uppercase text-[10px] text-gray-600">Store / Dispatcher (ပစ္စည်းထုတ်ပေးသူ)</p>
+                      <div className="border-b border-gray-400 mx-4"></div>
+                      <div>
+                        <p className="font-semibold">Warehouse Officer</p>
+                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-8">
+                      <p className="font-bold uppercase text-[10px] text-gray-600">Customer Receiver (ဝယ်ယူသူ လက်ခံလက်မှတ်)</p>
+                      <div className="border-b border-gray-400 mx-4"></div>
+                      <div>
+                        <p className="font-semibold">{selectedPrintSo.customer?.name || 'Customer'}</p>
+                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-center text-[10px] text-gray-500 pt-4 border-t border-gray-200">
+                    NAYA-ERA Official Enterprise ERP • System Automated Commercial Invoice • Certified Valid
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        )}
+
+        {printType === 'DELIVERY_ORDER' && selectedPrintShipment && (
+          printConfig.paperSize === 'THERMAL_80MM' ? (
+            /* 🧾 80MM THERMAL DELIVERY ORDER SLIP */
+            <div className="max-w-[76mm] mx-auto text-black font-mono text-[11px] leading-tight p-1 space-y-2">
+              <div className="text-center space-y-0.5 border-b border-dashed border-black pb-2">
+                <h2 className="text-sm font-bold uppercase">{orgContext.tenantName || 'NAYA-ERA ERP'}</h2>
+                <p className="text-[10px]">{selectedPrintShipment.salesTeam?.name || 'Logistics Fleet'}</p>
+                <p className="text-[10px] uppercase font-bold mt-1">*** DELIVERY ORDER (DO) ***</p>
+                <p className="text-[9px]">DO#: {selectedPrintShipment.shipmentNo}</p>
+                <p className="text-[9px]">SO Ref: {selectedPrintShipment.salesOrder?.orderNo || '-'}</p>
+                <p className="text-[9px]">Dispatch Date: {formatDate(selectedPrintShipment.shipmentDate)}</p>
+              </div>
+
+              <div className="border-b border-dashed border-black py-1 space-y-0.5 text-[10px]">
+                <p>Deliver To: <span className="font-bold">{selectedPrintShipment.salesOrder?.customer?.name || 'Customer Destination'}</span></p>
+                {selectedPrintShipment.salesOrder?.customer?.address && (
+                  <p className="truncate">Address: {selectedPrintShipment.salesOrder.customer.address}</p>
+                )}
+                {selectedPrintShipment.salesOrder?.customer?.phoneNumber && (
+                  <p>Contact: {selectedPrintShipment.salesOrder.customer.phoneNumber}</p>
+                )}
+                <p>Team/Van: {selectedPrintShipment.salesTeam?.name || 'Direct Van'}</p>
+              </div>
+
+              <div className="border-b border-dashed border-black py-1 space-y-1">
+                <div className="grid grid-cols-12 font-bold text-[10px] border-b border-dashed border-black pb-1">
+                  <span className="col-span-8">PRODUCT</span>
+                  <span className="col-span-4 text-right">DISPATCH QTY</span>
+                </div>
+                {(selectedPrintShipment.items || []).map((it, i) => (
+                  <div key={i} className="grid grid-cols-12 text-[10px] py-0.5">
+                    <span className="col-span-8 truncate font-semibold">{it.product?.name || `Product #${it.productId}`}</span>
+                    <span className="col-span-4 text-right font-bold font-mono">{it.qty} {it.uom?.symbol || ''}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-3 text-[9px] space-y-4 border-t border-dashed border-black">
+                <p className="text-[8px] italic">Goods received in sound & complete condition.</p>
+                <div className="space-y-3">
+                  <div>
+                    <p>Driver / Salesman Sign:</p>
+                    <p className="pt-3 border-b border-black w-32"></p>
+                  </div>
+                  <div>
+                    <p>Customer Receiver Sign:</p>
+                    <p className="pt-3 border-b border-black w-32"></p>
+                  </div>
+                </div>
+                <div className="text-center text-[8px] pt-1">
+                  <p>NAYA-ERA Mobile Logistics Dispatch</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* 📄 A4 FORMAL DELIVERY ORDER (DO) */
+            <div className="p-8 text-black space-y-6 max-w-4xl mx-auto font-sans">
+              {printConfig.showLetterhead && (
+                <div className="flex items-start justify-between border-b-2 border-black pb-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Truck className="h-6 w-6 text-black" />
+                      <h1 className="text-xl font-bold uppercase tracking-wider">
+                        {orgContext.tenantName || 'NAYA-ERA ENTERPRISE RESOURCE PLANNING'}
+                      </h1>
+                    </div>
+                    <p className="text-xs text-gray-700 font-medium">
+                      Branch: {orgContext.branchName || 'Head Office'} • Logistics & Distribution Division
+                    </p>
+                    <p className="text-[11px] text-gray-600">
+                      Official Delivery Order, Gate Pass & Consignment Note
+                    </p>
+                  </div>
+
+                  <div className="text-right text-xs space-y-0.5">
+                    <p className="font-bold font-mono text-sm">DO NUMBER: {selectedPrintShipment.shipmentNo}</p>
+                    <p className="text-gray-600">SO Reference: {selectedPrintShipment.salesOrder?.orderNo || '-'}</p>
+                    <p className="text-gray-600">Dispatch Date: {formatDate(selectedPrintShipment.shipmentDate)}</p>
+                    <p className="text-gray-600">Status: <span className="font-bold uppercase">{selectedPrintShipment.status}</span></p>
+                  </div>
+                </div>
+              )}
+
+              <div className="text-center py-2 bg-gray-100 border border-gray-300 rounded">
+                <h2 className="text-base font-bold uppercase tracking-wide">
+                  DELIVERY ORDER & DISPATCH NOTE (DO) / ပစ္စည်းပို့ဆောင်လွှာ
+                </h2>
+                <p className="text-xs text-gray-600 mt-0.5 font-medium">
+                  Official Document Accompanying Material Transportation & Customer Handover
+                </p>
+              </div>
+
+              {/* Destination & Logistics */}
+              <div className="grid grid-cols-2 gap-4 text-xs p-3.5 border border-gray-300 rounded bg-gray-50">
+                <div className="space-y-1">
+                  <p className="font-bold uppercase text-[10px] text-gray-500">Delivery Destination (ပို့ဆောင်ရမည့် နေရာ)</p>
+                  <p className="font-bold text-sm">{selectedPrintShipment.salesOrder?.customer?.name || 'Customer'}</p>
+                  <p className="text-gray-600">Phone: {selectedPrintShipment.salesOrder?.customer?.phoneNumber || '-'}</p>
+                  <p className="text-gray-600">Address: {selectedPrintShipment.salesOrder?.customer?.address || '-'}</p>
+                </div>
+                <div className="space-y-1 text-right">
+                  <p className="font-bold uppercase text-[10px] text-gray-500">Carrier & Logistics Unit</p>
+                  <p className="font-bold text-sm">{selectedPrintShipment.salesTeam?.name || 'Central Distribution Van'}</p>
+                  <p className="text-gray-600">Dispatch Officer: {user?.name || 'Logistics Lead'}</p>
+                  <p className="text-gray-600">Inventory Status: {selectedPrintShipment.status === 'SHIPPED' ? '✓ Outward Posted' : 'Draft Dispatch'}</p>
+                </div>
+              </div>
+
+              {/* Items Table */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider border-b border-gray-300 pb-1">
+                  Physical Consignment Line Items (ပို့ဆောင်သော ကုန်ပစ္စည်းစာရင်း)
+                </h3>
+                <table className="w-full text-xs border border-gray-300">
+                  <thead className="bg-gray-100 border-b border-gray-300 text-[10px] uppercase">
+                    <tr>
+                      <th className="p-2 text-left w-12">No.</th>
+                      <th className="p-2 text-left">Product Name</th>
+                      <th className="p-2 text-left">SKU Code</th>
+                      <th className="p-2 text-center">Packaging / Unit</th>
+                      <th className="p-2 text-right">Quantity to Deliver</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {(selectedPrintShipment.items || []).map((it, idx) => (
+                      <tr key={idx}>
+                        <td className="p-2 font-bold text-center">{idx + 1}</td>
+                        <td className="p-2 font-semibold">{it.product?.name || `Product #${it.productId}`}</td>
+                        <td className="p-2 font-mono text-gray-600">{it.product?.sku || '-'}</td>
+                        <td className="p-2 text-center text-gray-600">{it.uom?.symbol || ''}</td>
+                        <td className="p-2 text-right font-mono font-bold text-sm">{formatQuantity(it.qty)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="bg-gray-100 font-bold border-t-2 border-black">
+                    <tr>
+                      <td colSpan={4} className="p-2 text-right uppercase">Total Items Dispatched:</td>
+                      <td className="p-2 text-right font-mono text-sm">
+                        {(selectedPrintShipment.items || []).reduce((s, it) => s + Number(it.qty || 0), 0)} Units
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              {/* Receiver Confirmation Notice */}
+              <div className="p-3 bg-gray-50 border border-gray-300 rounded text-xs italic text-gray-700">
+                Customer Acknowledgment: The customer hereby confirms having inspected and received all products detailed in this delivery order in full quantity, sound packaging, and undamaged quality.
+              </div>
+
+              {/* Signatures */}
+              {printConfig.showSignatures && (
+                <div className="pt-8 border-t border-gray-300 mt-8 space-y-6">
+                  <div className="grid grid-cols-3 gap-6 text-center text-xs">
+                    <div className="space-y-8">
+                      <p className="font-bold uppercase text-[10px] text-gray-600">Store Dispatcher (ပစ္စည်းထုတ်ပေးသူ)</p>
+                      <div className="border-b border-gray-400 mx-4"></div>
+                      <div>
+                        <p className="font-semibold">{user?.name || 'Warehouse Staff'}</p>
+                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-8">
+                      <p className="font-bold uppercase text-[10px] text-gray-600">Delivery Driver / Salesman (ပို့ဆောင်သူ)</p>
+                      <div className="border-b border-gray-400 mx-4"></div>
+                      <div>
+                        <p className="font-semibold">{selectedPrintShipment.salesTeam?.name || 'Fleet Driver'}</p>
+                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-8">
+                      <p className="font-bold uppercase text-[10px] text-gray-600">Customer Received By (လက်ခံရရှိသူ)</p>
+                      <div className="border-b border-gray-400 mx-4"></div>
+                      <div>
+                        <p className="font-semibold">{selectedPrintShipment.salesOrder?.customer?.name || 'Authorized Receiver'}</p>
+                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-center text-[10px] text-gray-500 pt-4 border-t border-gray-200">
+                    NAYA-ERA Official Enterprise ERP • System Automated Delivery Order • Certified Valid
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        )}
+      </div>
     </div>
   );
 }

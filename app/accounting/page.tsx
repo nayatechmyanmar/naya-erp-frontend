@@ -11,6 +11,8 @@ import {
   Eye,
   CheckCircle2,
   RefreshCw,
+  Printer,
+  Building2,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api/bff-client';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -38,7 +40,7 @@ import {
 } from '@/types/erp';
 
 export default function AccountingPage() {
-  const { orgContext } = useAuth();
+  const { user, orgContext } = useAuth();
   const { success, error } = useToast();
 
   const [activeTab, setActiveTab] = React.useState('accounts');
@@ -64,6 +66,28 @@ export default function AccountingPage() {
   const [selectedJe, setSelectedJe] = React.useState<JournalEntry | null>(null);
   const [jeSheetOpen, setJeSheetOpen] = React.useState(false);
   const [paymentSheetOpen, setPaymentSheetOpen] = React.useState(false);
+
+  // Document Printing States
+  const [printDialogOpen, setPrintDialogOpen] = React.useState(false);
+  const [selectedPrintPayment, setSelectedPrintPayment] = React.useState<Payment | null>(null);
+  const [printConfig, setPrintConfig] = React.useState<{
+    paperSize: 'A4' | 'THERMAL_80MM';
+    showLetterhead: boolean;
+    showSignatures: boolean;
+  }>({
+    paperSize: 'A4',
+    showLetterhead: true,
+    showSignatures: true,
+  });
+
+  const handleOpenPrintPayment = (p: Payment) => {
+    setSelectedPrintPayment(p);
+    setPrintDialogOpen(true);
+  };
+
+  const handleExecutePrint = () => {
+    window.print();
+  };
 
   // Form States
   const [accountForm, setAccountForm] = React.useState({
@@ -299,17 +323,29 @@ export default function AccountingPage() {
       header: 'Actions',
       className: 'text-right',
       cell: r => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setSelectedPayment(r);
-            setPaymentSheetOpen(true);
-          }}
-          className="h-7 text-xs"
-        >
-          <Eye className="h-3.5 w-3.5 mr-1" /> View
-        </Button>
+        <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleOpenPrintPayment(r)}
+            className="h-7 text-xs text-zinc-600 hover:text-blue-600"
+            title={r.paymentType === 'CUSTOMER_PAYMENT' ? 'Print Money Receipt' : 'Print Payment Voucher'}
+          >
+            <Printer className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSelectedPayment(r);
+              setPaymentSheetOpen(true);
+            }}
+            className="h-7 text-xs"
+            title="View Details"
+          >
+            <Eye className="h-3.5 w-3.5 mr-1" /> View
+          </Button>
+        </div>
       ),
     },
   ];
@@ -457,7 +493,18 @@ export default function AccountingPage() {
         </div>
 
         {/* Actions Footer */}
-        <div className="flex items-center justify-end pt-2 border-t border-zinc-100 dark:border-zinc-800 text-xs" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800 text-xs" onClick={e => e.stopPropagation()}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleOpenPrintPayment(p)}
+            className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1 hover:text-blue-600"
+            title="Print Voucher / Receipt"
+          >
+            <Printer className="h-3.5 w-3.5" />
+            <span>Print</span>
+          </Button>
+
           <Button
             variant="ghost"
             size="sm"
@@ -916,6 +963,25 @@ export default function AccountingPage() {
         onOpenChange={setPaymentSheetOpen}
         title={`Payment: ${selectedPayment?.paymentNo || ''}`}
         description={`Amount: ${formatCurrency(selectedPayment?.amount)} • Method: ${selectedPayment?.paymentMethod || ''}`}
+        footer={
+          selectedPayment && (
+            <div className="flex justify-between items-center w-full">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleOpenPrintPayment(selectedPayment)}
+                className="gap-1.5 text-xs text-blue-600 hover:text-blue-700"
+              >
+                <Printer className="h-4 w-4" />
+                <span>
+                  {selectedPayment.paymentType === 'CUSTOMER_PAYMENT'
+                    ? 'Print Money Receipt (ငွေရပြေစာ ပရင့်ထုတ်ပါ)'
+                    : 'Print Payment Voucher (ငွေပေးချေလွှာ ပရင့်ထုတ်ပါ)'}
+                </span>
+              </Button>
+            </div>
+          )
+        }
       >
         {selectedPayment && (
           <div className="space-y-4 text-xs">
@@ -1015,6 +1081,448 @@ export default function AccountingPage() {
           </div>
         )}
       </Sheet>
+
+      {/* ─── PRINT CUSTOMIZER DIALOG ─────────────────────────────────── */}
+      <Dialog
+        open={printDialogOpen}
+        onOpenChange={setPrintDialogOpen}
+        title={
+          selectedPrintPayment?.paymentType === 'CUSTOMER_PAYMENT'
+            ? 'Print Official Money Receipt (တရားဝင် ငွေရပြေစာ ပရင့်ထုတ်ရန်)'
+            : 'Print Payment Voucher (ငွေပေးချေလွှာ ပရင့်ထုတ်ရန်)'
+        }
+        maxWidth="lg"
+      >
+        <div className="space-y-4 text-xs">
+          <div className="space-y-2">
+            <label className="font-semibold text-zinc-700 dark:text-zinc-300">
+              Select Output Document Format (ပုံနှိပ်မည့် ပုံစံရွေးချယ်ပါ)
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div
+                onClick={() => setPrintConfig({ ...printConfig, paperSize: 'A4' })}
+                className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                  printConfig.paperSize === 'A4'
+                    ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200'
+                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                }`}
+              >
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Scale className="h-4 w-4 text-blue-600" />
+                  <span>📄 A4 Formal Financial Document</span>
+                </div>
+                <p className="text-[11px] text-zinc-500 mt-1">
+                  Official full-size voucher for finance filing, accounting archives, and audit trails.
+                </p>
+              </div>
+
+              <div
+                onClick={() => setPrintConfig({ ...printConfig, paperSize: 'THERMAL_80MM' })}
+                className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                  printConfig.paperSize === 'THERMAL_80MM'
+                    ? 'border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
+                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                }`}
+              >
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Receipt className="h-4 w-4 text-emerald-600" />
+                  <span>🧾 80mm POS Thermal Cash Slip</span>
+                </div>
+                <p className="text-[11px] text-zinc-500 mt-1">
+                  Compact roll receipt for counter cashiers, POS printers, and customer walk-ins.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={printConfig.showLetterhead}
+                onChange={e => setPrintConfig({ ...printConfig, showLetterhead: e.target.checked })}
+                className="rounded border-zinc-300 h-4 w-4 text-blue-600"
+              />
+              <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                Include Official Enterprise Letterhead (လုပ်ငန်းခေါင်းစီးနှင့် လိပ်စာ)
+              </span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={printConfig.showSignatures}
+                onChange={e => setPrintConfig({ ...printConfig, showSignatures: e.target.checked })}
+                className="rounded border-zinc-300 h-4 w-4 text-blue-600"
+              />
+              <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                Include Signatures & Verification Block (စာရင်းကိုင်/မန်နေဂျာ/ငွေပေး-ငွေလက်ခံသူ လက်မှတ်များ)
+              </span>
+            </label>
+          </div>
+
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setPrintDialogOpen(false)} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button type="button" variant="primary" onClick={handleExecutePrint} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 gap-1.5">
+              <Printer className="h-4 w-4" />
+              <span>Print Document (ပရင့်ထုတ်ပါ)</span>
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* ─── DEDICATED PRINT PAPER DOCUMENT ENGINE ───────────────────── */}
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+          #printable-accounting-area,
+          #printable-accounting-area * {
+            visibility: visible !important;
+          }
+          #printable-accounting-area {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: block !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Pyidaungsu", "Myanmar3" !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+          @page {
+            size: ${printConfig.paperSize === 'THERMAL_80MM' ? '80mm auto' : 'A4 portrait'};
+            margin: ${printConfig.paperSize === 'THERMAL_80MM' ? '4mm' : '10mm 14mm'};
+          }
+        }
+      `}</style>
+
+      <div id="printable-accounting-area" className="hidden">
+        {selectedPrintPayment && (
+          selectedPrintPayment.paymentType === 'CUSTOMER_PAYMENT' ? (
+            /* ─── CUSTOMER MONEY RECEIPT (ငွေရပြေစာ) ─── */
+            printConfig.paperSize === 'THERMAL_80MM' ? (
+              /* 🧾 80MM THERMAL MONEY RECEIPT SLIP */
+              <div className="max-w-[76mm] mx-auto text-black font-mono text-[11px] leading-tight p-1 space-y-2">
+                <div className="text-center space-y-0.5 border-b border-dashed border-black pb-2">
+                  <h2 className="text-sm font-bold uppercase">{orgContext.tenantName || 'NAYA-ERA ERP'}</h2>
+                  <p className="text-[10px]">{orgContext.branchName || 'Finance Dept'}</p>
+                  <p className="text-[10px] uppercase font-bold mt-1">*** OFFICIAL MONEY RECEIPT ***</p>
+                  <p className="text-[9px]">Receipt#: {selectedPrintPayment.paymentNo}</p>
+                  <p className="text-[9px]">Date: {formatDate(selectedPrintPayment.paymentDate)}</p>
+                </div>
+
+                <div className="border-b border-dashed border-black py-1 space-y-0.5 text-[10px]">
+                  <p>Received From: <span className="font-bold">{selectedPrintPayment.customer?.name || 'Customer'}</span></p>
+                  {selectedPrintPayment.customer?.phoneNumber && <p>Phone: {selectedPrintPayment.customer.phoneNumber}</p>}
+                  <p>Method: <span className="font-bold">{selectedPrintPayment.paymentMethod}</span></p>
+                  {selectedPrintPayment.referenceType && (
+                    <p>Ref: {selectedPrintPayment.referenceType} #{selectedPrintPayment.referenceId || ''}</p>
+                  )}
+                  {selectedPrintPayment.description && (
+                    <p className="truncate">Description: {selectedPrintPayment.description}</p>
+                  )}
+                </div>
+
+                <div className="border-b border-dashed border-black py-2 text-center space-y-1">
+                  <span className="text-[10px] font-bold">TOTAL RECEIVED AMOUNT:</span>
+                  <p className="text-sm font-bold font-mono">{formatCurrency(selectedPrintPayment.amount)}</p>
+                </div>
+
+                <div className="pt-3 text-[9px] space-y-4 border-t border-dashed border-black">
+                  <div className="space-y-3">
+                    <div>
+                      <p>Cashier / Receiver Sign: _________________</p>
+                    </div>
+                    <div>
+                      <p>Customer Sign: _________________</p>
+                    </div>
+                  </div>
+                  <div className="text-center text-[8px] pt-1">
+                    <p>Thank You For Your Payment!</p>
+                    <p>NAYA-ERA Cloud ERP Financial System</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* 📄 A4 FORMAL MONEY RECEIPT */
+              <div className="p-8 text-black space-y-6 max-w-4xl mx-auto font-sans">
+                {printConfig.showLetterhead && (
+                  <div className="flex items-start justify-between border-b-2 border-black pb-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-6 w-6 text-black" />
+                        <h1 className="text-xl font-bold uppercase tracking-wider">
+                          {orgContext.tenantName || 'NAYA-ERA ENTERPRISE RESOURCE PLANNING'}
+                        </h1>
+                      </div>
+                      <p className="text-xs text-gray-700 font-medium">
+                        Branch: {orgContext.branchName || 'Head Office'} • Accounts & Treasury Department
+                      </p>
+                      <p className="text-[11px] text-gray-600">
+                        Official Acknowledgment of Accounts Receivable Settlement
+                      </p>
+                    </div>
+
+                    <div className="text-right text-xs space-y-0.5">
+                      <p className="font-bold font-mono text-sm">RECEIPT NO: {selectedPrintPayment.paymentNo}</p>
+                      <p className="text-gray-600">Receipt Date: {formatDate(selectedPrintPayment.paymentDate)}</p>
+                      <p className="text-gray-600">Payment Method: <span className="font-bold">{selectedPrintPayment.paymentMethod}</span></p>
+                      <p className="text-gray-600">GL Status: <span className="font-bold text-emerald-600">Auto-Posted ✓</span></p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="text-center py-2 bg-gray-100 border border-gray-300 rounded">
+                  <h2 className="text-base font-bold uppercase tracking-wide">
+                    OFFICIAL MONEY RECEIPT / တရားဝင် ငွေရပြေစာ
+                  </h2>
+                  <p className="text-xs text-gray-600 mt-0.5 font-medium">
+                    Verified Proof of Cash / Electronic Funds Received
+                  </p>
+                </div>
+
+                {/* Receipt Details Box */}
+                <div className="border border-gray-300 rounded p-4 space-y-3 bg-gray-50 text-xs">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="font-bold uppercase text-[10px] text-gray-500">Received From (ငွေပေးသွင်းသူ)</p>
+                      <p className="font-bold text-sm mt-0.5">{selectedPrintPayment.customer?.name || 'Customer'}</p>
+                      <p className="text-gray-600">Contact: {selectedPrintPayment.customer?.phoneNumber || '-'}</p>
+                      <p className="text-gray-600">Address: {selectedPrintPayment.customer?.address || '-'}</p>
+                    </div>
+                    <div className="text-right space-y-1">
+                      <p className="font-bold uppercase text-[10px] text-gray-500">Accounting Reference</p>
+                      <p className="text-gray-700">Ref Type: {selectedPrintPayment.referenceType || 'Direct Customer Receipt'}</p>
+                      {selectedPrintPayment.referenceId && <p className="text-gray-700 font-mono">Ref Doc ID: #{selectedPrintPayment.referenceId}</p>}
+                      <p className="text-gray-700">Payment Channel: <span className="font-bold">{selectedPrintPayment.paymentMethod}</span></p>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-3">
+                    <p className="text-gray-600">
+                      <span className="font-semibold text-gray-800">Description / Purpose: </span>
+                      {selectedPrintPayment.description || 'Settlement of outstanding customer sales account.'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Received Amount Callout */}
+                <div className="border-2 border-black rounded p-4 bg-white flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase text-gray-500">Total Net Amount Received (စုစုပေါင်း လက်ခံရရှိငွေ)</p>
+                    <p className="text-xs text-gray-700 font-medium mt-1">Official Currency: Myanmar Kyats (MMK)</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-2xl font-bold font-mono text-black">
+                      {formatCurrency(selectedPrintPayment.amount)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Signatures */}
+                {printConfig.showSignatures && (
+                  <div className="pt-8 border-t border-gray-300 mt-8 space-y-6">
+                    <div className="grid grid-cols-2 gap-12 text-center text-xs">
+                      <div className="space-y-8">
+                        <p className="font-bold uppercase text-[10px] text-gray-600">Authorized Cashier / Accountant (ငွေကိုင်လက်မှတ်)</p>
+                        <div className="border-b border-gray-400 mx-8"></div>
+                        <div>
+                          <p className="font-semibold">{user?.name || 'Chief Cashier'}</p>
+                          <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-8">
+                        <p className="font-bold uppercase text-[10px] text-gray-600">Payer / Customer Received By (ငွေပေးသွင်းသူ)</p>
+                        <div className="border-b border-gray-400 mx-8"></div>
+                        <div>
+                          <p className="font-semibold">{selectedPrintPayment.customer?.name || 'Customer'}</p>
+                          <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-center text-[10px] text-gray-500 pt-4 border-t border-gray-200">
+                      NAYA-ERA Official Enterprise ERP • System Automated Official Money Receipt • Certified Valid
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          ) : (
+            /* ─── SUPPLIER / EXPENSE PAYMENT VOUCHER (ငွေပေးချေလွှာ) ─── */
+            printConfig.paperSize === 'THERMAL_80MM' ? (
+              /* 🧾 80MM THERMAL PAYMENT VOUCHER SLIP */
+              <div className="max-w-[76mm] mx-auto text-black font-mono text-[11px] leading-tight p-1 space-y-2">
+                <div className="text-center space-y-0.5 border-b border-dashed border-black pb-2">
+                  <h2 className="text-sm font-bold uppercase">{orgContext.tenantName || 'NAYA-ERA ERP'}</h2>
+                  <p className="text-[10px]">{orgContext.branchName || 'Treasury'}</p>
+                  <p className="text-[10px] uppercase font-bold mt-1">*** PAYMENT VOUCHER ***</p>
+                  <p className="text-[9px]">Voucher#: {selectedPrintPayment.paymentNo}</p>
+                  <p className="text-[9px]">Date: {formatDate(selectedPrintPayment.paymentDate)}</p>
+                </div>
+
+                <div className="border-b border-dashed border-black py-1 space-y-0.5 text-[10px]">
+                  <p>Paid To: <span className="font-bold">{selectedPrintPayment.supplier?.name || 'Payee / Supplier'}</span></p>
+                  <p>Type: {selectedPrintPayment.paymentType}</p>
+                  <p>Method: {selectedPrintPayment.paymentMethod}</p>
+                  {selectedPrintPayment.description && (
+                    <p className="truncate">Note: {selectedPrintPayment.description}</p>
+                  )}
+                </div>
+
+                <div className="border-b border-dashed border-black py-2 text-center space-y-1">
+                  <span className="text-[10px] font-bold">TOTAL DISBURSED:</span>
+                  <p className="text-sm font-bold font-mono">{formatCurrency(selectedPrintPayment.amount)}</p>
+                </div>
+
+                <div className="pt-3 text-[9px] space-y-4 border-t border-dashed border-black">
+                  <div className="space-y-3">
+                    <div>
+                      <p>Disbursed By: _________________</p>
+                    </div>
+                    <div>
+                      <p>Payee Received: _________________</p>
+                    </div>
+                  </div>
+                  <div className="text-center text-[8px] pt-1">
+                    <p>NAYA-ERA Financial Accounting</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* 📄 A4 FORMAL SUPPLIER PAYMENT VOUCHER */
+              <div className="p-8 text-black space-y-6 max-w-4xl mx-auto font-sans">
+                {printConfig.showLetterhead && (
+                  <div className="flex items-start justify-between border-b-2 border-black pb-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-6 w-6 text-black" />
+                        <h1 className="text-xl font-bold uppercase tracking-wider">
+                          {orgContext.tenantName || 'NAYA-ERA ENTERPRISE RESOURCE PLANNING'}
+                        </h1>
+                      </div>
+                      <p className="text-xs text-gray-700 font-medium">
+                        Branch: {orgContext.branchName || 'Head Office'} • Accounts Payable & Treasury
+                      </p>
+                      <p className="text-[11px] text-gray-600">
+                        Official Payment Voucher & Cash Disbursement Authorization
+                      </p>
+                    </div>
+
+                    <div className="text-right text-xs space-y-0.5">
+                      <p className="font-bold font-mono text-sm">VOUCHER NO: {selectedPrintPayment.paymentNo}</p>
+                      <p className="text-gray-600">Voucher Date: {formatDate(selectedPrintPayment.paymentDate)}</p>
+                      <p className="text-gray-600">Payment Type: <span className="font-bold">{selectedPrintPayment.paymentType}</span></p>
+                      <p className="text-gray-600">GL Status: <span className="font-bold text-emerald-600">Auto-Posted ✓</span></p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="text-center py-2 bg-gray-100 border border-gray-300 rounded">
+                  <h2 className="text-base font-bold uppercase tracking-wide">
+                    PAYMENT VOUCHER / ငွေပေးချေလွှာ (ရှင်းတမ်း)
+                  </h2>
+                  <p className="text-xs text-gray-600 mt-0.5 font-medium">
+                    Authorized Cash & Bank Disbursement Note
+                  </p>
+                </div>
+
+                {/* Payee Details */}
+                <div className="border border-gray-300 rounded p-4 space-y-3 bg-gray-50 text-xs">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="font-bold uppercase text-[10px] text-gray-500">Paid To (ငွေလက်ခံမည့်သူ / ကုန်သွင်းသူ)</p>
+                      <p className="font-bold text-sm mt-0.5">{selectedPrintPayment.supplier?.name || selectedPrintPayment.description || 'Payee'}</p>
+                      {selectedPrintPayment.supplier?.phoneNumber && (
+                        <p className="text-gray-600">Contact: {selectedPrintPayment.supplier.phoneNumber}</p>
+                      )}
+                      {selectedPrintPayment.supplier?.location && (
+                        <p className="text-gray-600">Location: {selectedPrintPayment.supplier.location}</p>
+                      )}
+                    </div>
+                    <div className="text-right space-y-1">
+                      <p className="font-bold uppercase text-[10px] text-gray-500">Payment Authorization</p>
+                      <p className="text-gray-700">Method: <span className="font-bold">{selectedPrintPayment.paymentMethod}</span></p>
+                      <p className="text-gray-700">Ref Type: {selectedPrintPayment.referenceType || 'Direct AP Payment'}</p>
+                      {selectedPrintPayment.referenceId && <p className="text-gray-700 font-mono">Ref Doc ID: #{selectedPrintPayment.referenceId}</p>}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-3">
+                    <p className="text-gray-600">
+                      <span className="font-semibold text-gray-800">Particulars / Payment Details: </span>
+                      {selectedPrintPayment.description || 'Payment disbursement in settlement of supplier invoice or company operational expenses.'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Amount Callout */}
+                <div className="border-2 border-black rounded p-4 bg-white flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase text-gray-500">Total Net Amount Paid (စုစုပေါင်း ပေးချေငွေ)</p>
+                    <p className="text-xs text-gray-700 font-medium mt-1">Official Currency: Myanmar Kyats (MMK)</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-2xl font-bold font-mono text-black">
+                      {formatCurrency(selectedPrintPayment.amount)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3-Column Signatures */}
+                {printConfig.showSignatures && (
+                  <div className="pt-8 border-t border-gray-300 mt-8 space-y-6">
+                    <div className="grid grid-cols-3 gap-6 text-center text-xs">
+                      <div className="space-y-8">
+                        <p className="font-bold uppercase text-[10px] text-gray-600">Prepared By (စာရင်းကိုင်)</p>
+                        <div className="border-b border-gray-400 mx-4"></div>
+                        <div>
+                          <p className="font-semibold">{user?.name || 'Accountant'}</p>
+                          <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-8">
+                        <p className="font-bold uppercase text-[10px] text-gray-600">Approved By (မန်နေဂျာ/ညွှန်ကြားရေးမှူး)</p>
+                        <div className="border-b border-gray-400 mx-4"></div>
+                        <div>
+                          <p className="font-semibold">Finance Director / MD</p>
+                          <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-8">
+                        <p className="font-bold uppercase text-[10px] text-gray-600">Received By Payee (ငွေလက်ခံရရှိသူ)</p>
+                        <div className="border-b border-gray-400 mx-4"></div>
+                        <div>
+                          <p className="font-semibold">{selectedPrintPayment.supplier?.name || 'Payee'}</p>
+                          <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-center text-[10px] text-gray-500 pt-4 border-t border-gray-200">
+                      NAYA-ERA Official Enterprise ERP • System Automated Payment Voucher • Certified Valid
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          )
+        )}
+      </div>
 
       {/* ─── MOBILE FLOATING ACTION BUTTON (M3 Standard) ───────────── */}
       <div className="fixed bottom-6 right-6 sm:hidden z-40">

@@ -15,6 +15,7 @@ import {
   Truck,
   Scale,
   Receipt,
+  Printer,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api/bff-client';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -40,7 +41,7 @@ import {
 } from '@/types/erp';
 
 export default function PurchasingPage() {
-  const { orgContext } = useAuth();
+  const { user, orgContext } = useAuth();
   const { success, error } = useToast();
 
   const [activeTab, setActiveTab] = React.useState('orders');
@@ -61,6 +62,47 @@ export default function PurchasingPage() {
   const [poSheetOpen, setPoSheetOpen] = React.useState(false);
   const [receiptSheetOpen, setReceiptSheetOpen] = React.useState(false);
   const [cancelConfirmOpen, setCancelConfirmOpen] = React.useState(false);
+
+  // Document Printing States
+  const [printDialogOpen, setPrintDialogOpen] = React.useState(false);
+  const [printType, setPrintType] = React.useState<'PO' | 'RECEIPT'>('RECEIPT');
+  const [selectedPrintPo, setSelectedPrintPo] = React.useState<PurchaseOrder | null>(null);
+  const [selectedPrintReceipt, setSelectedPrintReceipt] = React.useState<PurchaseReceipt | null>(null);
+  const [printConfig, setPrintConfig] = React.useState<{
+    paperSize: 'A4' | 'THERMAL_80MM';
+    showLetterhead: boolean;
+    showSignatures: boolean;
+  }>({
+    paperSize: 'A4',
+    showLetterhead: true,
+    showSignatures: true,
+  });
+
+  const handleOpenPrintPo = async (po: PurchaseOrder) => {
+    if (!po.items || po.items.length === 0) {
+      const detailRes = await apiFetch<PurchaseOrder>(`/api/purchase/purchase-orders/${po.id}`);
+      setSelectedPrintPo(detailRes.success && detailRes.data ? detailRes.data : po);
+    } else {
+      setSelectedPrintPo(po);
+    }
+    setPrintType('PO');
+    setPrintDialogOpen(true);
+  };
+
+  const handleOpenPrintReceipt = async (receipt: PurchaseReceipt) => {
+    if (!receipt.items || receipt.items.length === 0) {
+      const detailRes = await apiFetch<PurchaseReceipt>(`/api/purchase/purchase-receipts/${receipt.id}`);
+      setSelectedPrintReceipt(detailRes.success && detailRes.data ? detailRes.data : receipt);
+    } else {
+      setSelectedPrintReceipt(receipt);
+    }
+    setPrintType('RECEIPT');
+    setPrintDialogOpen(true);
+  };
+
+  const handleExecutePrint = () => {
+    window.print();
+  };
 
   // PO Form State
   const [poForm, setPoForm] = React.useState({
@@ -324,6 +366,16 @@ export default function PurchasingPage() {
           <Button
             variant="ghost"
             size="sm"
+            onClick={() => handleOpenPrintPo(r)}
+            className="h-7 text-xs text-zinc-600 hover:text-blue-600"
+            title="Print Purchase Order Voucher (အမှာစာ ပရင့်ထုတ်ပါ)"
+          >
+            <Printer className="h-3.5 w-3.5" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => inspectPo(r)}
             className="h-7 text-xs"
             title="Inspect"
@@ -369,6 +421,16 @@ export default function PurchasingPage() {
       className: 'text-right',
       cell: r => (
         <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleOpenPrintReceipt(r)}
+            className="h-7 text-xs text-zinc-600 hover:text-emerald-600"
+            title="Print Goods Received Note (GRN) (ပစ္စည်းလက်ခံပြေစာ ပရင့်ထုတ်ပါ)"
+          >
+            <Printer className="h-3.5 w-3.5" />
+          </Button>
+
           <Button
             variant="ghost"
             size="sm"
@@ -445,16 +507,28 @@ export default function PurchasingPage() {
 
         {/* Action Buttons Footer */}
         <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800 text-xs" onClick={e => e.stopPropagation()}>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => inspectPo(po)}
-            className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1"
-            title="Inspect"
-          >
-            <Eye className="h-3.5 w-3.5" />
-            <span className="text-xs">Detail</span>
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleOpenPrintPo(po)}
+              className="h-8 px-2 text-zinc-600 dark:text-zinc-300 gap-1 hover:text-blue-600"
+              title="Print PO"
+            >
+              <Printer className="h-3.5 w-3.5" />
+              <span className="text-xs">Print</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => inspectPo(po)}
+              className="h-8 px-2 text-zinc-600 dark:text-zinc-300 gap-1"
+              title="Inspect"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              <span className="text-xs">Detail</span>
+            </Button>
+          </div>
 
           <div className="flex items-center gap-1.5">
             {po.status === 'DRAFT' && (
@@ -519,16 +593,28 @@ export default function PurchasingPage() {
 
         {/* Action Buttons Footer */}
         <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800 text-xs" onClick={e => e.stopPropagation()}>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => inspectReceipt(r)}
-            className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1"
-            title="Inspect"
-          >
-            <Eye className="h-3.5 w-3.5" />
-            <span className="text-xs">Detail</span>
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleOpenPrintReceipt(r)}
+              className="h-8 px-2 text-zinc-600 dark:text-zinc-300 gap-1 hover:text-emerald-600"
+              title="Print Goods Received Note"
+            >
+              <Printer className="h-3.5 w-3.5" />
+              <span className="text-xs">Print</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => inspectReceipt(r)}
+              className="h-8 px-2 text-zinc-600 dark:text-zinc-300 gap-1"
+              title="Inspect"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              <span className="text-xs">Detail</span>
+            </Button>
+          </div>
 
           {r.status === 'DRAFT' && (
             <Button
@@ -1018,7 +1104,15 @@ export default function PurchasingPage() {
         footer={
           selectedPo && (
             <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2 w-full">
-              <div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleOpenPrintPo(selectedPo)}
+                  className="gap-1.5 text-xs text-blue-600 hover:text-blue-700"
+                >
+                  <Printer className="h-4 w-4" /> Print PO (အမှာစာ ပရင့်ထုတ်ရန်)
+                </Button>
                 {selectedPo.status === 'DRAFT' && (
                   <Button
                     variant="outline"
@@ -1132,16 +1226,26 @@ export default function PurchasingPage() {
         title={`Goods Receipt: ${selectedReceipt?.receiptNo || ''}`}
         description={`PO Reference: ${selectedReceipt?.purchaseOrder?.poNo || ''}`}
         footer={
-          selectedReceipt && selectedReceipt.status === 'DRAFT' && (
-            <div className="flex justify-end gap-2 w-full">
+          selectedReceipt && (
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2 w-full">
               <Button
-                variant="primary"
+                variant="outline"
                 size="sm"
-                onClick={() => handlePostReceipt(selectedReceipt.id)}
-                className="bg-emerald-600 hover:bg-emerald-700 gap-1.5 w-full sm:w-auto text-xs"
+                onClick={() => handleOpenPrintReceipt(selectedReceipt)}
+                className="gap-1.5 text-xs text-emerald-600 hover:text-emerald-700"
               >
-                <CheckCircle2 className="h-4 w-4" /> Post to Stock & General Ledger (စာရင်းသွင်းပါ)
+                <Printer className="h-4 w-4" /> Print GRN (ပစ္စည်းလက်ခံပြေစာ ပရင့်ထုတ်ရန်)
               </Button>
+              {selectedReceipt.status === 'DRAFT' && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => handlePostReceipt(selectedReceipt.id)}
+                  className="bg-emerald-600 hover:bg-emerald-700 gap-1.5 w-full sm:w-auto text-xs"
+                >
+                  <CheckCircle2 className="h-4 w-4" /> Post to Stock & General Ledger (စာရင်းသွင်းပါ)
+                </Button>
+              )}
             </div>
           )
         }
@@ -1195,6 +1299,532 @@ export default function PurchasingPage() {
         )}
       </Sheet>
 
+      {/* ─── PRINT CUSTOMIZER DIALOG ─────────────────────────────────── */}
+      <Dialog
+        open={printDialogOpen}
+        onOpenChange={setPrintDialogOpen}
+        title={printType === 'RECEIPT' ? 'Print Goods Received Note (GRN)' : 'Print Purchase Order Voucher'}
+        maxWidth="lg"
+      >
+        <div className="space-y-4 text-xs">
+          <div className="space-y-2">
+            <label className="font-semibold text-zinc-700 dark:text-zinc-300">
+              Select Output Document Format (ပုံနှိပ်မည့် ပုံစံရွေးချယ်ပါ)
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div
+                onClick={() => setPrintConfig({ ...printConfig, paperSize: 'A4' })}
+                className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                  printConfig.paperSize === 'A4'
+                    ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200'
+                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                }`}
+              >
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Scale className="h-4 w-4 text-blue-600" />
+                  <span>📄 A4 Formal Warehouse Voucher</span>
+                </div>
+                <p className="text-[11px] text-zinc-500 mt-1">
+                  Official multi-column voucher for store archives, supplier proof, and internal auditing.
+                </p>
+              </div>
+
+              <div
+                onClick={() => setPrintConfig({ ...printConfig, paperSize: 'THERMAL_80MM' })}
+                className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                  printConfig.paperSize === 'THERMAL_80MM'
+                    ? 'border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
+                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                }`}
+              >
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <Receipt className="h-4 w-4 text-emerald-600" />
+                  <span>🧾 80mm Thermal Receipt Slip</span>
+                </div>
+                <p className="text-[11px] text-zinc-500 mt-1">
+                  Compact roll receipt for warehouse bluetooth docket printers and immediate gate passes.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={printConfig.showLetterhead}
+                onChange={e => setPrintConfig({ ...printConfig, showLetterhead: e.target.checked })}
+                className="rounded border-zinc-300 h-4 w-4 text-blue-600"
+              />
+              <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                Include Official Enterprise Letterhead (လုပ်ငန်းခေါင်းစီးနှင့် လိပ်စာ)
+              </span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={printConfig.showSignatures}
+                onChange={e => setPrintConfig({ ...printConfig, showSignatures: e.target.checked })}
+                className="rounded border-zinc-300 h-4 w-4 text-blue-600"
+              />
+              <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                Include Signatures & Verification Block (ပစ္စည်းလက်ခံသူ/စစ်ဆေးသူ/ပို့ဆောင်သူ လက်မှတ်များ)
+              </span>
+            </label>
+          </div>
+
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setPrintDialogOpen(false)} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button type="button" variant="primary" onClick={handleExecutePrint} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 gap-1.5">
+              <Printer className="h-4 w-4" />
+              <span>Print Voucher (ပရင့်ထုတ်ပါ)</span>
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* ─── DEDICATED PRINT PAPER DOCUMENT ENGINE ───────────────────── */}
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+          #printable-purchasing-area,
+          #printable-purchasing-area * {
+            visibility: visible !important;
+          }
+          #printable-purchasing-area {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: block !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Pyidaungsu", "Myanmar3" !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+          @page {
+            size: ${printConfig.paperSize === 'THERMAL_80MM' ? '80mm auto' : 'A4 portrait'};
+            margin: ${printConfig.paperSize === 'THERMAL_80MM' ? '4mm' : '10mm 14mm'};
+          }
+        }
+      `}</style>
+
+      <div id="printable-purchasing-area" className="hidden">
+        {printType === 'RECEIPT' && selectedPrintReceipt && (
+          printConfig.paperSize === 'THERMAL_80MM' ? (
+            /* 🧾 80MM THERMAL GOODS RECEIVED SLIP */
+            <div className="max-w-[76mm] mx-auto text-black font-mono text-[11px] leading-tight p-1 space-y-2">
+              <div className="text-center space-y-0.5 border-b border-dashed border-black pb-2">
+                <h2 className="text-sm font-bold uppercase">{orgContext.tenantName || 'NAYA-ERA ERP'}</h2>
+                <p className="text-[10px]">{selectedPrintReceipt.warehouse?.name || 'Central Store'}</p>
+                <p className="text-[10px] uppercase font-bold mt-1">*** GOODS RECEIVED NOTE (GRN) ***</p>
+                <p className="text-[9px]">GRN#: {selectedPrintReceipt.receiptNo}</p>
+                <p className="text-[9px]">PO Ref: {selectedPrintReceipt.purchaseOrder?.poNo || '-'}</p>
+                <p className="text-[9px]">Date: {formatDate(selectedPrintReceipt.receivedDate)}</p>
+              </div>
+
+              <div className="border-b border-dashed border-black py-1 space-y-0.5 text-[10px]">
+                <p>Supplier: <span className="font-bold">{selectedPrintReceipt.purchaseOrder?.supplier?.name || 'Registered Supplier'}</span></p>
+                <p>Warehouse: {selectedPrintReceipt.warehouse?.name || '-'}</p>
+                <p>Status: {selectedPrintReceipt.status}</p>
+              </div>
+
+              <div className="border-b border-dashed border-black py-1 space-y-1">
+                <div className="grid grid-cols-12 font-bold text-[10px] border-b border-dashed border-black pb-1">
+                  <span className="col-span-7">ITEM</span>
+                  <span className="col-span-2 text-right">QTY</span>
+                  <span className="col-span-3 text-right">TOTAL</span>
+                </div>
+                {(selectedPrintReceipt.items || []).map((it, i) => (
+                  <div key={i} className="grid grid-cols-12 text-[10px] py-0.5">
+                    <div className="col-span-7 truncate">
+                      <p className="font-bold">{it.product?.name || `Item #${it.productId}`}</p>
+                      <p className="text-[9px] text-gray-700 font-normal">@{formatCurrency(it.rate)} {it.isFoc ? '(FOC)' : ''}</p>
+                    </div>
+                    <span className="col-span-2 text-right font-bold">{it.qty} {it.uom?.symbol || ''}</span>
+                    <span className="col-span-3 text-right font-bold">{it.isFoc ? '0' : formatCurrency(it.amount)}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-1 py-1 text-[10px]">
+                <div className="flex justify-between font-bold text-xs">
+                  <span>TOTAL VALUATION:</span>
+                  <span>
+                    {formatCurrency(
+                      (selectedPrintReceipt.items || []).reduce((s, it) => s + (it.isFoc ? 0 : Number(it.amount || 0)), 0)
+                    )}
+                  </span>
+                </div>
+                <div className="flex justify-between text-[9px]">
+                  <span>Total Items Received:</span>
+                  <span>{selectedPrintReceipt.items?.length || 0} SKU(s)</span>
+                </div>
+              </div>
+
+              <div className="pt-3 text-[9px] space-y-4 border-t border-dashed border-black">
+                <div className="space-y-3">
+                  <div>
+                    <p>Received by (Storekeeper):</p>
+                    <p className="pt-3 border-b border-black w-32"></p>
+                  </div>
+                  <div>
+                    <p>Supplier / Carrier Sign:</p>
+                    <p className="pt-3 border-b border-black w-32"></p>
+                  </div>
+                </div>
+                <div className="text-center text-[8px] pt-1">
+                  <p>Printed: {new Date().toLocaleString()}</p>
+                  <p>NAYA-ERA Industrial Warehouse System</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* 📄 A4 FORMAL GOODS RECEIVED NOTE (GRN) */
+            <div className="p-8 text-black space-y-6 max-w-4xl mx-auto font-sans">
+              {printConfig.showLetterhead && (
+                <div className="flex items-start justify-between border-b-2 border-black pb-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-6 w-6 text-black" />
+                      <h1 className="text-xl font-bold uppercase tracking-wider">
+                        {orgContext.tenantName || 'NAYA-ERA ENTERPRISE RESOURCE PLANNING'}
+                      </h1>
+                    </div>
+                    <p className="text-xs text-gray-700 font-medium">
+                      Branch: {orgContext.branchName || 'Head Office'} • Receiving Facility: {selectedPrintReceipt.warehouse?.name}
+                    </p>
+                    <p className="text-[11px] text-gray-600">
+                      Warehouse Logistics & Quality Control Receiving Document
+                    </p>
+                  </div>
+
+                  <div className="text-right text-xs space-y-0.5">
+                    <p className="font-bold font-mono text-sm">GRN NO: {selectedPrintReceipt.receiptNo}</p>
+                    <p className="text-gray-600">PO Ref: {selectedPrintReceipt.purchaseOrder?.poNo || 'Direct Inward'}</p>
+                    <p className="text-gray-600">Received Date: {formatDate(selectedPrintReceipt.receivedDate)}</p>
+                    <p className="text-gray-600">Status: <span className="font-bold uppercase">{selectedPrintReceipt.status}</span></p>
+                  </div>
+                </div>
+              )}
+
+              <div className="text-center py-2 bg-gray-100 border border-gray-300 rounded">
+                <h2 className="text-base font-bold uppercase tracking-wide">
+                  GOODS RECEIVED NOTE (GRN) / ကုန်ပစ္စည်းလက်ခံပြေစာ
+                </h2>
+                <p className="text-xs text-gray-600 mt-0.5 font-medium">
+                  Official Record of Material Inward & Warehouse Stock Ingestion
+                </p>
+              </div>
+
+              {/* Vendor and Warehouse Details */}
+              <div className="grid grid-cols-2 gap-4 text-xs p-3.5 border border-gray-300 rounded bg-gray-50">
+                <div className="space-y-1">
+                  <p className="font-bold uppercase text-[10px] text-gray-500">Supplier / Vendor Details</p>
+                  <p className="font-bold text-sm">{selectedPrintReceipt.purchaseOrder?.supplier?.name || 'Registered Supplier'}</p>
+                  <p className="text-gray-600">Contact: {selectedPrintReceipt.purchaseOrder?.supplier?.phoneNumber || '-'}</p>
+                  <p className="text-gray-600">Location: {selectedPrintReceipt.purchaseOrder?.supplier?.location || '-'}</p>
+                </div>
+                <div className="space-y-1 text-right">
+                  <p className="font-bold uppercase text-[10px] text-gray-500">Receiving Destination</p>
+                  <p className="font-bold text-sm">{selectedPrintReceipt.warehouse?.name || 'Main Warehouse'}</p>
+                  <p className="text-gray-600">Stock Integration: {selectedPrintReceipt.status === 'POSTED' ? '✓ Post Complete (Stock + GL)' : 'Draft Note'}</p>
+                  <p className="text-gray-600">Operator: {user?.name || 'Storekeeper'}</p>
+                </div>
+              </div>
+
+              {/* Line Items Table */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider border-b border-gray-300 pb-1">
+                  Received Inventory Line Items (လက်ခံရရှိသော ပစ္စည်းစာရင်းများ)
+                </h3>
+                <table className="w-full text-xs border border-gray-300">
+                  <thead className="bg-gray-100 border-b border-gray-300 text-[10px] uppercase">
+                    <tr>
+                      <th className="p-2 text-left w-12">No.</th>
+                      <th className="p-2 text-left">Product / SKU</th>
+                      <th className="p-2 text-center">Unit</th>
+                      <th className="p-2 text-right">Qty Received</th>
+                      <th className="p-2 text-right">Unit Rate (MMK)</th>
+                      <th className="p-2 text-right">Total Amount (MMK)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {(selectedPrintReceipt.items || []).map((it, idx) => (
+                      <tr key={idx}>
+                        <td className="p-2 font-bold text-center">{idx + 1}</td>
+                        <td className="p-2">
+                          <p className="font-semibold">{it.product?.name || `Product #${it.productId}`}</p>
+                          <p className="text-[10px] text-gray-500 font-mono">{it.product?.sku || '-'}</p>
+                        </td>
+                        <td className="p-2 text-center text-gray-600">{it.uom?.symbol || ''}</td>
+                        <td className="p-2 text-right font-mono font-bold">{formatQuantity(it.qty)}</td>
+                        <td className="p-2 text-right font-mono">{it.isFoc ? '0.00 (FOC)' : formatCurrency(it.rate)}</td>
+                        <td className="p-2 text-right font-mono font-bold">{it.isFoc ? '0.00' : formatCurrency(it.amount)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="bg-gray-100 font-bold border-t-2 border-black">
+                    <tr>
+                      <td colSpan={5} className="p-2 text-right uppercase">Grand Total Valuation (စုစုပေါင်း တန်ဖိုး):</td>
+                      <td className="p-2 text-right font-mono text-sm">
+                        {formatCurrency(
+                          (selectedPrintReceipt.items || []).reduce((s, it) => s + (it.isFoc ? 0 : Number(it.amount || 0)), 0)
+                        )}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              {/* Signatures & Quality Acceptance */}
+              {printConfig.showSignatures && (
+                <div className="pt-8 border-t border-gray-300 mt-8 space-y-6">
+                  <div className="grid grid-cols-3 gap-6 text-center text-xs">
+                    <div className="space-y-8">
+                      <p className="font-bold uppercase text-[10px] text-gray-600">Received By (ပစ္စည်းလက်ခံသူ Storekeeper)</p>
+                      <div className="border-b border-gray-400 mx-4"></div>
+                      <div>
+                        <p className="font-semibold">{user?.name || 'Store Officer'}</p>
+                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-8">
+                      <p className="font-bold uppercase text-[10px] text-gray-600">Inspected By (အရည်အသွေးစစ်ဆေးသူ QC)</p>
+                      <div className="border-b border-gray-400 mx-4"></div>
+                      <div>
+                        <p className="font-semibold">Quality Inspector / Manager</p>
+                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-8">
+                      <p className="font-bold uppercase text-[10px] text-gray-600">Delivered By (ကုန်ပို့သူ/ကားမောင်းသူ)</p>
+                      <div className="border-b border-gray-400 mx-4"></div>
+                      <div>
+                        <p className="font-semibold">{selectedPrintReceipt.purchaseOrder?.supplier?.name || 'Carrier Representative'}</p>
+                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-center text-[10px] text-gray-500 pt-4 border-t border-gray-200">
+                    NAYA-ERA Official Enterprise ERP • System Automated Warehouse Voucher • Certified Valid
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        )}
+
+        {printType === 'PO' && selectedPrintPo && (
+          printConfig.paperSize === 'THERMAL_80MM' ? (
+            /* 🧾 80MM THERMAL PURCHASE ORDER SLIP */
+            <div className="max-w-[76mm] mx-auto text-black font-mono text-[11px] leading-tight p-1 space-y-2">
+              <div className="text-center space-y-0.5 border-b border-dashed border-black pb-2">
+                <h2 className="text-sm font-bold uppercase">{orgContext.tenantName || 'NAYA-ERA ERP'}</h2>
+                <p className="text-[10px] uppercase font-bold mt-1">*** PURCHASE ORDER (PO) ***</p>
+                <p className="text-[9px]">PO#: {selectedPrintPo.poNo}</p>
+                <p className="text-[9px]">Date: {formatDate(selectedPrintPo.orderDate)}</p>
+              </div>
+
+              <div className="border-b border-dashed border-black py-1 space-y-0.5 text-[10px]">
+                <p>To Supplier: <span className="font-bold">{selectedPrintPo.supplier?.name || 'Supplier'}</span></p>
+                <p>Delivery Target: {formatDate(selectedPrintPo.deliveryDate) || 'Immediate'}</p>
+                <p>Status: {selectedPrintPo.status}</p>
+              </div>
+
+              <div className="border-b border-dashed border-black py-1 space-y-1">
+                <div className="grid grid-cols-12 font-bold text-[10px] border-b border-dashed border-black pb-1">
+                  <span className="col-span-7">PRODUCT</span>
+                  <span className="col-span-2 text-right">QTY</span>
+                  <span className="col-span-3 text-right">TOTAL</span>
+                </div>
+                {(selectedPrintPo.items || []).map((it, i) => (
+                  <div key={i} className="grid grid-cols-12 text-[10px] py-0.5">
+                    <div className="col-span-7 truncate">
+                      <p className="font-bold">{it.product?.name || `Item #${it.productId}`}</p>
+                      <p className="text-[9px] text-gray-700 font-normal">@{formatCurrency(it.rate)} {it.isFoc ? '(FOC)' : ''}</p>
+                    </div>
+                    <span className="col-span-2 text-right font-bold">{it.qty} {it.uom?.symbol || ''}</span>
+                    <span className="col-span-3 text-right font-bold">{it.isFoc ? '0' : formatCurrency(it.amount)}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-1 py-1 text-[10px]">
+                <div className="flex justify-between font-bold text-xs">
+                  <span>TOTAL SPEND:</span>
+                  <span>
+                    {formatCurrency(
+                      (selectedPrintPo.items || []).reduce((s, it) => s + (it.isFoc ? 0 : Number(it.amount || 0)), 0)
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-3 text-[9px] space-y-3 border-t border-dashed border-black">
+                <div>
+                  <p>Authorized Purchasing Sign:</p>
+                  <p className="pt-3 border-b border-black w-32"></p>
+                </div>
+                <div className="text-center text-[8px]">
+                  <p>NAYA-ERA Cloud ERP System</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* 📄 A4 FORMAL PURCHASE ORDER VOUCHER */
+            <div className="p-8 text-black space-y-6 max-w-4xl mx-auto font-sans">
+              {printConfig.showLetterhead && (
+                <div className="flex items-start justify-between border-b-2 border-black pb-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-6 w-6 text-black" />
+                      <h1 className="text-xl font-bold uppercase tracking-wider">
+                        {orgContext.tenantName || 'NAYA-ERA ENTERPRISE RESOURCE PLANNING'}
+                      </h1>
+                    </div>
+                    <p className="text-xs text-gray-700 font-medium">
+                      Branch: {orgContext.branchName || 'Head Office'} • Procurement Dept
+                    </p>
+                    <p className="text-[11px] text-gray-600">
+                      Official Commercial Purchase Order Contract
+                    </p>
+                  </div>
+
+                  <div className="text-right text-xs space-y-0.5">
+                    <p className="font-bold font-mono text-sm">PO NUMBER: {selectedPrintPo.poNo}</p>
+                    <p className="text-gray-600">Order Date: {formatDate(selectedPrintPo.orderDate)}</p>
+                    <p className="text-gray-600">Delivery Target: {formatDate(selectedPrintPo.deliveryDate)}</p>
+                    <p className="text-gray-600">Status: <span className="font-bold uppercase">{selectedPrintPo.status}</span></p>
+                  </div>
+                </div>
+              )}
+
+              <div className="text-center py-2 bg-gray-100 border border-gray-300 rounded">
+                <h2 className="text-base font-bold uppercase tracking-wide">
+                  PURCHASE ORDER (PO) / အဝယ်အမှာစာ
+                </h2>
+                <p className="text-xs text-gray-600 mt-0.5 font-medium">
+                  Official Authorization for Supply of Materials & Goods
+                </p>
+              </div>
+
+              {/* Vendor Details */}
+              <div className="grid grid-cols-2 gap-4 text-xs p-3.5 border border-gray-300 rounded bg-gray-50">
+                <div className="space-y-1">
+                  <p className="font-bold uppercase text-[10px] text-gray-500">Supplier / Vendor Information</p>
+                  <p className="font-bold text-sm">{selectedPrintPo.supplier?.name || 'Registered Supplier'}</p>
+                  <p className="text-gray-600">Phone: {selectedPrintPo.supplier?.phoneNumber || '-'}</p>
+                  <p className="text-gray-600">Location: {selectedPrintPo.supplier?.location || '-'}</p>
+                </div>
+                <div className="space-y-1 text-right">
+                  <p className="font-bold uppercase text-[10px] text-gray-500">Purchasing Organization</p>
+                  <p className="font-bold text-sm">{orgContext.tenantName || 'NaYa Enterprise'}</p>
+                  <p className="text-gray-600">Requested By: {user?.name || 'Procurement Officer'}</p>
+                  <p className="text-gray-600">Terms: Net 30 Days / Cash on Delivery</p>
+                </div>
+              </div>
+
+              {/* Line Items */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider border-b border-gray-300 pb-1">
+                  Ordered Products & Material Specifications (မှာယူသော ပစ္စည်းစာရင်း)
+                </h3>
+                <table className="w-full text-xs border border-gray-300">
+                  <thead className="bg-gray-100 border-b border-gray-300 text-[10px] uppercase">
+                    <tr>
+                      <th className="p-2 text-left w-12">No.</th>
+                      <th className="p-2 text-left">Product / SKU</th>
+                      <th className="p-2 text-center">Unit</th>
+                      <th className="p-2 text-right">Order Qty</th>
+                      <th className="p-2 text-right">Agreed Rate (MMK)</th>
+                      <th className="p-2 text-right">Amount (MMK)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {(selectedPrintPo.items || []).map((it, idx) => (
+                      <tr key={idx}>
+                        <td className="p-2 font-bold text-center">{idx + 1}</td>
+                        <td className="p-2">
+                          <p className="font-semibold">{it.product?.name || `Product #${it.productId}`}</p>
+                          <p className="text-[10px] text-gray-500 font-mono">{it.product?.sku || '-'}</p>
+                        </td>
+                        <td className="p-2 text-center text-gray-600">{it.uom?.symbol || ''}</td>
+                        <td className="p-2 text-right font-mono font-bold">{formatQuantity(it.qty)}</td>
+                        <td className="p-2 text-right font-mono">{it.isFoc ? '0.00 (FOC)' : formatCurrency(it.rate)}</td>
+                        <td className="p-2 text-right font-mono font-bold">{it.isFoc ? '0.00' : formatCurrency(it.amount)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="bg-gray-100 font-bold border-t-2 border-black">
+                    <tr>
+                      <td colSpan={5} className="p-2 text-right uppercase">Total Procurement Amount (စုစုပေါင်း ကုန်ကျစရိတ်):</td>
+                      <td className="p-2 text-right font-mono text-sm">
+                        {formatCurrency(
+                          (selectedPrintPo.items || []).reduce((s, it) => s + (it.isFoc ? 0 : Number(it.amount || 0)), 0)
+                        )}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              {/* Signatures */}
+              {printConfig.showSignatures && (
+                <div className="pt-8 border-t border-gray-300 mt-8 space-y-6">
+                  <div className="grid grid-cols-3 gap-6 text-center text-xs">
+                    <div className="space-y-8">
+                      <p className="font-bold uppercase text-[10px] text-gray-600">Prepared By (အမှာစာဖွင့်သူ)</p>
+                      <div className="border-b border-gray-400 mx-4"></div>
+                      <div>
+                        <p className="font-semibold">{user?.name || 'Purchasing Officer'}</p>
+                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-8">
+                      <p className="font-bold uppercase text-[10px] text-gray-600">Approved By (အတည်ပြုသူ)</p>
+                      <div className="border-b border-gray-400 mx-4"></div>
+                      <div>
+                        <p className="font-semibold">Procurement Director / Seal</p>
+                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-8">
+                      <p className="font-bold uppercase text-[10px] text-gray-600">Supplier Acknowledged (ကုန်သွင်းသူ)</p>
+                      <div className="border-b border-gray-400 mx-4"></div>
+                      <div>
+                        <p className="font-semibold">{selectedPrintPo.supplier?.name || 'Authorized Signatory'}</p>
+                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-center text-[10px] text-gray-500 pt-4 border-t border-gray-200">
+                    NAYA-ERA Official Enterprise ERP • System Automated Purchase Order • Certified Valid
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        )}
+      </div>
+
       {/* ─── MOBILE FLOATING ACTION BUTTON (M3 Standard) ───────────── */}
       <div className="fixed bottom-6 right-6 sm:hidden z-40">
         <Button
@@ -1209,3 +1839,4 @@ export default function PurchasingPage() {
     </div>
   );
 }
+
