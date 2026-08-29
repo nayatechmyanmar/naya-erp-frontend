@@ -507,27 +507,177 @@ export default function SalesPage() {
         </TabsList>
 
         {/* ─── TAB 1: SALES ORDERS ────────────────────────────────────── */}
-        <TabsContent value="orders">
-          <DataTable
-            data={salesOrders}
-            columns={soColumns}
-            searchPlaceholder="Search sales orders by SO# or customer..."
-            searchKey="orderNo"
-            isLoading={isLoading}
-            onRowClick={r => inspectSo(r)}
-          />
+        <TabsContent value="orders" className="space-y-4">
+          <div className="hidden sm:block">
+            <DataTable
+              data={salesOrders}
+              columns={soColumns}
+              searchPlaceholder="Search sales orders by SO# or customer..."
+              searchKey="orderNo"
+              isLoading={isLoading}
+              onRowClick={r => inspectSo(r)}
+            />
+          </div>
+
+          {/* Mobile View for Orders */}
+          <div className="sm:hidden space-y-3">
+            {isLoading ? (
+              <div className="p-8 text-center text-xs text-zinc-400">Loading orders...</div>
+            ) : salesOrders.length === 0 ? (
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 text-center text-xs text-zinc-500">
+                No sales orders found.
+              </div>
+            ) : (
+              salesOrders.map(so => {
+                const total = (so.items || []).reduce((acc, it) => acc + (Number(it.amount) || 0), 0);
+                const assignedTeam = so.assignments?.[0]?.salesTeam?.name;
+                return (
+                  <div
+                    key={so.id}
+                    className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 shadow-xs space-y-3"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span className="font-mono font-bold text-sm text-blue-600 dark:text-blue-400">
+                          {so.orderNo}
+                        </span>
+                        <div className="text-[10px] text-zinc-400">{formatDate(so.orderDate)}</div>
+                      </div>
+                      <StatusBadge status={so.status} />
+                    </div>
+
+                    <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/80 space-y-1 text-xs">
+                      <div className="flex items-center justify-between font-semibold text-zinc-900 dark:text-zinc-100">
+                        <span>{so.customer?.name || `Customer #${so.customerId}`}</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400">{formatCurrency(total)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] text-zinc-500">
+                        <span>Team: {assignedTeam || 'Unassigned'}</span>
+                        <span>{so.items?.length || 0} items</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => inspectSo(so)}
+                        className="h-8 text-xs gap-1"
+                      >
+                        <Eye className="h-3.5 w-3.5" /> View
+                      </Button>
+                      {so.status === 'DRAFT' && (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleConfirmSo(so.id)}
+                          className="h-8 text-xs gap-1 bg-emerald-600 text-white"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Confirm
+                        </Button>
+                      )}
+                      {(so.status === 'CONFIRMED' || so.status === 'PARTIALLY_SHIPPED') && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenAssignModal(so)}
+                            className="h-8 text-xs gap-1 text-blue-600"
+                          >
+                            <Users className="h-3.5 w-3.5" /> Assign
+                          </Button>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => handleOpenCreateShipment(so)}
+                            className="h-8 text-xs gap-1 bg-blue-600 text-white"
+                          >
+                            <Truck className="h-3.5 w-3.5" /> Dispatch
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </TabsContent>
 
         {/* ─── TAB 2: SHIPMENTS ───────────────────────────────────────── */}
-        <TabsContent value="shipments">
-          <DataTable
-            data={shipments}
-            columns={shipmentColumns}
-            searchPlaceholder="Search shipments by SHP# or SO#..."
-            searchKey="shipmentNo"
-            isLoading={isLoading}
-            onRowClick={r => inspectShipment(r)}
-          />
+        <TabsContent value="shipments" className="space-y-4">
+          <div className="hidden sm:block">
+            <DataTable
+              data={shipments}
+              columns={shipmentColumns}
+              searchPlaceholder="Search shipments by SHP# or SO#..."
+              searchKey="shipmentNo"
+              isLoading={isLoading}
+              onRowClick={r => inspectShipment(r)}
+            />
+          </div>
+
+          {/* Mobile View for Shipments */}
+          <div className="sm:hidden space-y-3">
+            {isLoading ? (
+              <div className="p-8 text-center text-xs text-zinc-400">Loading shipments...</div>
+            ) : shipments.length === 0 ? (
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 text-center text-xs text-zinc-500">
+                No shipments found.
+              </div>
+            ) : (
+              shipments.map(shp => (
+                <div
+                  key={shp.id}
+                  className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 shadow-xs space-y-3"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400">
+                        {shp.shipmentNo}
+                      </span>
+                      <div className="text-[10px] text-zinc-400">Date: {formatDate(shp.shipmentDate)}</div>
+                    </div>
+                    <StatusBadge status={shp.status} />
+                  </div>
+
+                  <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/80 text-xs space-y-1 text-zinc-600 dark:text-zinc-300">
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-400">SO Reference:</span>
+                      <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                        {shp.salesOrder?.orderNo || `SO #${shp.salesOrderId}`}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-400">Sales Team:</span>
+                      <span>{shp.salesTeam?.name || 'Unassigned'}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => inspectShipment(shp)}
+                      className="h-8 text-xs gap-1"
+                    >
+                      <Eye className="h-3.5 w-3.5" /> View
+                    </Button>
+                    {shp.status === 'DRAFT' && (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleOpenPostShipmentDialog(shp)}
+                        className="h-8 text-xs gap-1 bg-emerald-600 text-white"
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Post & GL Sync
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </TabsContent>
       </Tabs>
 

@@ -6,7 +6,37 @@ export type ApiResponse<T = any> = {
   data?: T;
 };
 
-// ─── AUTH & TENANT ───────────────────────────────────────────────
+// ─── AUTH & TENANT & RBAC ───────────────────────────────────────
+export type Permission = {
+  id: number;
+  code: string;
+  module: string;
+  name: string;
+  description?: string;
+};
+
+export type Role = {
+  id: number;
+  tenantId: number;
+  name: string;
+  description?: string;
+  isSystem: boolean;
+  userCount?: number;
+  permissionCount?: number;
+  permissions?: Permission[];
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type RolePermission = {
+  id: number;
+  tenantId: number;
+  roleId: number;
+  permissionId: number;
+  permission?: Permission;
+  role?: Role;
+};
+
 export type UserRole = {
   id: number;
   name: string;
@@ -19,11 +49,26 @@ export type UserProfile = {
   phoneNumber?: string;
   address?: string;
   roleId?: number;
+  roleName?: string;
+  role?: Role;
+  permissions?: string[];
   tenantId: number;
   branchId?: number;
   branch?: Branch;
   isActive?: boolean;
   createdAt?: string;
+  updatedAt?: string;
+};
+
+export type UserDetail = UserProfile & {
+  teams?: Array<{
+    id: number;
+    saleTeamId: number;
+    role: 'LEADER' | 'MEMBER';
+    isActive: boolean;
+    joinedDate: string;
+    saleTeam?: { id: number; name: string };
+  }>;
 };
 
 export type LoginResponseData = {

@@ -11,6 +11,7 @@ import {
   Factory,
   TrendingUp,
   Users,
+  ShieldCheck,
   Landmark,
   FileBarChart,
   Moon,
@@ -43,6 +44,7 @@ const navItems: NavItem[] = [
   { title: 'Manufacturing', href: '/manufacturing', icon: Factory },
   { title: 'Sales & Orders', href: '/sales', icon: TrendingUp },
   { title: 'Sales Teams & Portal', href: '/sales-teams', icon: Users },
+  { title: 'Users & Permissions', href: '/users', icon: ShieldCheck },
   { title: 'Accounting', href: '/accounting', icon: Landmark },
   { title: 'Reports', href: '/reports', icon: FileBarChart },
 ];

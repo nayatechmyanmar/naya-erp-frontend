@@ -749,15 +749,106 @@ export default function SalesTeamsPage() {
             </Card>
           </div>
 
-          {/* Orders Table */}
-          <DataTable
-            data={myOrders}
-            columns={myOrderColumns}
-            searchPlaceholder="Search my orders by SO# or customer..."
-            searchKey="orderNo"
-            isLoading={isLoading}
-            onRowClick={r => inspectOrder(r)}
-          />
+          {/* Desktop Table View */}
+          <div className="hidden sm:block">
+            <DataTable
+              data={myOrders}
+              columns={myOrderColumns}
+              searchPlaceholder="Search my orders by SO# or customer..."
+              searchKey="orderNo"
+              isLoading={isLoading}
+              onRowClick={r => inspectOrder(r)}
+            />
+          </div>
+
+          {/* Mobile Card List View for Salesmen on Phone */}
+          <div className="sm:hidden space-y-3">
+            {isLoading ? (
+              <div className="p-8 text-center text-xs text-zinc-400">Loading orders...</div>
+            ) : myOrders.length === 0 ? (
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 text-center text-xs text-zinc-500">
+                No assigned orders found for your team.
+              </div>
+            ) : (
+              myOrders.map(order => {
+                const total = (order.items || []).reduce((acc, it) => acc + (Number(it.amount) || 0), 0);
+                return (
+                  <div
+                    key={order.id}
+                    className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 shadow-xs space-y-3"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span className="font-mono font-bold text-sm text-blue-600 dark:text-blue-400">
+                          {order.orderNo}
+                        </span>
+                        <div className="text-[10px] text-zinc-400">{formatDate(order.orderDate)}</div>
+                      </div>
+                      <StatusBadge status={order.status} />
+                    </div>
+
+                    <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/80 space-y-1 text-xs">
+                      <div className="flex items-center justify-between font-semibold text-zinc-900 dark:text-zinc-100">
+                        <span>{order.customer?.name || `Customer #${order.customerId}`}</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400">{formatCurrency(total)}</span>
+                      </div>
+                      {order.customer?.phoneNumber && (
+                        <div className="flex items-center justify-between text-[11px] text-zinc-500 pt-0.5">
+                          <span className="truncate max-w-[180px]">{order.customer?.address || 'Customer Location'}</span>
+                          <a
+                            href={`tel:${order.customer.phoneNumber}`}
+                            className="inline-flex items-center gap-1 font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md text-[11px]"
+                          >
+                            <Phone className="h-3 w-3" /> Call Customer
+                          </a>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => inspectOrder(order)}
+                        className="h-8 text-xs gap-1"
+                      >
+                        <Eye className="h-3.5 w-3.5" /> View
+                      </Button>
+
+                      {(order.status === 'CONFIRMED' || order.status === 'PARTIALLY_SHIPPED') ? (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleOpenDispatch(order)}
+                          className="h-8 text-xs gap-1 bg-blue-600 text-white"
+                        >
+                          <Truck className="h-3.5 w-3.5" /> Dispatch
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled
+                          className="h-8 text-xs opacity-50"
+                        >
+                          Dispatched
+                        </Button>
+                      )}
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleOpenPayment(order)}
+                        className="h-8 text-xs gap-1 text-emerald-600 border-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                      >
+                        <DollarSign className="h-3.5 w-3.5" /> Collect
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </TabsContent>
 
         {/* ─── TAB 2: SALES TEAMS & MEMBERS ─────────────────────────── */}
