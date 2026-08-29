@@ -11,10 +11,6 @@ import {
   Eye,
   CheckCircle2,
   RefreshCw,
-  TrendingDown,
-  TrendingUp,
-  Filter,
-  DollarSign,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api/bff-client';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -379,64 +375,279 @@ export default function AccountingPage() {
     },
   ];
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Accounting & General Ledger (ဘဏ္ဍာရေးနှင့် စာရင်းကိုင်)
-          </h1>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Full double-entry general ledger, chart of accounts, payment reconciliation, and cashier daily closing registers.
-          </p>
+  // ─── MOBILE M3 CARDS RENDERERS ──────────────────────────────────
+  const renderAccountCard = (acc: Account) => {
+    const typeVariants: Record<string, 'default' | 'secondary' | 'success' | 'warning' | 'destructive' | 'info'> = {
+      ASSET: 'info',
+      LIABILITY: 'warning',
+      EQUITY: 'default',
+      REVENUE: 'success',
+      EXPENSE: 'destructive',
+    };
+
+    return (
+      <div className="rounded-2xl border border-zinc-200/90 bg-white p-3.5 sm:p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 space-y-3 transition-all hover:border-zinc-300 dark:hover:border-zinc-700">
+        {/* Top Header: Account Code & Status */}
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 rounded-md">
+            {acc.accountCode}
+          </span>
+          <Badge variant={acc.isActive ? 'success' : 'destructive'} className="text-[10px] px-2 py-0.5">
+            {acc.isActive ? 'Active' : 'Inactive'}
+          </Badge>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={loadAccountingData} className="gap-1.5 h-8 text-xs">
-            <RefreshCw className={isLoading ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />
-            <span>Refresh</span>
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setAccountDialogOpen(true)} className="gap-1.5 h-8 text-xs">
-            <Plus className="h-3.5 w-3.5" />
-            <span>+ New Account (စာရင်းသစ်ဖွင့်ရန်)</span>
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setClosingDialogOpen(true)} className="gap-1.5 h-8 text-xs">
-            <CalendarDays className="h-3.5 w-3.5" />
-            <span>Open Register (မနက်ပိုင်းဖွင့်ရန်)</span>
-          </Button>
-          <Button variant="primary" size="sm" onClick={() => setPaymentDialogOpen(true)} className="gap-1.5 h-8 text-xs">
-            <Receipt className="h-3.5 w-3.5" />
-            <span>+ Record Payment (ငွေပေး/ငွေရ သွင်းရန်)</span>
+        {/* Account Identity */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 leading-snug">
+            {acc.accountName}
+          </h4>
+        </div>
+
+        {/* Account Type Footer */}
+        <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800 text-xs">
+          <span className="text-[11px] text-zinc-500">Account Classification:</span>
+          <Badge variant={typeVariants[acc.accountType] || 'default'} className="text-xs font-medium">
+            {acc.accountType}
+          </Badge>
+        </div>
+      </div>
+    );
+  };
+
+  const renderPaymentCard = (p: Payment) => {
+    const typeMap: Record<string, { label: string; variant: 'success' | 'destructive' | 'secondary' }> = {
+      CUSTOMER_PAYMENT: { label: 'Customer Payment (ငွေရ)', variant: 'success' },
+      SUPPLIER_PAYMENT: { label: 'Supplier Payment (ငွေပေး)', variant: 'destructive' },
+      EXPENSE_PAYMENT: { label: 'Expense (အသုံးစရိတ်)', variant: 'secondary' },
+    };
+    const item = typeMap[p.paymentType] || { label: p.paymentType, variant: 'secondary' };
+
+    return (
+      <div className="rounded-2xl border border-zinc-200/90 bg-white p-3.5 sm:p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 space-y-3 transition-all hover:border-zinc-300 dark:hover:border-zinc-700">
+        {/* Top Header: Payment No & Type Badge */}
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-mono text-xs font-bold text-zinc-800 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800 px-2.5 py-0.5 rounded-md">
+            {p.paymentNo}
+          </span>
+          <Badge variant={item.variant} className="text-[10px] px-2 py-0.5">
+            {item.label}
+          </Badge>
+        </div>
+
+        {/* Partner & Method */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">
+              {p.customer?.name || p.supplier?.name || (p.description ? p.description : 'Direct Payment')}
+            </span>
+            <Badge variant="outline" className="text-[10px] font-mono">
+              {p.paymentMethod}
+            </Badge>
+          </div>
+          <p className="text-[11px] text-zinc-400">Date: {formatDate(p.paymentDate)}</p>
+        </div>
+
+        {/* Amount Box */}
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800 text-xs">
+          <span className="text-[11px] font-semibold text-zinc-500">Payment Amount:</span>
+          <span className="font-bold font-mono text-sm text-zinc-900 dark:text-zinc-100">
+            {formatCurrency(p.amount)}
+          </span>
+        </div>
+
+        {/* Actions Footer */}
+        <div className="flex items-center justify-end pt-2 border-t border-zinc-100 dark:border-zinc-800 text-xs" onClick={e => e.stopPropagation()}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSelectedPayment(p);
+              setPaymentSheetOpen(true);
+            }}
+            className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1"
+          >
+            <Eye className="h-3.5 w-3.5" />
+            <span>View Detail</span>
           </Button>
         </div>
       </div>
+    );
+  };
 
-      {/* Tabs */}
+  const renderClosingCard = (dc: DailyClosing) => {
+    return (
+      <div className="rounded-2xl border border-zinc-200/90 bg-white p-3.5 sm:p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 space-y-3 transition-all hover:border-zinc-300 dark:hover:border-zinc-700">
+        {/* Top Header: Date & Status */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 font-bold text-xs text-zinc-900 dark:text-zinc-100">
+            <CalendarDays className="h-4 w-4 text-blue-600 shrink-0" />
+            <span>{formatDate(dc.closingDate)}</span>
+          </div>
+          <StatusBadge status={dc.status} />
+        </div>
+
+        {/* 3-Column Cash Summary */}
+        <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800 text-center text-xs">
+          <div className="space-y-0.5">
+            <span className="text-[10px] uppercase font-semibold text-zinc-400">Opening</span>
+            <p className="font-mono font-bold text-zinc-800 dark:text-zinc-200 text-[11px]">
+              {formatCurrency(dc.openingCash)}
+            </p>
+          </div>
+          <div className="space-y-0.5 border-x border-zinc-200 dark:border-zinc-700/60">
+            <span className="text-[10px] uppercase font-semibold text-zinc-400">Received (+)</span>
+            <p className="font-mono font-bold text-emerald-600 text-[11px]">
+              {formatCurrency(dc.cashReceived ?? 0)}
+            </p>
+          </div>
+          <div className="space-y-0.5">
+            <span className="text-[10px] uppercase font-semibold text-zinc-400">Paid (-)</span>
+            <p className="font-mono font-bold text-rose-600 text-[11px]">
+              {formatCurrency(dc.cashPaid ?? 0)}
+            </p>
+          </div>
+        </div>
+
+        {/* Closing Cash Total */}
+        <div className="flex items-center justify-between px-2 text-xs">
+          <span className="text-zinc-500 font-medium">Closing Cash (ချုပ်ငွေ):</span>
+          <span className="font-bold font-mono text-blue-600 dark:text-blue-400 text-sm">
+            {dc.closingCash !== null && dc.closingCash !== undefined ? formatCurrency(dc.closingCash) : 'In Session'}
+          </span>
+        </div>
+
+        {/* Action Button */}
+        {dc.status === 'OPEN' && (
+          <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 flex justify-end" onClick={e => e.stopPropagation()}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSelectedClosing(dc);
+                setCloseRegisterForm({ cashReceived: '0', cashPaid: '0' });
+                setCloseRegisterDialogOpen(true);
+              }}
+              className="h-8 w-full sm:w-auto text-xs gap-1.5 text-amber-600 border-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40"
+            >
+              <Lock className="h-3.5 w-3.5" /> Close Register (စာရင်းချုပ်ရန်)
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderJeCard = (je: JournalEntry) => {
+    return (
+      <div className="rounded-2xl border border-zinc-200/90 bg-white p-3.5 sm:p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 space-y-3 transition-all hover:border-zinc-300 dark:hover:border-zinc-700">
+        {/* Top Header: Entry No & Status */}
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 rounded-md">
+            {je.entryNo}
+          </span>
+          <StatusBadge status={je.status} />
+        </div>
+
+        {/* Description & Reference */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 leading-snug">
+            {je.description || 'General Ledger Entry'}
+          </h4>
+          <div className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-500">
+            <span>Date: {formatDate(je.entryDate)}</span>
+            <span>• Ref: {je.referenceType ? `${je.referenceType} #${je.referenceId || ''}` : 'Direct Entry'}</span>
+          </div>
+        </div>
+
+        {/* Balanced Banner & Actions */}
+        <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800 text-xs" onClick={e => e.stopPropagation()}>
+          <Badge variant="success" className="text-[10px] gap-1 px-2 py-0.5">
+            <CheckCircle2 className="h-3 w-3" /> Auto-Posted Double Entry
+          </Badge>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => inspectJe(je)}
+            className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1"
+          >
+            <Eye className="h-3.5 w-3.5" />
+            <span>Inspect GL</span>
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-4 sm:space-y-6 max-w-full overflow-x-hidden min-w-0">
+      {/* ─── WORKSPACE HEADER (M3 Responsive) ───────────────────────── */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-4 pb-1">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <Landmark className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 shrink-0" />
+            <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 truncate">
+              Accounting & General Ledger (ဘဏ္ဍာရေးနှင့် စာရင်းကိုင်)
+            </h1>
+          </div>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
+            Chart of accounts, double-entry GL, payments, and cashier daily closings
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+          <Button variant="outline" size="sm" onClick={loadAccountingData} className="gap-1.5 h-8 text-xs shrink-0">
+            <RefreshCw className={isLoading ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />
+            <span className="hidden sm:inline">Refresh (ပြန်ဖွင့်)</span>
+            <span className="sm:hidden">Refresh</span>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setAccountDialogOpen(true)} className="gap-1.5 h-8 text-xs shrink-0">
+            <Plus className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">+ New Account (စာရင်းသစ်ဖွင့်ရန်)</span>
+            <span className="sm:hidden">+ Account</span>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setClosingDialogOpen(true)} className="gap-1.5 h-8 text-xs shrink-0">
+            <CalendarDays className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Open Register (မနက်ပိုင်းဖွင့်ရန်)</span>
+            <span className="sm:hidden">Register</span>
+          </Button>
+          <div className="hidden sm:block">
+            <Button variant="primary" size="sm" onClick={() => setPaymentDialogOpen(true)} className="gap-1.5 h-8 text-xs bg-blue-600 hover:bg-blue-700">
+              <Receipt className="h-3.5 w-3.5" />
+              <span>+ Record Payment (ငွေပေး/ငွေရ သွင်းရန်)</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── TABS NAVIGATION (Scrollable M3 Segmented Bar) ─────────── */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-zinc-100 dark:bg-zinc-800">
-          <TabsTrigger value="accounts" count={filteredAccounts.length}>
-            Chart of Accounts (စာရင်းခေါင်းစဉ်များ)
-          </TabsTrigger>
-          <TabsTrigger value="payments" count={payments.length}>
-            Payments (ငွေပေး/ငွေရ မှတ်တမ်းများ)
-          </TabsTrigger>
-          <TabsTrigger value="closings" count={dailyClosings.length}>
-            Daily Closings (နေ့စဉ် ငွေစာရင်းချုပ်)
-          </TabsTrigger>
-          <TabsTrigger value="journal" count={journalEntries.length}>
-            General Ledger (Double-Entry စာရင်းများ)
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
+          <TabsList className="w-max sm:w-full justify-start">
+            <TabsTrigger value="accounts" count={filteredAccounts.length}>
+              🏛️ Chart of Accounts (စာရင်းခေါင်းစဉ်များ)
+            </TabsTrigger>
+            <TabsTrigger value="payments" count={payments.length}>
+              💳 Payments (ငွေပေး/ငွေရ မှတ်တမ်းများ)
+            </TabsTrigger>
+            <TabsTrigger value="closings" count={dailyClosings.length}>
+              🔒 Daily Closings (နေ့စဉ် ငွေစာရင်းချုပ်)
+            </TabsTrigger>
+            <TabsTrigger value="journal" count={journalEntries.length}>
+              ⚖️ General Ledger (Double-Entry စာရင်းများ)
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* ─── TAB 1: CHART OF ACCOUNTS ───────────────────────────────── */}
         <TabsContent value="accounts" className="space-y-4">
-          <div className="flex items-center gap-2 text-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 text-xs">
             <span className="font-semibold text-zinc-500">Account Type Filter:</span>
             <select
               value={accountTypeFilter}
               onChange={e => setAccountTypeFilter(e.target.value)}
-              className="rounded border border-zinc-300 bg-white px-2.5 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-800"
+              className="rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-800 w-full sm:w-auto"
             >
               <option value="ALL">All Account Types (အားလုံး)</option>
               <option value="ASSET">ASSET (ပိုင်ဆိုင်မှုများ)</option>
@@ -450,9 +661,10 @@ export default function AccountingPage() {
           <DataTable
             data={filteredAccounts}
             columns={accountColumns}
-            searchPlaceholder="Search accounts by code or name..."
+            searchPlaceholder="Search accounts by code or name (စာရင်းရှာရန်)..."
             searchKey="accountName"
             isLoading={isLoading}
+            renderCard={renderAccountCard}
           />
         </TabsContent>
 
@@ -461,9 +673,10 @@ export default function AccountingPage() {
           <DataTable
             data={payments}
             columns={paymentColumns}
-            searchPlaceholder="Search payment transactions..."
+            searchPlaceholder="Search payment transactions by PAY# (ငွေပေး/ငွေရ ရှာရန်)..."
             searchKey="paymentNo"
             isLoading={isLoading}
+            renderCard={renderPaymentCard}
           />
         </TabsContent>
 
@@ -472,8 +685,9 @@ export default function AccountingPage() {
           <DataTable
             data={dailyClosings}
             columns={closingColumns}
-            searchPlaceholder="Search daily closings..."
+            searchPlaceholder="Search daily closings (ငွေစာရင်းချုပ်ရှာရန်)..."
             isLoading={isLoading}
+            renderCard={renderClosingCard}
           />
         </TabsContent>
 
@@ -482,9 +696,10 @@ export default function AccountingPage() {
           <DataTable
             data={journalEntries}
             columns={jeColumns}
-            searchPlaceholder="Search journal entries..."
+            searchPlaceholder="Search journal entries by JE# or memo (GL ရှာရန်)..."
             searchKey="entryNo"
             isLoading={isLoading}
+            renderCard={renderJeCard}
             onRowClick={r => inspectJe(r)}
           />
         </TabsContent>
@@ -520,12 +735,12 @@ export default function AccountingPage() {
             <option value="EXPENSE">EXPENSE (Cost of Goods / Operational - အသုံးစရိတ်)</option>
           </Select>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={() => setAccountDialogOpen(false)}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setAccountDialogOpen(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button type="submit" variant="primary">
-              Save Account
+            <Button type="submit" variant="primary" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
+              Save Account (စာရင်းသိမ်းရန်)
             </Button>
           </div>
         </form>
@@ -577,7 +792,7 @@ export default function AccountingPage() {
             </Select>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               type="number"
               step="any"
@@ -600,7 +815,7 @@ export default function AccountingPage() {
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               type="date"
               label="Payment Date (ရက်စွဲ) *"
@@ -616,12 +831,12 @@ export default function AccountingPage() {
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={() => setPaymentDialogOpen(false)}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setPaymentDialogOpen(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button type="submit" variant="primary">
-              Record Payment & Post GL
+            <Button type="submit" variant="primary" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
+              Record Payment & Post GL (ငွေစာရင်းသွင်းမည်)
             </Button>
           </div>
         </form>
@@ -645,12 +860,12 @@ export default function AccountingPage() {
             onChange={e => setOpenClosingForm({ ...openClosingForm, openingCash: e.target.value })}
             required
           />
-          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={() => setClosingDialogOpen(false)}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setClosingDialogOpen(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button type="submit" variant="primary">
-              Open Register
+            <Button type="submit" variant="primary" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
+              Open Register (စာရင်းဖွင့်မည်)
             </Button>
           </div>
         </form>
@@ -659,7 +874,7 @@ export default function AccountingPage() {
       {/* ─── MODAL: CLOSE DAILY CLOSING REGISTER ─────────────────────── */}
       <Dialog open={closeRegisterDialogOpen} onOpenChange={setCloseRegisterDialogOpen} title="Close Cash Register (ညနေပိုင်း ငွေစာရင်းချုပ်ရန်)">
         <form onSubmit={handleCloseDailyClosing} className="space-y-4">
-          <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 text-xs">
+          <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 text-xs">
             <p className="text-zinc-500">Opening Balance (မနက်ပိုင်း မူလလက်ကျန်):</p>
             <p className="font-bold text-sm text-zinc-900 dark:text-zinc-100 font-mono">
               {formatCurrency(selectedClosing?.openingCash)}
@@ -684,11 +899,11 @@ export default function AccountingPage() {
             required
           />
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={() => setCloseRegisterDialogOpen(false)}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setCloseRegisterDialogOpen(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button type="submit" variant="primary" className="bg-amber-600 hover:bg-amber-700">
+            <Button type="submit" variant="primary" className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700">
               Confirm Daily Close (အတည်ပြု ချုပ်မည်)
             </Button>
           </div>
@@ -704,7 +919,7 @@ export default function AccountingPage() {
       >
         {selectedPayment && (
           <div className="space-y-4 text-xs">
-            <div className="grid grid-cols-2 gap-3 p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 p-3.5 sm:p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
               <div>
                 <p className="text-[10px] font-bold uppercase text-zinc-400">Payment Type</p>
                 <p className="font-semibold mt-1">{selectedPayment.paymentType}</p>
@@ -735,7 +950,7 @@ export default function AccountingPage() {
       >
         {selectedJe && (
           <div className="space-y-6 text-xs">
-            <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 space-y-1">
+            <div className="p-3.5 sm:p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 space-y-1">
               <p className="text-[10px] font-bold uppercase text-zinc-400">Description</p>
               <p className="font-semibold text-zinc-900 dark:text-zinc-100">{selectedJe.description || 'System Auto-Entry'}</p>
             </div>
@@ -752,7 +967,7 @@ export default function AccountingPage() {
                 </Badge>
               </div>
 
-              <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
                 <table className="w-full text-xs">
                   <thead className="bg-zinc-50 dark:bg-zinc-950/50 border-b border-zinc-200 dark:border-zinc-800">
                     <tr>
@@ -800,6 +1015,22 @@ export default function AccountingPage() {
           </div>
         )}
       </Sheet>
+
+      {/* ─── MOBILE FLOATING ACTION BUTTON (M3 Standard) ───────────── */}
+      <div className="fixed bottom-6 right-6 sm:hidden z-40">
+        <Button
+          type="button"
+          onClick={() => {
+            if (activeTab === 'accounts') setAccountDialogOpen(true);
+            else if (activeTab === 'closings') setClosingDialogOpen(true);
+            else setPaymentDialogOpen(true);
+          }}
+          className="h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl flex items-center justify-center p-0 active:scale-95 transition-transform"
+          title="Create"
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      </div>
     </div>
   );
 }
