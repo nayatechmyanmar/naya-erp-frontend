@@ -1,12 +1,32 @@
-// Server-side API client for BFF routes to call the Express ERP backend
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 
 const BACKEND_URL = process.env.API_BACKEND_URL || 'http://localhost:3330/api/v1';
 
 export async function getAuthToken(): Promise<string | null> {
   try {
     const cookieStore = await cookies();
-    return cookieStore.get('auth_token')?.value || null;
+    const tokenFromCookie = cookieStore.get('auth_token')?.value;
+    if (tokenFromCookie && tokenFromCookie !== 'undefined' && tokenFromCookie !== 'null') {
+      return tokenFromCookie;
+    }
+
+    const headersList = await headers();
+    const authHeader = headersList.get('authorization');
+    if (authHeader) {
+      const parsed = authHeader.toLowerCase().startsWith('bearer ')
+        ? authHeader.slice(7).trim()
+        : authHeader.trim();
+      if (parsed && parsed !== 'undefined' && parsed !== 'null') {
+        return parsed;
+      }
+    }
+
+    const xToken = headersList.get('x-access-token');
+    if (xToken && xToken !== 'undefined' && xToken !== 'null') {
+      return xToken.trim();
+    }
+
+    return null;
   } catch {
     return null;
   }

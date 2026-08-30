@@ -21,29 +21,40 @@ export async function POST(req: Request) {
     const { accessToken, user } = result.data;
     const cookieStore = await cookies();
 
-    // Set HTTP-only secure cookie for accessToken
-    cookieStore.set('auth_token', accessToken, {
+    const isSecure = process.env.COOKIE_SECURE === 'true';
+
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isSecure,
+      sameSite: 'lax' as const,
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7 days
-    });
+    };
 
-    // Set user session cookie for fast client session hydration
-    cookieStore.set('user_session', JSON.stringify(user), {
+    const sessionCookieOptions = {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isSecure,
+      sameSite: 'lax' as const,
       path: '/',
       maxAge: 60 * 60 * 24 * 7,
-    });
+    };
 
-    return NextResponse.json({
+    // Set HTTP-only cookie for accessToken
+    cookieStore.set('auth_token', accessToken, cookieOptions);
+
+    // Set user session cookie for fast client session hydration
+    cookieStore.set('user_session', JSON.stringify(user), sessionCookieOptions);
+
+    const response = NextResponse.json({
       success: true,
       message: 'Login successful',
       data: { accessToken, user },
     });
+
+    response.cookies.set('auth_token', accessToken, cookieOptions);
+    response.cookies.set('user_session', JSON.stringify(user), sessionCookieOptions);
+
+    return response;
   } catch (error: any) {
     return NextResponse.json(
       { success: false, message: error.message || 'Internal server error' },

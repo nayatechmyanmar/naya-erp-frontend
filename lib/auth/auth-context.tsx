@@ -48,6 +48,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           tenantId: sessionUser.tenantId || prev.tenantId,
           branchId: sessionUser.branchId || prev.branchId,
         }));
+      } else if (typeof window !== 'undefined') {
+        const localUserStr = localStorage.getItem('user_session');
+        const localToken = localStorage.getItem('auth_token') || localStorage.getItem('accessToken');
+        if (localUserStr && localToken) {
+          try {
+            const parsedUser = JSON.parse(localUserStr);
+            setUser(parsedUser);
+            setOrgContext(prev => ({
+              ...prev,
+              tenantId: parsedUser.tenantId || prev.tenantId,
+              branchId: parsedUser.branchId || prev.branchId,
+            }));
+          } catch {
+            // invalid json
+          }
+        }
       }
     } catch {
       // Not logged in or offline
@@ -94,6 +110,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, refreshMasterContext]);
 
   const login = (token: string, newUser: UserProfile) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('accessToken', token);
+      localStorage.setItem('user_session', JSON.stringify(newUser));
+    }
     setUser(newUser);
     setOrgContext(prev => ({
       ...prev,
@@ -104,6 +125,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user_session');
+    }
     await apiFetch('/api/auth/logout', { method: 'POST' });
     setUser(null);
     window.location.href = '/login';
