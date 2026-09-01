@@ -117,7 +117,7 @@ export default function InventoryPage() {
   const handleStockAdjustment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!adjustForm.warehouseId || !adjustForm.productId || !adjustForm.uomId || !adjustForm.qty) {
-      error('Please complete all required fields (အချက်အလက်များ ပြည့်စုံစွာ ဖြည့်ပါ)');
+      error('အချက်အလက်များ ပြည့်စုံစွာ ဖြည့်သွင်းပေးပါ');
       return;
     }
 
@@ -135,12 +135,12 @@ export default function InventoryPage() {
     });
 
     if (res.success) {
-      success('Stock Adjusted (စတော့ ချိန်ညှိပြီးပါပြီ)', `Applied quantity: ${adjustForm.qty}`);
+      success('စတော့ ချိန်ညှိပြီးပါပြီ', `ချိန်ညှိအရေအတွက်: ${adjustForm.qty}`);
       setAdjustDialogOpen(false);
       setAdjustForm({ warehouseId: '', productId: '', uomId: '', qty: '', reason: '' });
       loadInventoryData();
     } else {
-      error('Adjustment failed', res.message);
+      error('စတော့ ချိန်ညှိ၍မရပါ', res.message);
     }
   };
 
@@ -177,11 +177,11 @@ export default function InventoryPage() {
   const handleCreateTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!transferForm.fromWarehouseId || !transferForm.toWarehouseId) {
-      error('Please select both source and destination warehouses');
+      error('မူလဂိုဒေါင်နှင့် လက်ခံမည့်ဂိုဒေါင် နှစ်ခုစလုံးကို ရွေးချယ်ပေးပါ');
       return;
     }
     if (transferForm.fromWarehouseId === transferForm.toWarehouseId) {
-      error('Source and destination warehouse cannot be the same (ကုန်လှောင်ရုံတူ မဖြစ်ရပါ)');
+      error('မူလဂိုဒေါင်နှင့် လက်ခံမည့်ဂိုဒေါင် တူညီ၍မရပါ');
       return;
     }
 
@@ -203,7 +203,7 @@ export default function InventoryPage() {
     });
 
     if (res.success) {
-      success('Transfer Order Created (ကုန်လွှဲပြောင်းလွှာ ဖန်တီးပြီးပါပြီ)');
+      success('ကုန်လွှဲပြောင်းလွှာ ဖန်တီးပြီးပါပြီ');
       setTransferDialogOpen(false);
       setTransferForm({
         fromWarehouseId: '',
@@ -213,7 +213,7 @@ export default function InventoryPage() {
       });
       loadInventoryData();
     } else {
-      error('Transfer creation failed', res.message);
+      error('ကုန်လွှဲပြောင်းလွှာ ဖန်တီး၍မရပါ', res.message);
     }
   };
 
@@ -221,11 +221,11 @@ export default function InventoryPage() {
   const handlePostTransfer = async (transferId: number) => {
     const res = await apiFetch(`/api/inventory/warehouse-transfers/${transferId}/post`, { method: 'PUT' });
     if (res.success) {
-      success('Transfer Completed & Stock Updated (ကုန်လှောင်ရုံ စတော့ လွှဲပြောင်းပြီးပါပြီ)');
+      success('ကုန်လွှဲပြောင်းမှု ပြီးစီးပြီး စတော့စာရင်းများ အဆင့်မြှင့်တင်ပြီးပါပြီ');
       loadInventoryData();
       if (selectedTransfer?.id === transferId) setTransferSheetOpen(false);
     } else {
-      error('Post transfer failed', res.message);
+      error('လွှဲပြောင်းမှု မအောင်မြင်ပါ', res.message);
     }
   };
 
@@ -243,21 +243,31 @@ export default function InventoryPage() {
     });
   }, [movements, warehouseFilter, movementTypeFilter]);
 
+  const movementTypeMap: Record<string, { label: string; variant: 'success' | 'destructive' | 'warning' | 'info' | 'secondary' }> = {
+    PURCHASE_RECEIPT: { label: 'အဝယ်ကုန်လက်ခံ', variant: 'success' },
+    SALE_SHIPMENT: { label: 'အရောင်းပို့ဆောင်', variant: 'destructive' },
+    PRODUCTION_CONSUMPTION: { label: 'ကုန်ကြမ်းသုံးစွဲ', variant: 'destructive' },
+    PRODUCTION_OUTPUT: { label: 'အချောထည်ထွက်', variant: 'success' },
+    WAREHOUSE_TRANSFER_IN: { label: 'လွှဲပြောင်းဝင်', variant: 'info' },
+    WAREHOUSE_TRANSFER_OUT: { label: 'လွှဲပြောင်းထွက်', variant: 'warning' },
+    STOCK_ADJUSTMENT: { label: 'စတော့ချိန်ညှိမှု', variant: 'secondary' },
+  };
+
   // Stock Columns
   const stockColumns: Column<InventoryStock>[] = [
     {
-      header: 'Product Name (ကုန်ပစ္စည်းအမည်)',
+      header: 'ကုန်ပစ္စည်းအမည် / SKU',
       cell: r => (
         <div>
-          <p className="font-semibold text-zinc-900 dark:text-zinc-100">{r.product?.name || `Product #${r.productId}`}</p>
+          <p className="font-semibold text-zinc-900 dark:text-zinc-100">{r.product?.name || `ကုန်ပစ္စည်း #${r.productId}`}</p>
           <p className="font-mono text-[11px] text-zinc-500">{r.product?.sku}</p>
         </div>
       ),
       sortable: true,
     },
-    { header: 'Warehouse (ကုန်လှောင်ရုံ)', cell: r => r.warehouse?.name || `WH #${r.warehouseId}` },
+    { header: 'ဂိုဒေါင်', cell: r => r.warehouse?.name || `ဂိုဒေါင် #${r.warehouseId}` },
     {
-      header: 'On-Hand Stock (လက်ကျန် အရေအတွက်)',
+      header: 'လက်ကျန်အရေအတွက်',
       accessorKey: 'onHandQty',
       sortable: true,
       cell: r => {
@@ -265,12 +275,12 @@ export default function InventoryPage() {
         const isLow = qty <= 10;
         return (
           <div className="flex items-center gap-2">
-            <span className={`font-bold font-mono text-sm ${isLow ? 'text-rose-600' : 'text-emerald-600'}`}>
-              {qty.toLocaleString()}
+            <span className={`font-bold font-mono text-sm ${isLow ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+              {qty.toLocaleString()} {r.product?.baseUom?.symbol || ''}
             </span>
             {isLow && (
               <Badge variant="destructive" className="text-[10px] py-0 px-1 gap-1">
-                <AlertTriangle className="h-3 w-3" /> Low Stock
+                <AlertTriangle className="h-3 w-3" /> လက်ကျန်နည်း
               </Badge>
             )}
           </div>
@@ -278,7 +288,7 @@ export default function InventoryPage() {
       },
     },
     {
-      header: 'Action',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => (
         <Button
@@ -289,8 +299,9 @@ export default function InventoryPage() {
             setStockSheetOpen(true);
           }}
           className="h-7 text-xs"
+          title="အသေးစိတ်ကြည့်ရန်"
         >
-          <Eye className="h-3.5 w-3.5 mr-1" /> Inspect
+          <Eye className="h-3.5 w-3.5 mr-1" /> အသေးစိတ်
         </Button>
       ),
     },
@@ -298,37 +309,29 @@ export default function InventoryPage() {
 
   // Movements Columns
   const movementColumns: Column<InventoryMovement>[] = [
-    { header: 'Date (ရက်စွဲ)', cell: r => formatDate(r.movementDate), sortable: true },
+    { header: 'ရက်စွဲ', cell: r => formatDate(r.movementDate), sortable: true },
     {
-      header: 'Event Type (လှုပ်ရှားမှု အမျိုးအစား)',
+      header: 'လှုပ်ရှားမှုအမျိုးအစား',
       accessorKey: 'movementType',
       cell: r => {
-        const typeVariants: Record<string, 'success' | 'destructive' | 'warning' | 'info' | 'secondary'> = {
-          PURCHASE_RECEIPT: 'success',
-          SALE_SHIPMENT: 'destructive',
-          PRODUCTION_CONSUMPTION: 'destructive',
-          PRODUCTION_OUTPUT: 'success',
-          WAREHOUSE_TRANSFER_IN: 'info',
-          WAREHOUSE_TRANSFER_OUT: 'warning',
-          STOCK_ADJUSTMENT: 'secondary',
-        };
+        const conf = movementTypeMap[r.movementType] || { label: r.movementType.replace(/_/g, ' '), variant: 'default' };
         return (
-          <Badge variant={typeVariants[r.movementType] || 'default'}>
-            {r.movementType.replace(/_/g, ' ')}
+          <Badge variant={conf.variant}>
+            {conf.label}
           </Badge>
         );
       },
     },
-    { header: 'Product (ကုန်ပစ္စည်း)', cell: r => r.product?.name || `Product #${r.productId}` },
-    { header: 'Warehouse', cell: r => r.warehouse?.name || `WH #${r.warehouseId}` },
+    { header: 'ကုန်ပစ္စည်း', cell: r => r.product?.name || `ကုန်ပစ္စည်း #${r.productId}` },
+    { header: 'ဂိုဒေါင်', cell: r => r.warehouse?.name || `ဂိုဒေါင် #${r.warehouseId}` },
     {
-      header: 'Quantity (အရေအတွက်)',
+      header: 'အရေအတွက်',
       cell: r => {
         const qty = Number(r.qty);
         const isPositive = qty > 0;
         return (
           <span
-            className={`font-bold font-mono inline-flex items-center gap-1 ${isPositive ? 'text-emerald-600' : 'text-rose-600'
+            className={`font-bold font-mono inline-flex items-center gap-1 ${isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
               }`}
           >
             {isPositive ? <ArrowDownLeft className="h-3.5 w-3.5" /> : <ArrowUpRight className="h-3.5 w-3.5" />}
@@ -337,19 +340,19 @@ export default function InventoryPage() {
         );
       },
     },
-    { header: 'Total Value', cell: r => formatCurrency(r.totalCost) },
-    { header: 'Audit Reference', cell: r => r.referenceType ? `${r.referenceType} #${r.referenceId || ''}` : '-' },
+    { header: 'စုစုပေါင်းတန်ဖိုး', cell: r => formatCurrency(r.totalCost) },
+    { header: 'မူရင်းစာရွက်စာတမ်း', cell: r => r.referenceType ? `${r.referenceType} #${r.referenceId || ''}` : '-' },
   ];
 
   // Transfer Columns
   const transferColumns: Column<WarehouseTransfer>[] = [
-    { header: 'Transfer No', accessorKey: 'transferNo', sortable: true, className: 'font-mono font-bold text-blue-600' },
-    { header: 'From Warehouse', cell: r => r.fromWarehouse?.name || `WH #${r.fromWarehouseId}` },
-    { header: 'To Warehouse', cell: r => r.toWarehouse?.name || `WH #${r.toWarehouseId}` },
-    { header: 'Date', cell: r => formatDate(r.transferDate), sortable: true },
-    { header: 'Status', cell: r => <StatusBadge status={r.status} /> },
+    { header: 'လွှဲပြောင်းလွှာအမှတ်', accessorKey: 'transferNo', sortable: true, className: 'font-mono font-bold text-blue-600 dark:text-blue-400' },
+    { header: 'လွှဲပေးသည့်ဂိုဒေါင်', cell: r => r.fromWarehouse?.name || `ဂိုဒေါင် #${r.fromWarehouseId}` },
+    { header: 'လက်ခံမည့်ဂိုဒေါင်', cell: r => r.toWarehouse?.name || `ဂိုဒေါင် #${r.toWarehouseId}` },
+    { header: 'ရက်စွဲ', cell: r => formatDate(r.transferDate), sortable: true },
+    { header: 'အခြေအနေ', cell: r => <StatusBadge status={r.status} /> },
     {
-      header: 'Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => (
         <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
@@ -361,6 +364,7 @@ export default function InventoryPage() {
               setTransferSheetOpen(true);
             }}
             className="h-7 text-xs"
+            title="အသေးစိတ်ကြည့်ရန်"
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
@@ -372,7 +376,7 @@ export default function InventoryPage() {
               onClick={() => handlePostTransfer(r.id)}
               className="h-7 text-xs gap-1 bg-blue-600 hover:bg-blue-700"
             >
-              <CheckCircle2 className="h-3.5 w-3.5" /> Post Transfer
+              <CheckCircle2 className="h-3.5 w-3.5" /> လွှဲပြောင်းအတည်ပြုမည်
             </Button>
           )}
         </div>
@@ -394,24 +398,24 @@ export default function InventoryPage() {
           </span>
           <span className="inline-flex items-center gap-1 text-xs text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 px-2.5 py-0.5 rounded-md font-medium truncate max-w-[180px]">
             <WarehouseIcon className="h-3 w-3 shrink-0 text-zinc-500" />
-            <span className="truncate">{s.warehouse?.name || `WH #${s.warehouseId}`}</span>
+            <span className="truncate">{s.warehouse?.name || `ဂိုဒေါင် #${s.warehouseId}`}</span>
           </span>
         </div>
 
         {/* Product Identity */}
         <div>
           <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 leading-snug">
-            {s.product?.name || `Product #${s.productId}`}
+            {s.product?.name || `ကုန်ပစ္စည်း #${s.productId}`}
           </h4>
           <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1">
-            Category: {s.product?.category?.name || 'Standard'} • Base: {s.product?.baseUom?.symbol || s.product?.baseUom?.name || 'Unit'}
+            အမျိုးအစား: {s.product?.category?.name || 'အထွေထွေ'} • အခြေခံယူနစ်: {s.product?.baseUom?.symbol || s.product?.baseUom?.name || 'Unit'}
           </p>
         </div>
 
         {/* Stock Status Box */}
         <div className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800">
           <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
-            On-Hand Balance (လက်ကျန်):
+            လက်ကျန်အရေအတွက်:
           </span>
           <div className="flex items-center gap-2">
             <span className={`font-bold font-mono text-base ${isLow ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
@@ -419,7 +423,7 @@ export default function InventoryPage() {
             </span>
             {isLow && (
               <Badge variant="destructive" className="text-[10px] py-0 px-1.5 gap-1">
-                <AlertTriangle className="h-3 w-3" /> Low
+                <AlertTriangle className="h-3 w-3" /> လက်ကျန်နည်း
               </Badge>
             )}
           </div>
@@ -435,10 +439,10 @@ export default function InventoryPage() {
               setStockSheetOpen(true);
             }}
             className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1"
-            title="Inspect"
+            title="အသေးစိတ်ကြည့်ရန်"
           >
             <Eye className="h-3.5 w-3.5" />
-            <span>Detail</span>
+            <span>အသေးစိတ်</span>
           </Button>
 
           <Button
@@ -457,7 +461,7 @@ export default function InventoryPage() {
             className="h-8 px-3 text-xs text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 gap-1"
           >
             <SlidersHorizontal className="h-3.5 w-3.5" />
-            <span>Adjust (ချိန်ညှိရန်)</span>
+            <span>စတော့ချိန်ညှိမည်</span>
           </Button>
         </div>
       </div>
@@ -467,16 +471,7 @@ export default function InventoryPage() {
   const renderMovementCard = (m: InventoryMovement) => {
     const qty = Number(m.qty);
     const isPositive = qty > 0;
-
-    const typeVariants: Record<string, 'success' | 'destructive' | 'warning' | 'info' | 'secondary'> = {
-      PURCHASE_RECEIPT: 'success',
-      SALE_SHIPMENT: 'destructive',
-      PRODUCTION_CONSUMPTION: 'destructive',
-      PRODUCTION_OUTPUT: 'success',
-      WAREHOUSE_TRANSFER_IN: 'info',
-      WAREHOUSE_TRANSFER_OUT: 'warning',
-      STOCK_ADJUSTMENT: 'secondary',
-    };
+    const conf = movementTypeMap[m.movementType] || { label: m.movementType.replace(/_/g, ' '), variant: 'default' };
 
     return (
       <div className="rounded-2xl border border-zinc-200/90 bg-white p-3.5 sm:p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 space-y-2.5 transition-all hover:border-zinc-300 dark:hover:border-zinc-700">
@@ -486,19 +481,19 @@ export default function InventoryPage() {
             <Calendar className="h-3 w-3 text-zinc-400" />
             <span>{formatDate(m.movementDate)}</span>
           </span>
-          <Badge variant={typeVariants[m.movementType] || 'default'} className="text-[10px] px-2 py-0.5">
-            {m.movementType.replace(/_/g, ' ')}
+          <Badge variant={conf.variant} className="text-[10px] px-2 py-0.5">
+            {conf.label}
           </Badge>
         </div>
 
         {/* Product Identity */}
         <div>
           <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 leading-snug">
-            {m.product?.name || `Product #${m.productId}`}
+            {m.product?.name || `ကုန်ပစ္စည်း #${m.productId}`}
           </h4>
           <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 dark:text-zinc-400 mt-1">
             <WarehouseIcon className="h-3 w-3 text-zinc-400 shrink-0" />
-            <span className="truncate">{m.warehouse?.name || `WH #${m.warehouseId}`}</span>
+            <span className="truncate">{m.warehouse?.name || `ဂိုဒေါင် #${m.warehouseId}`}</span>
             {m.referenceType && (
               <span className="text-zinc-400 font-mono truncate">
                 • {m.referenceType} #{m.referenceId || ''}
@@ -510,7 +505,7 @@ export default function InventoryPage() {
         {/* Quantity and Value Grid */}
         <div className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800 text-xs">
           <div className="space-y-0.5">
-            <span className="text-[10px] uppercase font-bold text-zinc-400">Quantity</span>
+            <span className="text-[10px] uppercase font-bold text-zinc-400">အရေအတွက်</span>
             <div>
               <span
                 className={`font-bold font-mono inline-flex items-center gap-1 text-sm ${isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
@@ -523,7 +518,7 @@ export default function InventoryPage() {
           </div>
 
           <div className="text-right space-y-0.5">
-            <span className="text-[10px] uppercase font-bold text-zinc-400">Total Value</span>
+            <span className="text-[10px] uppercase font-bold text-zinc-400">စုစုပေါင်းတန်ဖိုး</span>
             <p className="font-mono font-bold text-zinc-800 dark:text-zinc-200">
               {formatCurrency(m.totalCost)}
             </p>
@@ -541,7 +536,7 @@ export default function InventoryPage() {
             }}
             className="h-7 px-2 text-zinc-600 dark:text-zinc-300 gap-1 text-xs"
           >
-            <Eye className="h-3 w-3" /> View Details
+            <Eye className="h-3 w-3" /> အသေးစိတ်ကြည့်ရန်
           </Button>
         </div>
       </div>
@@ -569,18 +564,18 @@ export default function InventoryPage() {
             </div>
             <div className="min-w-0">
               <p className="font-bold text-zinc-900 dark:text-zinc-100 truncate">
-                {t.fromWarehouse?.name || `WH #${t.fromWarehouseId}`}
+                {t.fromWarehouse?.name || `ဂိုဒေါင် #${t.fromWarehouseId}`}
               </p>
               <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
-                → To: {t.toWarehouse?.name || `WH #${t.toWarehouseId}`}
+                → လက်ခံမည့်ဂိုဒေါင်: {t.toWarehouse?.name || `ဂိုဒေါင် #${t.toWarehouseId}`}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400 pl-9">
             <Calendar className="h-3 w-3 text-zinc-400" />
-            <span>Date: {formatDate(t.transferDate)}</span>
-            <span>• {itemCount} item{itemCount !== 1 ? 's' : ''}</span>
+            <span>ရက်စွဲ: {formatDate(t.transferDate)}</span>
+            <span>• ပစ္စည်း {itemCount} မျိုး</span>
           </div>
         </div>
 
@@ -594,10 +589,10 @@ export default function InventoryPage() {
               setTransferSheetOpen(true);
             }}
             className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1"
-            title="Inspect"
+            title="အသေးစိတ်ကြည့်ရန်"
           >
             <Eye className="h-3.5 w-3.5" />
-            <span className="text-xs">Detail</span>
+            <span className="text-xs">အသေးစိတ်</span>
           </Button>
 
           {t.status === 'DRAFT' && (
@@ -607,7 +602,7 @@ export default function InventoryPage() {
               onClick={() => handlePostTransfer(t.id)}
               className="h-8 px-3 text-xs gap-1 bg-blue-600 hover:bg-blue-700"
             >
-              <CheckCircle2 className="h-3.5 w-3.5" /> Post Transfer (လွှဲပြောင်းပါ)
+              <CheckCircle2 className="h-3.5 w-3.5" /> လွှဲပြောင်းအတည်ပြုမည်
             </Button>
           )}
         </div>
@@ -627,25 +622,25 @@ export default function InventoryPage() {
             </h1>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
-            Real-time stock balances, immutable movement audit trails & inter-warehouse transfers
+            လက်ကျန်စတော့စာရင်းများ၊ ပစ္စည်းလှုပ်ရှားမှုမှတ်တမ်းနှင့် ဂိုဒေါင်အချင်းချင်း ကုန်လွှဲပြောင်းမှုများ
           </p>
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           <Button variant="outline" size="sm" onClick={loadInventoryData} className="gap-1.5 h-8 text-xs shrink-0">
             <RefreshCw className={isLoading ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />
-            <span className="hidden sm:inline">Refresh (ပြန်ဖွင့်)</span>
+            <span className="hidden sm:inline">ပြန်လည်ရယူရန်</span>
             <span className="sm:hidden">Refresh</span>
           </Button>
           <Button variant="outline" size="sm" onClick={() => setAdjustDialogOpen(true)} className="gap-1.5 h-8 text-xs shrink-0">
             <SlidersHorizontal className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Stock ချိန်ညှိရန်</span>
+            <span className="hidden sm:inline">စတော့ ချိန်ညှိမည်</span>
             <span className="sm:hidden">Adjust</span>
           </Button>
           <div className="hidden sm:block">
             <Button variant="primary" size="sm" onClick={() => setTransferDialogOpen(true)} className="gap-1.5 h-8 text-xs">
               <ArrowRightLeft className="h-3.5 w-3.5" />
-              <span>+ Transfer Stock (ကုန်လွှဲပြောင်းရန်)</span>
+              <span>+ ကုန်လွှဲပြောင်းလွှာ အသစ်</span>
             </Button>
           </div>
         </div>
@@ -656,14 +651,14 @@ export default function InventoryPage() {
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <div className="flex items-center gap-1.5 font-semibold text-zinc-700 dark:text-zinc-300 shrink-0">
             <Filter className="h-4 w-4 text-blue-600" />
-            <span>Warehouse:</span>
+            <span>ဂိုဒေါင်:</span>
           </div>
           <select
             value={warehouseFilter}
             onChange={e => setWarehouseFilter(e.target.value)}
             className="flex-1 sm:w-56 rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-800"
           >
-            <option value="ALL">All Warehouses (ကုန်လှောင်ရုံအားလုံး)</option>
+            <option value="ALL">ဂိုဒေါင် အားလုံး</option>
             {warehouses.map(w => (
               <option key={w.id} value={w.id}>
                 {w.name}
@@ -674,20 +669,20 @@ export default function InventoryPage() {
 
         {activeTab === 'movements' && (
           <div className="flex items-center gap-2 w-full sm:w-auto sm:border-l sm:border-zinc-200 dark:sm:border-zinc-800 sm:pl-3">
-            <span className="font-semibold text-zinc-700 dark:text-zinc-300 shrink-0">Event Type:</span>
+            <span className="font-semibold text-zinc-700 dark:text-zinc-300 shrink-0">လှုပ်ရှားမှု အမျိုးအစား:</span>
             <select
               value={movementTypeFilter}
               onChange={e => setMovementTypeFilter(e.target.value)}
               className="flex-1 sm:w-56 rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-800"
             >
-              <option value="ALL">All Movement Events (အားလုံး)</option>
-              <option value="PURCHASE_RECEIPT">Purchase Receipt (ဝယ်ယူလက်ခံ)</option>
-              <option value="SALE_SHIPMENT">Sales Shipment (အရောင်းပို့ဆောင်)</option>
-              <option value="PRODUCTION_CONSUMPTION">Production Consumption (ကုန်ကြမ်းသုံးစွဲ)</option>
-              <option value="PRODUCTION_OUTPUT">Production Output (အချောထည်ထွက်)</option>
-              <option value="WAREHOUSE_TRANSFER_IN">Transfer In (လွှဲပြောင်းဝင်)</option>
-              <option value="WAREHOUSE_TRANSFER_OUT">Transfer Out (လွှဲပြောင်းထွက်)</option>
-              <option value="STOCK_ADJUSTMENT">Stock Adjustment (ချိန်ညှိမှု)</option>
+              <option value="ALL">အားလုံး</option>
+              <option value="PURCHASE_RECEIPT">အဝယ်ကုန်လက်ခံ (Purchase Receipt)</option>
+              <option value="SALE_SHIPMENT">အရောင်းပို့ဆောင် (Sales Shipment)</option>
+              <option value="PRODUCTION_CONSUMPTION">ကုန်ကြမ်းသုံးစွဲ (Production Consumption)</option>
+              <option value="PRODUCTION_OUTPUT">အချောထည်ထွက် (Production Output)</option>
+              <option value="WAREHOUSE_TRANSFER_IN">ဂိုဒေါင်လွှဲပြောင်းဝင် (Transfer In)</option>
+              <option value="WAREHOUSE_TRANSFER_OUT">ဂိုဒေါင်လွှဲပြောင်းထွက် (Transfer Out)</option>
+              <option value="STOCK_ADJUSTMENT">စတော့ချိန်ညှိမှု (Stock Adjustment)</option>
             </select>
           </div>
         )}
@@ -698,13 +693,13 @@ export default function InventoryPage() {
         <div className="overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
           <TabsList className="w-max sm:w-full justify-start">
             <TabsTrigger value="stock" count={filteredStock.length}>
-              📦 Stock On-Hand (လက်ကျန်စာရင်း)
+              📦 လက်ကျန်စတော့ (Stock On-Hand)
             </TabsTrigger>
             <TabsTrigger value="movements" count={filteredMovements.length}>
-              📊 Movement Audit Trail (လှုပ်ရှားမှုမှတ်တမ်း)
+              📊 ကုန်လှုပ်ရှားမှု မှတ်တမ်း (Movement Audit)
             </TabsTrigger>
             <TabsTrigger value="transfers" count={transfers.length}>
-              🔄 Warehouse Transfers (ကုန်လှောင်ရုံအချင်းချင်း လွှဲပြောင်းမှု)
+              🔄 ဂိုဒေါင်လွှဲပြောင်းမှုများ (Transfers)
             </TabsTrigger>
           </TabsList>
         </div>
@@ -714,7 +709,7 @@ export default function InventoryPage() {
           <DataTable
             data={filteredStock}
             columns={stockColumns}
-            searchPlaceholder="Search stock by product name or SKU (စတော့ရှာရန်)..."
+            searchPlaceholder="ကုန်ပစ္စည်းအမည် သို့မဟုတ် SKU ဖြင့် ရှာဖွေရန်..."
             isLoading={isLoading}
             renderCard={renderStockCard}
             onRowClick={r => {
@@ -729,7 +724,7 @@ export default function InventoryPage() {
           <DataTable
             data={filteredMovements}
             columns={movementColumns}
-            searchPlaceholder="Search movements by product or event type (လှုပ်ရှားမှုရှာရန်)..."
+            searchPlaceholder="ကုန်ပစ္စည်း သို့မဟုတ် လှုပ်ရှားမှုဖြင့် ရှာဖွေရန်..."
             searchKey="movementType"
             isLoading={isLoading}
             renderCard={renderMovementCard}
@@ -745,7 +740,7 @@ export default function InventoryPage() {
           <DataTable
             data={transfers}
             columns={transferColumns}
-            searchPlaceholder="Search transfer orders by TRF# (လွှဲပြောင်းလွှာရှာရန်)..."
+            searchPlaceholder="လွှဲပြောင်းလွှာအမှတ်ဖြင့် ရှာဖွေရန်..."
             searchKey="transferNo"
             isLoading={isLoading}
             renderCard={renderTransferCard}
@@ -761,17 +756,17 @@ export default function InventoryPage() {
       <Dialog
         open={adjustDialogOpen}
         onOpenChange={setAdjustDialogOpen}
-        title="Manual Stock Adjustment (စတော့ ချိန်ညှိရန်)"
-        maxWidth="md"
+        title="စတော့ ချိန်ညှိရန်"
+        maxWidth="lg"
       >
         <form onSubmit={handleStockAdjustment} className="space-y-4">
           <Select
-            label="Warehouse (ကုန်လှောင်ရုံ) *"
+            label="ဂိုဒေါင် *"
             value={adjustForm.warehouseId}
             onChange={e => setAdjustForm({ ...adjustForm, warehouseId: e.target.value })}
             required
           >
-            <option value="">Select Warehouse...</option>
+            <option value="">ဂိုဒေါင် ရွေးချယ်ပါ...</option>
             {warehouses.map(w => (
               <option key={w.id} value={w.id}>
                 {w.name}
@@ -780,7 +775,7 @@ export default function InventoryPage() {
           </Select>
 
           <Select
-            label="Product (ကုန်ပစ္စည်း) *"
+            label="ကုန်ပစ္စည်း *"
             value={adjustForm.productId}
             onChange={e => {
               const pId = e.target.value;
@@ -793,7 +788,7 @@ export default function InventoryPage() {
             }}
             required
           >
-            <option value="">Select Product...</option>
+            <option value="">ကုန်ပစ္စည်း ရွေးချယ်ပါ...</option>
             {products.map(p => (
               <option key={p.id} value={p.id}>
                 {p.name} ({p.sku})
@@ -803,12 +798,12 @@ export default function InventoryPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Select
-              label="UOM (ယူနစ်) *"
+              label="ယူနစ် *"
               value={adjustForm.uomId}
               onChange={e => setAdjustForm({ ...adjustForm, uomId: e.target.value })}
               required
             >
-              <option value="">Select Unit...</option>
+              <option value="">ယူနစ် ရွေးချယ်ပါ...</option>
               {uoms.map(u => (
                 <option key={u.id} value={u.id}>
                   {u.name} ({u.symbol})
@@ -819,8 +814,8 @@ export default function InventoryPage() {
             <Input
               type="number"
               step="any"
-              label="Adjustment Qty * (+ or -)"
-              placeholder="e.g. 50 or -10"
+              label="ချိန်ညှိမည့် အရေအတွက် * (+ သို့မဟုတ် -)"
+              placeholder="ဥပမာ 50 သို့မဟုတ် -10"
               value={adjustForm.qty}
               onChange={e => setAdjustForm({ ...adjustForm, qty: e.target.value })}
               required
@@ -828,18 +823,18 @@ export default function InventoryPage() {
           </div>
 
           <Input
-            label="Adjustment Reason (အကြောင်းပြချက်)"
-            placeholder="e.g. Physical inventory count correction (စာရင်းစစ်ဆေးချိန်ညှိမှု)"
+            label="အကြောင်းပြချက်"
+            placeholder="ဥပမာ - စာရင်းစစ်ဆေးချိန်ညှိမှု / ပျက်စီးဆုံးရှုံးမှု"
             value={adjustForm.reason}
             onChange={e => setAdjustForm({ ...adjustForm, reason: e.target.value })}
           />
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setAdjustDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto">
-              Post Adjustment (အတည်ပြုသွင်းမည်)
+              အတည်ပြုသွင်းမည်
             </Button>
           </div>
         </form>
@@ -849,18 +844,18 @@ export default function InventoryPage() {
       <Dialog
         open={transferDialogOpen}
         onOpenChange={setTransferDialogOpen}
-        title="Create Warehouse Transfer (ကုန်လွှဲပြောင်းလွှာ ဖွင့်ရန်)"
-        maxWidth="xl"
+        title="ဂိုဒေါင် ကုန်လွှဲပြောင်းလွှာ ဖွင့်ရန်"
+        maxWidth="4xl"
       >
         <form onSubmit={handleCreateTransfer} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Select
-              label="From Warehouse (မူလ ကုန်လှောင်ရုံ) *"
+              label="လွှဲပေးမည့် ဂိုဒေါင် *"
               value={transferForm.fromWarehouseId}
               onChange={e => setTransferForm({ ...transferForm, fromWarehouseId: e.target.value })}
               required
             >
-              <option value="">Source WH...</option>
+              <option value="">မူလဂိုဒေါင် ရွေးပါ...</option>
               {warehouses.map(w => (
                 <option key={w.id} value={w.id}>
                   {w.name}
@@ -869,12 +864,12 @@ export default function InventoryPage() {
             </Select>
 
             <Select
-              label="To Warehouse (လွှဲပြောင်းမည့် ကုန်လှောင်ရုံ) *"
+              label="လက်ခံမည့် ဂိုဒေါင် *"
               value={transferForm.toWarehouseId}
               onChange={e => setTransferForm({ ...transferForm, toWarehouseId: e.target.value })}
               required
             >
-              <option value="">Destination WH...</option>
+              <option value="">လက်ခံမည့်ဂိုဒေါင် ရွေးပါ...</option>
               {warehouses.map(w => (
                 <option key={w.id} value={w.id}>
                   {w.name}
@@ -884,7 +879,7 @@ export default function InventoryPage() {
 
             <Input
               type="date"
-              label="Transfer Date (ရက်စွဲ) *"
+              label="လွှဲပြောင်းသည့်ရက်စွဲ *"
               value={transferForm.transferDate}
               onChange={e => setTransferForm({ ...transferForm, transferDate: e.target.value })}
               required
@@ -894,11 +889,16 @@ export default function InventoryPage() {
           {/* Transfer items */}
           <div className="space-y-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-                Items to Transfer (လွှဲပြောင်းမည့် ပစ္စည်းများ)
-              </h4>
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                  လွှဲပြောင်းမည့် ပစ္စည်းများ (Items to Transfer)
+                </h4>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                  စုစုပေါင်း ပစ္စည်း {transferForm.items.length} မျိုး
+                </p>
+              </div>
               <Button type="button" variant="outline" size="sm" onClick={addTransferItem} className="h-7 text-xs gap-1">
-                <Plus className="h-3 w-3" /> Add Item (ပစ္စည်းထပ်ထည့်ရန်)
+                <Plus className="h-3 w-3" /> + ပစ္စည်းအသစ်ထည့်ရန်
               </Button>
             </div>
 
@@ -911,7 +911,7 @@ export default function InventoryPage() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md">
-                      Item #{idx + 1}
+                      ပစ္စည်း #{idx + 1}
                     </span>
                     <Button
                       type="button"
@@ -921,17 +921,17 @@ export default function InventoryPage() {
                       disabled={transferForm.items.length === 1}
                       className="h-7 px-2 text-rose-500 hover:text-rose-700 text-xs gap-1"
                     >
-                      <Trash2 className="h-3.5 w-3.5" /> Delete
+                      <Trash2 className="h-3.5 w-3.5" /> ဖျက်မည်
                     </Button>
                   </div>
 
                   <Select
-                    label="Product (ကုန်ပစ္စည်း) *"
+                    label="ကုန်ပစ္စည်း *"
                     value={it.productId}
                     onChange={e => updateTransferItem(idx, 'productId', e.target.value)}
                     required
                   >
-                    <option value="">Select Product...</option>
+                    <option value="">ကုန်ပစ္စည်း ရွေးချယ်ပါ...</option>
                     {products.map(p => (
                       <option key={p.id} value={p.id}>
                         {p.name} ({p.sku})
@@ -941,12 +941,12 @@ export default function InventoryPage() {
 
                   <div className="grid grid-cols-2 gap-2">
                     <Select
-                      label="Unit (ယူနစ်) *"
+                      label="ယူနစ် *"
                       value={it.uomId}
                       onChange={e => updateTransferItem(idx, 'uomId', e.target.value)}
                       required
                     >
-                      <option value="">Unit...</option>
+                      <option value="">ယူနစ်...</option>
                       {uoms.map(u => (
                         <option key={u.id} value={u.id}>
                           {u.symbol || u.name}
@@ -957,8 +957,8 @@ export default function InventoryPage() {
                     <Input
                       type="number"
                       step="any"
-                      label="Quantity (အရေအတွက်) *"
-                      placeholder="Qty"
+                      label="အရေအတွက် *"
+                      placeholder="အရေအတွက်"
                       value={it.qty}
                       onChange={e => updateTransferItem(idx, 'qty', e.target.value)}
                       required
@@ -970,15 +970,22 @@ export default function InventoryPage() {
 
             {/* Desktop View: Table Rows */}
             <div className="hidden md:block space-y-2 max-h-56 overflow-y-auto pr-1">
+              <div className="flex items-center gap-2 px-2 py-1 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                <div className="flex-1 min-w-[200px]">ကုန်ပစ္စည်း *</div>
+                <div className="w-32 shrink-0">ယူနစ် *</div>
+                <div className="w-28 shrink-0">အရေအတွက် *</div>
+                <div className="w-8 shrink-0"></div>
+              </div>
+
               {transferForm.items.map((it, idx) => (
-                <div key={idx} className="flex items-center gap-2 p-2 rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/60">
-                  <div className="flex-1">
+                <div key={idx} className="flex items-center gap-2 p-2 rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/60 transition-all hover:border-zinc-300 dark:hover:border-zinc-700">
+                  <div className="flex-1 min-w-[200px]">
                     <Select
                       value={it.productId}
                       onChange={e => updateTransferItem(idx, 'productId', e.target.value)}
                       required
                     >
-                      <option value="">Select Product...</option>
+                      <option value="">ကုန်ပစ္စည်း ရွေးချယ်ပါ...</option>
                       {products.map(p => (
                         <option key={p.id} value={p.id}>
                           {p.name} ({p.sku})
@@ -987,13 +994,13 @@ export default function InventoryPage() {
                     </Select>
                   </div>
 
-                  <div className="w-28">
+                  <div className="w-32 shrink-0">
                     <Select
                       value={it.uomId}
                       onChange={e => updateTransferItem(idx, 'uomId', e.target.value)}
                       required
                     >
-                      <option value="">Unit...</option>
+                      <option value="">ယူနစ်...</option>
                       {uoms.map(u => (
                         <option key={u.id} value={u.id}>
                           {u.symbol || u.name}
@@ -1002,7 +1009,7 @@ export default function InventoryPage() {
                     </Select>
                   </div>
 
-                  <div className="w-24">
+                  <div className="w-28 shrink-0">
                     <Input
                       type="number"
                       step="any"
@@ -1020,6 +1027,7 @@ export default function InventoryPage() {
                     onClick={() => removeTransferItem(idx)}
                     disabled={transferForm.items.length === 1}
                     className="h-8 w-8 text-rose-500 hover:text-rose-700 shrink-0"
+                    title="ဖျက်သိမ်းရန်"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -1030,10 +1038,10 @@ export default function InventoryPage() {
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setTransferDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto">
-              Save Transfer Order (လွှဲပြောင်းလွှာသိမ်းရန်)
+              ကုန်လွှဲပြောင်းလွှာ သိမ်းဆည်းမည်
             </Button>
           </div>
         </form>
@@ -1043,8 +1051,8 @@ export default function InventoryPage() {
       <Sheet
         open={stockSheetOpen}
         onOpenChange={setStockSheetOpen}
-        title={selectedStock?.product?.name || 'Stock Item'}
-        description={`SKU: ${selectedStock?.product?.sku || ''} • Warehouse: ${selectedStock?.warehouse?.name || ''}`}
+        title={selectedStock?.product?.name || 'စတော့အသေးစိတ်'}
+        description={`SKU: ${selectedStock?.product?.sku || ''} • ဂိုဒေါင်: ${selectedStock?.warehouse?.name || ''}`}
         footer={
           selectedStock && (
             <div className="flex justify-end gap-2 w-full">
@@ -1064,7 +1072,7 @@ export default function InventoryPage() {
                 }}
                 className="gap-1.5 w-full sm:w-auto text-xs"
               >
-                <SlidersHorizontal className="h-3.5 w-3.5" /> Adjust Stock (စတော့ချိန်ညှိရန်)
+                <SlidersHorizontal className="h-3.5 w-3.5" /> စတော့ ချိန်ညှိမည်
               </Button>
             </div>
           )
@@ -1074,32 +1082,32 @@ export default function InventoryPage() {
           <div className="space-y-6 text-xs">
             <div className="grid grid-cols-2 gap-2.5 sm:gap-3 p-3.5 sm:p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
               <div className="col-span-2">
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Current On-Hand Balance</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">လက်ရှိ လက်ကျန်အရေအတွက်</p>
                 <div className="flex items-center gap-2 mt-1">
                   <p className="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
                     {Number(selectedStock.onHandQty).toLocaleString()} {selectedStock.product?.baseUom?.symbol || ''}
                   </p>
                   {Number(selectedStock.onHandQty) <= 10 && (
                     <Badge variant="destructive" className="text-[10px] py-0 px-1.5 gap-1">
-                      <AlertTriangle className="h-3 w-3" /> Low Stock
+                      <AlertTriangle className="h-3 w-3" /> လက်ကျန်နည်း
                     </Badge>
                   )}
                 </div>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Product SKU</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">ကုန်ပစ္စည်းကုဒ် (SKU)</p>
                 <p className="font-mono font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedStock.product?.sku || '-'}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Warehouse</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">ဂိုဒေါင်</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedStock.warehouse?.name}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Category</p>
-                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedStock.product?.category?.name || 'Standard'}</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">အမျိုးအစား</p>
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedStock.product?.category?.name || 'အထွေထွေ'}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Base Unit (UOM)</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">အခြေခံယူနစ်</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedStock.product?.baseUom?.name || selectedStock.product?.baseUom?.symbol || '-'}</p>
               </div>
             </div>
@@ -1111,33 +1119,33 @@ export default function InventoryPage() {
       <Sheet
         open={movementSheetOpen}
         onOpenChange={setMovementSheetOpen}
-        title={selectedMovement?.product?.name || 'Stock Movement Event'}
-        description={`Event: ${selectedMovement?.movementType || ''} • Date: ${formatDate(selectedMovement?.movementDate)}`}
+        title={selectedMovement?.product?.name || 'ကုန်လှုပ်ရှားမှု မှတ်တမ်း'}
+        description={`လှုပ်ရှားမှု: ${movementTypeMap[selectedMovement?.movementType || '']?.label || selectedMovement?.movementType || ''} • ရက်စွဲ: ${formatDate(selectedMovement?.movementDate)}`}
       >
         {selectedMovement && (
           <div className="space-y-6 text-xs">
             <div className="grid grid-cols-2 gap-2.5 sm:gap-3 p-3.5 sm:p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Event Type</p>
-                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedMovement.movementType.replace(/_/g, ' ')}</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">လှုပ်ရှားမှု အမျိုးအစား</p>
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{movementTypeMap[selectedMovement.movementType]?.label || selectedMovement.movementType.replace(/_/g, ' ')}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Warehouse</p>
-                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedMovement.warehouse?.name || `WH #${selectedMovement.warehouseId}`}</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">ဂိုဒေါင်</p>
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedMovement.warehouse?.name || `ဂိုဒေါင် #${selectedMovement.warehouseId}`}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Movement Qty</p>
-                <p className={`font-bold font-mono text-sm mt-1 ${Number(selectedMovement.qty) > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">လှုပ်ရှားမှု အရေအတွက်</p>
+                <p className={`font-bold font-mono text-sm mt-1 ${Number(selectedMovement.qty) > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                   {Number(selectedMovement.qty) > 0 ? `+${selectedMovement.qty}` : selectedMovement.qty} {selectedMovement.uom?.symbol || ''}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Total Value</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">စုစုပေါင်း တန်ဖိုး</p>
                 <p className="font-bold font-mono text-zinc-800 dark:text-zinc-200 mt-1">{formatCurrency(selectedMovement.totalCost)}</p>
               </div>
               {selectedMovement.referenceType && (
                 <div className="col-span-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
-                  <p className="text-[10px] font-bold uppercase text-zinc-400">Audit Source Reference</p>
+                  <p className="text-[10px] font-bold uppercase text-zinc-400">မူရင်းစာရွက်စာတမ်း ရည်ညွှန်းချက်</p>
                   <p className="font-mono font-semibold text-blue-600 dark:text-blue-400 mt-1">
                     {selectedMovement.referenceType} #{selectedMovement.referenceId || ''}
                   </p>
@@ -1152,8 +1160,8 @@ export default function InventoryPage() {
       <Sheet
         open={transferSheetOpen}
         onOpenChange={setTransferSheetOpen}
-        title={`Transfer: ${selectedTransfer?.transferNo || ''}`}
-        description={`From: ${selectedTransfer?.fromWarehouse?.name || ''} → To: ${selectedTransfer?.toWarehouse?.name || ''}`}
+        title={`လွှဲပြောင်းလွှာ: ${selectedTransfer?.transferNo || ''}`}
+        description={`လွှဲပေးသည့်ဂိုဒေါင်: ${selectedTransfer?.fromWarehouse?.name || ''} → လက်ခံမည့်ဂိုဒေါင်: ${selectedTransfer?.toWarehouse?.name || ''}`}
         footer={
           selectedTransfer && selectedTransfer.status === 'DRAFT' && (
             <div className="flex justify-end gap-2 w-full">
@@ -1163,7 +1171,7 @@ export default function InventoryPage() {
                 onClick={() => handlePostTransfer(selectedTransfer.id)}
                 className="bg-blue-600 hover:bg-blue-700 gap-1.5 w-full sm:w-auto text-xs"
               >
-                <CheckCircle2 className="h-4 w-4" /> Post Transfer to Movements (လွှဲပြောင်းအတည်ပြုပါ)
+                <CheckCircle2 className="h-4 w-4" /> လွှဲပြောင်းအတည်ပြုမည်
               </Button>
             </div>
           )
@@ -1173,25 +1181,25 @@ export default function InventoryPage() {
           <div className="space-y-6 text-xs">
             <div className="grid grid-cols-2 gap-2.5 sm:gap-3 p-3.5 sm:p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Status</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">အခြေအနေ</p>
                 <div className="mt-1">
                   <StatusBadge status={selectedTransfer.status} />
                 </div>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Transfer Date</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">လွှဲပြောင်းသည့်ရက်စွဲ</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{formatDate(selectedTransfer.transferDate)}</p>
               </div>
             </div>
 
             <div className="space-y-2">
               <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs">
-                Transfer Items (လွှဲပြောင်းမည့် ပစ္စည်းများ)
+                လွှဲပြောင်းသည့် ပစ္စည်းစာရင်း (Transfer Items)
               </h4>
               <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-900">
                 {(selectedTransfer.items || []).map((it, idx) => (
                   <div key={idx} className="flex items-center justify-between p-3">
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-100">{it.product?.name || `Product #${it.productId}`}</span>
+                    <span className="font-semibold text-zinc-900 dark:text-zinc-100">{it.product?.name || `ကုန်ပစ္စည်း #${it.productId}`}</span>
                     <span className="font-bold font-mono text-zinc-900 dark:text-zinc-100">{it.qty} {it.uom?.symbol || ''}</span>
                   </div>
                 ))}
@@ -1210,7 +1218,7 @@ export default function InventoryPage() {
             else setAdjustDialogOpen(true);
           }}
           className="h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl flex items-center justify-center p-0 active:scale-95 transition-transform"
-          title="Create"
+          title="အသစ်ထည့်ရန်"
         >
           <Plus className="h-6 w-6" />
         </Button>
