@@ -205,7 +205,7 @@ export default function SalesTeamsPage() {
       if (whRes.success && Array.isArray(whRes.data)) setWarehouses(whRes.data);
       if (brRes.success && Array.isArray(brRes.data)) setBranches(brRes.data);
     } catch (err: any) {
-      error('Failed to load portal data (အချက်အလက် ရယူ၍မရပါ)', err.message);
+      error('အချက်အလက် ရယူ၍မရပါ', err.message);
     } finally {
       setIsLoading(false);
     }
@@ -232,7 +232,7 @@ export default function SalesTeamsPage() {
       if (shipmentsRes.success && Array.isArray(shipmentsRes.data)) setTeamShipments(shipmentsRes.data);
       if (kpiRes.success && kpiRes.data) setTeamKpi(kpiRes.data);
     } catch (err: any) {
-      error('Failed to load team details', err.message);
+      error('အဖွဲ့အချက်အလက် ရယူ၍မရပါ', err.message);
     }
   };
 
@@ -249,7 +249,7 @@ export default function SalesTeamsPage() {
   const handleCreateTeam = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!teamForm.name.trim()) {
-      error('Team name is required (အရောင်းအဖွဲ့အမည် ထည့်သွင်းပါ)');
+      error('အရောင်းအဖွဲ့အမည် ထည့်သွင်းပါ');
       return;
     }
 
@@ -264,12 +264,12 @@ export default function SalesTeamsPage() {
     });
 
     if (res.success) {
-      success('Sales Team Created (အရောင်းအဖွဲ့ အသစ်ဖွဲ့စည်းပြီးပါပြီ)');
+      success('အရောင်းအဖွဲ့ အသစ်ဖွဲ့စည်းပြီးပါပြီ');
       setCreateTeamDialogOpen(false);
       setTeamForm({ name: '', branchId: '' });
       loadPortalData();
     } else {
-      error('Failed to create team', res.message);
+      error('အရောင်းအဖွဲ့ ဖွဲ့စည်း၍မရပါ', res.message);
     }
   };
 
@@ -277,7 +277,7 @@ export default function SalesTeamsPage() {
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTeam || !memberForm.userId) {
-      error('Please select a valid user (အဖွဲ့ဝင်အဖြစ် ထည့်သွင်းမည့် User ရွေးပါ)');
+      error('အဖွဲ့ဝင်အဖြစ် ထည့်သွင်းမည့် ဝန်ထမ်း ရွေးချယ်ပါ');
       return;
     }
 
@@ -294,7 +294,7 @@ export default function SalesTeamsPage() {
     });
 
     if (res.success) {
-      success('Member Added to Team (အဖွဲ့ဝင် ထည့်သွင်းပြီးပါပြီ)');
+      success('အဖွဲ့ဝင် ထည့်သွင်းပြီးပါပြီ');
       setAddMemberDialogOpen(false);
       setMemberForm({
         userId: '',
@@ -305,7 +305,7 @@ export default function SalesTeamsPage() {
       inspectTeam(selectedTeam);
       loadPortalData();
     } else {
-      error('Failed to add member', res.message);
+      error('အဖွဲ့ဝင် ထည့်သွင်း၍မရပါ', res.message);
     }
   };
 
@@ -314,7 +314,7 @@ export default function SalesTeamsPage() {
     e.preventDefault();
     if (!selectedTeam) return;
     if (!newSalesmanForm.name.trim() || !newSalesmanForm.email.trim() || !newSalesmanForm.password) {
-      error('Please fill in name, email and password (အမည်၊ အီးမေးလ်နှင့် စကားဝှက် ဖြည့်သွင်းပါ)');
+      error('အမည်၊ အီးမေးလ်နှင့် စကားဝှက် ဖြည့်သွင်းပါ');
       return;
     }
 
@@ -333,7 +333,7 @@ export default function SalesTeamsPage() {
     });
 
     if (!userRes.success || !userRes.data?.id) {
-      error('Failed to register user account (အကောင့်ဖွင့်မအောင်မြင်ပါ)', userRes.message);
+      error('အကောင့်ဖွင့်မအောင်မြင်ပါ', userRes.message);
       return;
     }
 
@@ -350,8 +350,8 @@ export default function SalesTeamsPage() {
 
     if (memberRes.success) {
       success(
-        'Salesman Registered & Added to Team! (အရောင်းဝန်ထမ်း အကောင့်ဖွင့်ပြီး အဖွဲ့ဝင်အဖြစ် ထည့်သွင်းပြီးပါပြီ)',
-        `Login with Email: ${newSalesmanForm.email}`
+        'အရောင်းဝန်ထမ်း အကောင့်ဖွင့်ပြီး အဖွဲ့ဝင်အဖြစ် ထည့်သွင်းပြီးပါပြီ',
+        `အီးမေးလ်: ${newSalesmanForm.email} ဖြင့် Login ဝင်ရောက်နိုင်ပါသည်။`
       );
       setAddMemberDialogOpen(false);
       setNewSalesmanForm({
@@ -367,7 +367,7 @@ export default function SalesTeamsPage() {
       inspectTeam(selectedTeam);
       loadPortalData();
     } else {
-      error('User registered, but failed to link to team', memberRes.message);
+      error('အကောင့်ဖွင့်ပြီးသော်လည်း အဖွဲ့ထဲသို့ ချိတ်ဆက်၍မရပါ', memberRes.message);
     }
   };
 
@@ -380,11 +380,11 @@ export default function SalesTeamsPage() {
     });
 
     if (res.success) {
-      success('Member updated (အဖွဲ့ဝင် အချက်အလက် ပြင်ဆင်ပြီးပါပြီ)');
+      success('အဖွဲ့ဝင် အချက်အလက် ပြင်ဆင်ပြီးပါပြီ');
       inspectTeam(selectedTeam);
       loadPortalData();
     } else {
-      error('Update failed', res.message);
+      error('ပြင်ဆင်မှု မအောင်မြင်ပါ', res.message);
     }
   };
 
@@ -396,11 +396,11 @@ export default function SalesTeamsPage() {
     });
 
     if (res.success) {
-      success('Member removed from team (အဖွဲ့မှ ဖယ်ရှားပြီးပါပြီ)');
+      success('အဖွဲ့ဝင်အား အဖွဲ့မှ ဖယ်ရှားပြီးပါပြီ');
       inspectTeam(selectedTeam);
       loadPortalData();
     } else {
-      error('Remove failed', res.message);
+      error('ဖယ်ရှားမှု မအောင်မြင်ပါ', res.message);
     }
   };
 
@@ -435,7 +435,7 @@ export default function SalesTeamsPage() {
   const handleSubmitDispatch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!dispatchForm.salesOrderId || !dispatchForm.warehouseId || dispatchForm.items.length === 0) {
-      error('Please complete all dispatch details (ပို့ဆောင်မှု အချက်အလက်များ ဖြည့်စွက်ပါ)');
+      error('ပို့ဆောင်မှု အချက်အလက်များ ပြည့်စုံစွာ ဖြည့်သွင်းပါ');
       return;
     }
 
@@ -459,12 +459,12 @@ export default function SalesTeamsPage() {
     });
 
     if (res.success) {
-      success('Shipment Draft Created (ပို့ဆောင်လွှာ မူကြမ်း ဖွင့်ပြီးပါပြီ)');
+      success('ပို့ဆောင်လွှာ မူကြမ်း ဖွင့်ပြီးပါပြီ');
       setDispatchDialogOpen(false);
       loadPortalData();
       if (selectedTeam) inspectTeam(selectedTeam);
     } else {
-      error('Dispatch creation failed', res.message);
+      error('ပို့ဆောင်လွှာ ဖွင့်၍မရပါ', res.message);
     }
   };
 
@@ -476,7 +476,7 @@ export default function SalesTeamsPage() {
       amount: total,
       paymentDate: new Date().toISOString().split('T')[0],
       paymentMethod: 'CASH',
-      description: `Settlement for SO #${order.orderNo}`,
+      description: `အမှာစာ #${order.orderNo} အတွက် ငွေလက်ခံ`,
     });
     setSelectedOrder(order);
     setPaymentDialogOpen(true);
@@ -486,7 +486,7 @@ export default function SalesTeamsPage() {
   const handleSubmitPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!paymentForm.customerId || Number(paymentForm.amount) <= 0) {
-      error('Please enter a valid payment amount (ငွေပမာဏ မှန်ကန်စွာ ထည့်သွင်းပါ)');
+      error('ငွေပမာဏ မှန်ကန်စွာ ထည့်သွင်းပါ');
       return;
     }
 
@@ -506,11 +506,11 @@ export default function SalesTeamsPage() {
     });
 
     if (res.success) {
-      success('Payment Recorded & GL Updated! (ဖောက်သည်ထံမှ ငွေလက်ခံစာရင်း သွင်းပြီးပါပြီ)', 'Cash/Bank DR and AR CR journals auto-posted.');
+      success('ဖောက်သည်ထံမှ ငွေလက်ခံစာရင်း သွင်းပြီးပါပြီ', 'ငွေစာရင်းနှင့် ရရန်ရှိငွေ စာရင်းသွင်းမှုများ အလိုအလျောက် ပြုလုပ်ပြီးပါပြီ။');
       setPaymentDialogOpen(false);
       loadPortalData();
     } else {
-      error('Payment recording failed', res.message);
+      error('ငွေလက်ခံစာရင်း သွင်း၍မရပါ', res.message);
     }
   };
 
@@ -518,7 +518,7 @@ export default function SalesTeamsPage() {
   const handlePostShipment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!targetShipmentForPost || !postWarehouseId) {
-      error('Please select source warehouse (ထုတ်ယူမည့် ဂိုဒေါင် ရွေးပါ)');
+      error('ထုတ်ယူမည့် ဂိုဒေါင် ရွေးချယ်ပါ');
       return;
     }
 
@@ -528,13 +528,13 @@ export default function SalesTeamsPage() {
     });
 
     if (res.success) {
-      success('Shipment Delivered & GL Synchronized (ပစ္စည်းပို့ဆောင်ပြီး စာရင်းချုပ်ပြီးပါပြီ)', 'Stock deducted, AR & Revenue posted to ledger.');
+      success('ပစ္စည်းပို့ဆောင်ပြီး စာရင်းချုပ်ပြီးပါပြီ', 'စတော့စာရင်းမှ ဖြတ်တောက်ပြီး အရောင်းရငွေနှင့် ရရန်ရှိငွေများ စာရင်းသွင်းပြီးပါပြီ။');
       setPostShipmentDialogOpen(false);
       setTargetShipmentForPost(null);
       loadPortalData();
       if (selectedTeam) inspectTeam(selectedTeam);
     } else {
-      error('Post shipment failed', res.message);
+      error('ပစ္စည်းပို့ဆောင်မှု အတည်ပြု၍မရပါ', res.message);
     }
   };
 
@@ -543,7 +543,7 @@ export default function SalesTeamsPage() {
   // My Orders Columns
   const myOrderColumns: Column<SalesOrder>[] = [
     {
-      header: 'Order No',
+      header: 'အမှာစာအမှတ်',
       accessorKey: 'orderNo',
       sortable: true,
       className: 'font-mono font-bold text-blue-600',
@@ -555,7 +555,7 @@ export default function SalesTeamsPage() {
       ),
     },
     {
-      header: 'Customer & Contact',
+      header: 'ဝယ်ယူသူနှင့် ဆက်သွယ်ရန်',
       cell: r => (
         <div className="flex flex-col">
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">{r.customer?.name || `Cust #${r.customerId}`}</span>
@@ -568,18 +568,18 @@ export default function SalesTeamsPage() {
       ),
     },
     {
-      header: 'Total Value',
+      header: 'စုစုပေါင်းတန်ဖိုး',
       cell: r => {
         const total = (r.items || []).reduce((acc, it) => acc + (Number(it.amount) || 0), 0);
         return <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100">{formatCurrency(total)}</span>;
       },
     },
     {
-      header: 'Status',
+      header: 'အခြေအနေ',
       cell: r => <StatusBadge status={r.status} />,
     },
     {
-      header: 'Fulfillment & Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => (
         <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
@@ -588,7 +588,7 @@ export default function SalesTeamsPage() {
             size="sm"
             onClick={() => handleOpenPrintOrder(r)}
             className="h-7 text-xs text-zinc-600 hover:text-blue-600"
-            title="Print Sales Invoice (အရောင်းပြေစာ ပရင့်ထုတ်ပါ)"
+            title="အရောင်းပြေစာ ပရင့်ထုတ်မည်"
           >
             <Printer className="h-3.5 w-3.5" />
           </Button>
@@ -598,7 +598,7 @@ export default function SalesTeamsPage() {
             size="sm"
             onClick={() => inspectOrder(r)}
             className="h-7 text-xs"
-            title="Inspect Order"
+            title="အသေးစိတ် ကြည့်ရှုမည်"
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
@@ -611,7 +611,7 @@ export default function SalesTeamsPage() {
               className="h-7 text-xs gap-1 bg-blue-600 hover:bg-blue-700"
             >
               <Truck className="h-3.5 w-3.5" />
-              <span>Dispatch</span>
+              <span>ပို့ဆောင်မည်</span>
             </Button>
           )}
 
@@ -622,7 +622,7 @@ export default function SalesTeamsPage() {
             className="h-7 text-xs gap-1 text-emerald-600 border-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
           >
             <DollarSign className="h-3.5 w-3.5" />
-            <span>Collect Pay</span>
+            <span>ငွေကောက်ခံမည်</span>
           </Button>
         </div>
       ),
@@ -632,7 +632,7 @@ export default function SalesTeamsPage() {
   // Team Performance Leaderboard Columns
   const leaderboardColumns: Column<TeamPerformanceOverview>[] = [
     {
-      header: 'Sales Team (အရောင်းအဖွဲ့)',
+      header: 'အရောင်းအဖွဲ့',
       accessorKey: 'teamName',
       sortable: true,
       className: 'font-bold text-zinc-900 dark:text-zinc-100',
@@ -643,31 +643,31 @@ export default function SalesTeamsPage() {
           </div>
           <div>
             <div className="font-semibold text-zinc-900 dark:text-zinc-100">{r.teamName}</div>
-            <div className="text-[10px] text-zinc-400">{r.activeMembers} active member(s)</div>
+            <div className="text-[10px] text-zinc-400">အဖွဲ့ဝင် {r.activeMembers} ဦး</div>
           </div>
         </div>
       ),
     },
     {
-      header: 'Assigned Orders',
+      header: 'တာဝန်ကျ အမှာစာ',
       accessorKey: 'totalAssignedOrders',
       sortable: true,
       cell: r => <span className="font-mono font-semibold">{r.totalAssignedOrders}</span>,
     },
     {
-      header: 'Fully Shipped',
+      header: 'ပို့ဆောင်ပြီးစီး',
       accessorKey: 'fullyShippedOrders',
       sortable: true,
       cell: r => <span className="font-mono font-semibold text-emerald-600">{r.fullyShippedOrders}</span>,
     },
     {
-      header: 'Total Shipments',
+      header: 'ပို့ဆောင်မှု အကြိမ်ရေ',
       accessorKey: 'totalShipments',
       sortable: true,
       cell: r => <span className="font-mono font-semibold text-blue-600">{r.totalShipments}</span>,
     },
     {
-      header: 'Fulfillment Rate (ပြီးစီးမှု)',
+      header: 'ပြီးစီးမှုနှုန်း',
       accessorKey: 'fulfillmentRate',
       sortable: true,
       cell: r => (
@@ -686,7 +686,7 @@ export default function SalesTeamsPage() {
       ),
     },
     {
-      header: 'Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => {
         const teamObj = saleTeams.find(t => t.id === r.teamId);
@@ -697,7 +697,7 @@ export default function SalesTeamsPage() {
             onClick={() => teamObj && inspectTeam(teamObj)}
             className="h-7 text-xs gap-1"
           >
-            <Eye className="h-3.5 w-3.5" /> Manage Team
+            <Eye className="h-3.5 w-3.5" /> အဖွဲ့စီမံရန်
           </Button>
         );
       },
@@ -723,7 +723,7 @@ export default function SalesTeamsPage() {
                 {r.teamName}
               </h4>
               <p className="text-[11px] text-zinc-500 truncate">
-                {r.activeMembers} active member{r.activeMembers !== 1 ? 's' : ''}
+                အဖွဲ့ဝင် {r.activeMembers} ဦး
               </p>
             </div>
           </div>
@@ -733,7 +733,7 @@ export default function SalesTeamsPage() {
             className={`text-[10px] px-2 py-0.5 shrink-0 ${r.fulfillmentRate >= 80 ? 'bg-emerald-600 text-white' : ''
               }`}
           >
-            {r.fulfillmentRate}% Fulfilled
+            {r.fulfillmentRate}% ပြီးစီးမှု
           </Badge>
         </div>
 
@@ -755,19 +755,19 @@ export default function SalesTeamsPage() {
         {/* 3-Column Metrics Grid */}
         <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800 text-center text-xs">
           <div className="space-y-0.5">
-            <span className="text-[10px] uppercase font-semibold text-zinc-400">Assigned</span>
+            <span className="text-[10px] uppercase font-semibold text-zinc-400">တာဝန်ကျ</span>
             <p className="font-mono font-bold text-zinc-800 dark:text-zinc-200">
               {r.totalAssignedOrders}
             </p>
           </div>
           <div className="space-y-0.5 border-x border-zinc-200 dark:border-zinc-700/60">
-            <span className="text-[10px] uppercase font-semibold text-zinc-400">Shipped</span>
+            <span className="text-[10px] uppercase font-semibold text-zinc-400">ပို့ဆောင်မှု</span>
             <p className="font-mono font-bold text-blue-600 dark:text-blue-400">
               {r.totalShipments}
             </p>
           </div>
           <div className="space-y-0.5">
-            <span className="text-[10px] uppercase font-semibold text-zinc-400">Delivered</span>
+            <span className="text-[10px] uppercase font-semibold text-zinc-400">ရောက်ရှိပြီး</span>
             <p className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
               {r.fullyShippedOrders}
             </p>
@@ -782,7 +782,7 @@ export default function SalesTeamsPage() {
             onClick={() => teamObj && inspectTeam(teamObj)}
             className="h-8 w-full sm:w-auto text-xs gap-1.5 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/40"
           >
-            <Eye className="h-3.5 w-3.5" /> Manage Team (အဖွဲ့စီမံရန်)
+            <Eye className="h-3.5 w-3.5" /> အဖွဲ့စီမံရန်
           </Button>
         </div>
       </div>
@@ -808,14 +808,14 @@ export default function SalesTeamsPage() {
             <span className="truncate">အရောင်းအဖွဲ့နှင့် လုပ်ငန်းခွင်</span>
           </h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
-            Dedicated portal for Salesmen & Team Leaders: Orders, deliveries, collections & performance
+            အရောင်းဝန်ထမ်းများနှင့် အဖွဲ့ခေါင်းဆောင်များအတွက် အမှာစာများ၊ ပို့ဆောင်မှုများ၊ ငွေကောက်ခံမှုနှင့် စွမ်းဆောင်ရည် မှတ်တမ်းများ
           </p>
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           <Button variant="outline" size="sm" onClick={loadPortalData} className="gap-1.5 h-8 text-xs shrink-0">
             <RefreshCw className={isLoading ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />
-            <span className="hidden sm:inline">Refresh (ပြန်ဖွင့်)</span>
+            <span className="hidden sm:inline">ပြန်လည်ရယူရန်</span>
             <span className="sm:hidden">Refresh</span>
           </Button>
           <Button
@@ -825,7 +825,7 @@ export default function SalesTeamsPage() {
             className="gap-1.5 h-8 text-xs bg-blue-600 hover:bg-blue-700 shrink-0"
           >
             <Plus className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">+ New Sales Team (အရောင်းအဖွဲ့သစ်)</span>
+            <span className="hidden sm:inline">+ အရောင်းအဖွဲ့ အသစ်</span>
             <span className="sm:hidden">+ Team</span>
           </Button>
         </div>
@@ -836,13 +836,13 @@ export default function SalesTeamsPage() {
         <div className="overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
           <TabsList className="w-max sm:w-full justify-start">
             <TabsTrigger value="my-orders" count={myOrders.length}>
-              📋 My Assigned Orders (ကျွန်ုပ်တာဝန်ကျ အမှာစာများ)
+              📋 တာဝန်ကျ အမှာစာများ (My Orders)
             </TabsTrigger>
             <TabsTrigger value="teams" count={saleTeams.length}>
-              👥 Sales Teams & Members (အရောင်းအဖွဲ့များ)
+              👥 အရောင်းအဖွဲ့များနှင့် အဖွဲ့ဝင်များ (Teams)
             </TabsTrigger>
             <TabsTrigger value="leaderboard" count={teamPerformances.length}>
-              🏆 Performance Leaderboard (စွမ်းဆောင်ရည် နှိုင်းယှဉ်ချက်)
+              🏆 စွမ်းဆောင်ရည် ဇယား (Leaderboard)
             </TabsTrigger>
           </TabsList>
         </div>
@@ -854,9 +854,9 @@ export default function SalesTeamsPage() {
             <Card>
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">My Assigned Orders (တာဝန်ကျအမှာစာ)</p>
+                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">တာဝန်ကျအမှာစာ (My Orders)</p>
                   <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 font-mono">{myOrders.length}</p>
-                  <p className="text-[11px] text-zinc-400">Total orders routed to your team</p>
+                  <p className="text-[11px] text-zinc-400">သင့်အဖွဲ့ထံ တာဝန်ပေးထားသော အမှာစာစုစုပေါင်း</p>
                 </div>
                 <div className="rounded-xl bg-blue-50 p-3 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
                   <TrendingUp className="h-5 w-5" />
@@ -867,9 +867,9 @@ export default function SalesTeamsPage() {
             <Card>
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Pending Dispatch (ပို့ဆောင်ရန် ကျန်ရှိ)</p>
+                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">ပို့ဆောင်ရန် ကျန်ရှိ (Pending Dispatch)</p>
                   <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 font-mono">{myPendingDispatch}</p>
-                  <p className="text-[11px] text-emerald-600 font-medium">{myFulfilledOrders} orders fully delivered</p>
+                  <p className="text-[11px] text-emerald-600 font-medium">{myFulfilledOrders} စောင် အပြည့်အဝ ပို့ဆောင်ပြီး</p>
                 </div>
                 <div className="rounded-xl bg-amber-50 p-3 text-amber-600 dark:bg-amber-950 dark:text-amber-400">
                   <Truck className="h-5 w-5" />
@@ -880,9 +880,9 @@ export default function SalesTeamsPage() {
             <Card>
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Total Sales Value (စုစုပေါင်း ရောင်းရငွေ)</p>
+                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">စုစုပေါင်း ရောင်းရငွေ (Total Sales)</p>
                   <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-mono">{formatCurrency(myTotalValue)}</p>
-                  <p className="text-[11px] text-zinc-400">Total monetary value of assigned orders</p>
+                  <p className="text-[11px] text-zinc-400">တာဝန်ကျ အမှာစာများ၏ စုစုပေါင်းတန်ဖိုး</p>
                 </div>
                 <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
                   <DollarSign className="h-5 w-5" />
@@ -896,7 +896,7 @@ export default function SalesTeamsPage() {
             <DataTable
               data={myOrders}
               columns={myOrderColumns}
-              searchPlaceholder="Search my orders by SO# or customer..."
+              searchPlaceholder="အမှာစာအမှတ် သို့မဟုတ် ဝယ်ယူသူဖြင့် ရှာဖွေရန်..."
               searchKey="orderNo"
               isLoading={isLoading}
               onRowClick={r => inspectOrder(r)}
@@ -906,10 +906,10 @@ export default function SalesTeamsPage() {
           {/* Mobile Card List View for Salesmen on Phone */}
           <div className="sm:hidden space-y-3">
             {isLoading ? (
-              <div className="p-8 text-center text-xs text-zinc-400">Loading orders...</div>
+              <div className="p-8 text-center text-xs text-zinc-400">အမှာစာများ ရယူနေပါသည်...</div>
             ) : myOrders.length === 0 ? (
               <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 text-center text-xs text-zinc-500">
-                No assigned orders found for your team.
+                သင့်အဖွဲ့အတွက် တာဝန်ပေးထားသော အမှာစာ မရှိသေးပါ။
               </div>
             ) : (
               myOrders.map(order => {
@@ -936,12 +936,12 @@ export default function SalesTeamsPage() {
                       </div>
                       {order.customer?.phoneNumber && (
                         <div className="flex items-center justify-between text-[11px] text-zinc-500 pt-0.5">
-                          <span className="truncate max-w-[180px]">{order.customer?.address || 'Customer Location'}</span>
+                          <span className="truncate max-w-[180px]">{order.customer?.address || 'ဖောက်သည်လိပ်စာ'}</span>
                           <a
                             href={`tel:${order.customer.phoneNumber}`}
                             className="inline-flex items-center gap-1 font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md text-[11px]"
                           >
-                            <Phone className="h-3 w-3" /> Call Customer
+                            <Phone className="h-3 w-3" /> ဖုန်းခေါ်မည်
                           </a>
                         </div>
                       )}
@@ -954,10 +954,10 @@ export default function SalesTeamsPage() {
                           size="sm"
                           onClick={() => handleOpenPrintOrder(order)}
                           className="h-8 px-2 text-zinc-600 dark:text-zinc-300 gap-1 hover:text-blue-600"
-                          title="Print Receipt"
+                          title="ပြေစာ ပရင့်ထုတ်မည်"
                         >
                           <Printer className="h-3.5 w-3.5" />
-                          <span className="text-xs">Print</span>
+                          <span className="text-xs">ပရင့်</span>
                         </Button>
 
                         <Button
@@ -966,7 +966,7 @@ export default function SalesTeamsPage() {
                           onClick={() => inspectOrder(order)}
                           className="h-8 text-xs gap-1"
                         >
-                          <Eye className="h-3.5 w-3.5" /> View
+                          <Eye className="h-3.5 w-3.5" /> ကြည့်မည်
                         </Button>
                       </div>
 
@@ -978,7 +978,7 @@ export default function SalesTeamsPage() {
                             onClick={() => handleOpenDispatch(order)}
                             className="h-8 text-xs gap-1 bg-blue-600 text-white"
                           >
-                            <Truck className="h-3.5 w-3.5" /> Dispatch
+                            <Truck className="h-3.5 w-3.5" /> ပို့ဆောင်မည်
                           </Button>
                         )}
 
@@ -988,7 +988,7 @@ export default function SalesTeamsPage() {
                           onClick={() => handleOpenPayment(order)}
                           className="h-8 text-xs gap-1 text-emerald-600 border-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
                         >
-                          <DollarSign className="h-3.5 w-3.5" /> Collect
+                          <DollarSign className="h-3.5 w-3.5" /> ငွေကောက်မည်
                         </Button>
                       </div>
                     </div>
@@ -1017,7 +1017,7 @@ export default function SalesTeamsPage() {
                       </div>
                       <div>
                         <CardTitle className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{team.name}</CardTitle>
-                        <p className="text-[11px] text-zinc-500">Branch: {team.branch?.name || 'Head Office'}</p>
+                        <p className="text-[11px] text-zinc-500">ဌာနခွဲ: {team.branch?.name || 'ရုံးချုပ်'}</p>
                       </div>
                     </div>
                     <Badge variant="outline" className="text-[10px] font-mono">
@@ -1028,22 +1028,22 @@ export default function SalesTeamsPage() {
                   <CardContent className="p-4 pt-2 space-y-3">
                     <div className="grid grid-cols-2 gap-2 text-xs py-2 border-y border-zinc-100 dark:border-zinc-800/80">
                       <div>
-                        <span className="text-zinc-500 block text-[10px]">Active Members</span>
+                        <span className="text-zinc-500 block text-[10px]">လက်ရှိ အဖွဲ့ဝင်များ</span>
                         <span className="font-bold text-zinc-800 dark:text-zinc-200">
-                          {perf?.activeMembers ?? 0} members
+                          {perf?.activeMembers ?? 0} ဦး
                         </span>
                       </div>
                       <div>
-                        <span className="text-zinc-500 block text-[10px]">Assigned Orders</span>
+                        <span className="text-zinc-500 block text-[10px]">တာဝန်ကျ အမှာစာများ</span>
                         <span className="font-bold text-blue-600 dark:text-blue-400">
-                          {perf?.totalAssignedOrders ?? 0} orders
+                          {perf?.totalAssignedOrders ?? 0} စောင်
                         </span>
                       </div>
                     </div>
 
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-zinc-500">Fulfillment Rate</span>
+                        <span className="text-zinc-500">ပြီးစီးမှုနှုန်း</span>
                         <span className="font-bold text-emerald-600">{perf?.fulfillmentRate ?? 0}%</span>
                       </div>
                       <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
@@ -1055,7 +1055,7 @@ export default function SalesTeamsPage() {
                     </div>
 
                     <Button variant="ghost" size="sm" className="w-full text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 h-7 mt-1">
-                      View Team Details & Members →
+                      အဖွဲ့ဝင်များနှင့် အသေးစိတ်ကြည့်ရန် →
                     </Button>
                   </CardContent>
                 </Card>
@@ -1069,7 +1069,7 @@ export default function SalesTeamsPage() {
           <DataTable
             data={teamPerformances}
             columns={leaderboardColumns}
-            searchPlaceholder="Search team performance (စွမ်းဆောင်ရည်ရှာရန်)..."
+            searchPlaceholder="စွမ်းဆောင်ရည်ရှာရန်..."
             searchKey="teamName"
             isLoading={isLoading}
             renderCard={renderLeaderboardCard}
@@ -1078,14 +1078,14 @@ export default function SalesTeamsPage() {
       </Tabs>
 
       {/* ─── SHEET: TEAM DETAILS & MEMBER MANAGEMENT ───────────────── */}
-      <Sheet open={teamSheetOpen} onOpenChange={setTeamSheetOpen} title={selectedTeam?.name || 'Sales Team Details'} width="xl">
+      <Sheet open={teamSheetOpen} onOpenChange={setTeamSheetOpen} title={selectedTeam?.name || 'အရောင်းအဖွဲ့ အသေးစိတ်'} width="xl">
         {selectedTeam && (
           <div className="space-y-5">
             {/* Header info */}
             <div className="rounded-lg bg-zinc-50 dark:bg-zinc-900/60 p-4 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">{selectedTeam.name}</h3>
-                <p className="text-xs text-zinc-500">Branch: {selectedTeam.branch?.name || 'Head Office (Mandalay)'}</p>
+                <p className="text-xs text-zinc-500">ဌာနခွဲ: {selectedTeam.branch?.name || 'ရုံးချုပ်'}</p>
               </div>
               <Button
                 variant="primary"
@@ -1094,7 +1094,7 @@ export default function SalesTeamsPage() {
                 className="gap-1 text-xs bg-blue-600"
               >
                 <UserPlus className="h-3.5 w-3.5" />
-                <span>+ Add Member</span>
+                <span>+ အဖွဲ့ဝင်ထည့်မည်</span>
               </Button>
             </div>
 
@@ -1102,16 +1102,16 @@ export default function SalesTeamsPage() {
             <Tabs value={teamDetailTab} onValueChange={setTeamDetailTab}>
               <TabsList className="bg-zinc-100 dark:bg-zinc-800">
                 <TabsTrigger value="members" count={teamMembers.length}>
-                  Members (အဖွဲ့ဝင်များ)
+                  အဖွဲ့ဝင်များ ({teamMembers.length})
                 </TabsTrigger>
                 <TabsTrigger value="orders" count={teamOrders.length}>
-                  Orders (အမှာစာများ)
+                  အမှာစာများ ({teamOrders.length})
                 </TabsTrigger>
                 <TabsTrigger value="shipments" count={teamShipments.length}>
-                  Shipments (ပို့ဆောင်မှုများ)
+                  ပို့ဆောင်မှုများ ({teamShipments.length})
                 </TabsTrigger>
                 <TabsTrigger value="kpis">
-                  KPIs & Analytics
+                  စွမ်းဆောင်ရည် သုံးသပ်ချက်
                 </TabsTrigger>
               </TabsList>
 
@@ -1119,7 +1119,7 @@ export default function SalesTeamsPage() {
               <TabsContent value="members" className="space-y-3 pt-2">
                 {teamMembers.length === 0 ? (
                   <div className="text-center py-8 text-xs text-zinc-400">
-                    No members in this team yet. Click &quot;+ Add Member&quot; to assign staff.
+                    ဤအဖွဲ့တွင် အဖွဲ့ဝင် မရှိသေးပါ။ &quot;+ အဖွဲ့ဝင်ထည့်မည်&quot; ကို နှိပ်၍ ဝန်ထမ်း ထည့်သွင်းပါ။
                   </div>
                 ) : (
                   teamMembers.map(m => (
@@ -1136,14 +1136,14 @@ export default function SalesTeamsPage() {
                             <span>{m.user?.name || `User #${m.userId}`}</span>
                             {m.role === 'LEADER' && (
                               <Badge variant="default" className="text-[9px] px-1.5 py-0 bg-purple-600 text-white border-purple-700">
-                                LEADER (ခေါင်းဆောင်)
+                                ခေါင်းဆောင် (LEADER)
                               </Badge>
                             )}
                           </div>
                           <div className="text-[10px] text-zinc-400 flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
                             <span>📧 {m.user?.email}</span>
                             {m.user?.phoneNumber && <span>📞 {m.user.phoneNumber}</span>}
-                            <span>• Joined: {formatDate(m.joinedDate)}</span>
+                            <span>• စတင်ရက်: {formatDate(m.joinedDate)}</span>
                           </div>
                         </div>
                       </div>
@@ -1155,13 +1155,14 @@ export default function SalesTeamsPage() {
                           onClick={() => handleUpdateMember(m, { role: m.role === 'LEADER' ? 'MEMBER' : 'LEADER' })}
                           className="h-6 text-[10px] px-2"
                         >
-                          {m.role === 'LEADER' ? 'Make Member' : 'Make Leader'}
+                          {m.role === 'LEADER' ? 'အဖွဲ့ဝင်ပြောင်းမည်' : 'ခေါင်းဆောင်ခန့်မည်'}
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleRemoveMember(m.id)}
                           className="h-6 text-[10px] text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 px-2"
+                          title="အဖွဲ့မှ ဖယ်ရှားမည်"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -1199,7 +1200,7 @@ export default function SalesTeamsPage() {
                   >
                     <div>
                       <div className="font-mono font-bold text-emerald-600">{sh.shipmentNo}</div>
-                      <div className="text-zinc-500">Date: {formatDate(sh.shipmentDate)}</div>
+                      <div className="text-zinc-500">ရက်စွဲ: {formatDate(sh.shipmentDate)}</div>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Button
@@ -1207,10 +1208,10 @@ export default function SalesTeamsPage() {
                         size="sm"
                         onClick={() => handleOpenPrintShipment(sh)}
                         className="h-6 text-[10px] text-zinc-600 dark:text-zinc-300 gap-1 hover:text-emerald-600 px-2"
-                        title="Print Delivery Slip"
+                        title="ပို့ဆောင်လွှာ ပရင့်ထုတ်မည်"
                       >
                         <Printer className="h-3 w-3" />
-                        <span>Print DO</span>
+                        <span>DO ပရင့်</span>
                       </Button>
                       <StatusBadge status={sh.status} />
                       {sh.status === 'DRAFT' && (
@@ -1224,7 +1225,7 @@ export default function SalesTeamsPage() {
                           }}
                           className="h-6 text-[10px] bg-emerald-600"
                         >
-                          Post & GL Sync
+                          အတည်ပြု စာရင်းသွင်းမည်
                         </Button>
                       )}
                     </div>
@@ -1237,32 +1238,32 @@ export default function SalesTeamsPage() {
                 {teamKpi ? (
                   <div className="grid grid-cols-2 gap-3 text-xs">
                     <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-                      <span className="text-zinc-500 block text-[10px]">Total Assigned Orders</span>
+                      <span className="text-zinc-500 block text-[10px]">တာဝန်ကျ အမှာစာ စုစုပေါင်း</span>
                       <span className="text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100">
                         {teamKpi.summary.totalAssignedOrders}
                       </span>
                     </div>
                     <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-                      <span className="text-zinc-500 block text-[10px]">Fully Shipped Orders</span>
+                      <span className="text-zinc-500 block text-[10px]">အပြည့်အဝ ပို့ဆောင်ပြီး အမှာစာ</span>
                       <span className="text-xl font-bold font-mono text-emerald-600">
                         {teamKpi.summary.fullyShippedOrders}
                       </span>
                     </div>
                     <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-                      <span className="text-zinc-500 block text-[10px]">Total Shipments</span>
+                      <span className="text-zinc-500 block text-[10px]">ပို့ဆောင်မှု စုစုပေါင်း</span>
                       <span className="text-xl font-bold font-mono text-blue-600">
                         {teamKpi.summary.totalShipments}
                       </span>
                     </div>
                     <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-                      <span className="text-zinc-500 block text-[10px]">Fulfillment Rate</span>
+                      <span className="text-zinc-500 block text-[10px]">ပြီးစီးမှုနှုန်း</span>
                       <span className="text-xl font-bold font-mono text-purple-600">
                         {teamKpi.summary.fulfillmentRate}%
                       </span>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-4 text-zinc-400 text-xs">Loading KPIs...</div>
+                  <div className="text-center py-4 text-zinc-400 text-xs">စွမ်းဆောင်ရည် တွက်ချက်နေပါသည်...</div>
                 )}
               </TabsContent>
             </Tabs>
@@ -1271,42 +1272,42 @@ export default function SalesTeamsPage() {
       </Sheet>
 
       {/* ─── SHEET: ORDER INSPECTION ───────────────────────────────── */}
-      <Sheet open={orderSheetOpen} onOpenChange={setOrderSheetOpen} title={selectedOrder ? `Sales Order ${selectedOrder.orderNo}` : 'Order Details'} width="xl">
+      <Sheet open={orderSheetOpen} onOpenChange={setOrderSheetOpen} title={selectedOrder ? `အမှာစာ ${selectedOrder.orderNo}` : 'အမှာစာ အသေးစိတ်'} width="xl">
         {selectedOrder && (
           <div className="space-y-4 text-xs">
             <div className="grid grid-cols-2 gap-3 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
               <div>
-                <span className="text-zinc-500 block text-[10px]">Customer (ဝယ်ယူသူ)</span>
+                <span className="text-zinc-500 block text-[10px]">ဝယ်ယူသူ (Customer)</span>
                 <span className="font-semibold text-zinc-900 dark:text-zinc-100">{selectedOrder.customer?.name}</span>
                 {selectedOrder.customer?.phoneNumber && (
                   <p className="text-[11px] text-zinc-500">{selectedOrder.customer.phoneNumber}</p>
                 )}
               </div>
               <div>
-                <span className="text-zinc-500 block text-[10px]">Status</span>
+                <span className="text-zinc-500 block text-[10px]">အခြေအနေ</span>
                 <StatusBadge status={selectedOrder.status} />
               </div>
               <div>
-                <span className="text-zinc-500 block text-[10px]">Order Date</span>
+                <span className="text-zinc-500 block text-[10px]">အမှာစာ ရက်စွဲ</span>
                 <span>{formatDate(selectedOrder.orderDate)}</span>
               </div>
               <div>
-                <span className="text-zinc-500 block text-[10px]">Delivery Target Date</span>
+                <span className="text-zinc-500 block text-[10px]">ပို့ဆောင်ရမည့် ရက်စွဲ</span>
                 <span>{selectedOrder.deliveryDate ? formatDate(selectedOrder.deliveryDate) : '-'}</span>
               </div>
             </div>
 
             {/* Items Breakdown */}
             <div>
-              <h4 className="font-bold text-zinc-900 dark:text-zinc-100 mb-2">Order Items (မှာယူထားသော ပစ္စည်းများ)</h4>
+              <h4 className="font-bold text-zinc-900 dark:text-zinc-100 mb-2">မှာယူထားသော ပစ္စည်းများ (Order Items)</h4>
               <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
                 <table className="w-full text-left">
                   <thead className="bg-zinc-100 dark:bg-zinc-800/60 text-[10px] text-zinc-500 uppercase">
                     <tr>
-                      <th className="p-2">Product</th>
-                      <th className="p-2 text-right">Qty</th>
-                      <th className="p-2 text-right">Rate</th>
-                      <th className="p-2 text-right">Amount</th>
+                      <th className="p-2">ကုန်ပစ္စည်း</th>
+                      <th className="p-2 text-right">အရေအတွက်</th>
+                      <th className="p-2 text-right">ဈေးနှုန်း</th>
+                      <th className="p-2 text-right">ကျသင့်ငွေ</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -1331,7 +1332,7 @@ export default function SalesTeamsPage() {
                 onClick={() => handleOpenPrintOrder(selectedOrder)}
                 className="gap-1.5 text-blue-600 border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-950/40"
               >
-                <Printer className="h-3.5 w-3.5" /> Print Invoice (ပြေစာ ပရင့်ထုတ်ပါ)
+                <Printer className="h-3.5 w-3.5" /> ပြေစာ ပရင့်ထုတ်မည်
               </Button>
 
               {(selectedOrder.status === 'CONFIRMED' || selectedOrder.status === 'PARTIALLY_SHIPPED') && (
@@ -1344,7 +1345,7 @@ export default function SalesTeamsPage() {
                   }}
                   className="gap-1.5 bg-blue-600"
                 >
-                  <Truck className="h-3.5 w-3.5" /> Dispatch Shipment (ပစ္စည်းပို့ဆောင်လွှာဖွင့်ရန်)
+                  <Truck className="h-3.5 w-3.5" /> ပစ္စည်းပို့ဆောင်လွှာ ဖွင့်မည်
                 </Button>
               )}
               <Button
@@ -1356,7 +1357,7 @@ export default function SalesTeamsPage() {
                 }}
                 className="gap-1.5 text-emerald-600 border-emerald-300"
               >
-                <DollarSign className="h-3.5 w-3.5" /> Collect Payment (ငွေကောက်ခံရန်)
+                <DollarSign className="h-3.5 w-3.5" /> ငွေလက်ခံစာရင်း သွင်းမည်
               </Button>
             </div>
           </div>
@@ -1364,22 +1365,22 @@ export default function SalesTeamsPage() {
       </Sheet>
 
       {/* ─── MODAL: CREATE SALES TEAM ──────────────────────────────── */}
-      <Dialog open={createTeamDialogOpen} onOpenChange={setCreateTeamDialogOpen} title="Create Sales Team (အရောင်းအဖွဲ့ အသစ်ဖွဲ့စည်းရန်)" maxWidth="md">
+      <Dialog open={createTeamDialogOpen} onOpenChange={setCreateTeamDialogOpen} title="အရောင်းအဖွဲ့ အသစ်ဖွဲ့စည်းရန်" maxWidth="md">
         <form onSubmit={handleCreateTeam} className="space-y-4">
           <Input
-            label="Team Name (အဖွဲ့အမည်) *"
-            placeholder="e.g. Yangon Route A, Mandalay Wholesale"
+            label="အဖွဲ့အမည် *"
+            placeholder="ဥပမာ - ရန်ကုန် လမ်းကြောင်း (A)၊ မန္တလေး လက်ကားအဖွဲ့"
             value={teamForm.name}
             onChange={e => setTeamForm({ ...teamForm, name: e.target.value })}
             required
           />
 
           <Select
-            label="Branch (ဘဏ်ခွဲ / လုပ်ငန်းတည်နေရာ)"
+            label="ဌာနခွဲ / လုပ်ငန်းတည်နေရာ"
             value={teamForm.branchId}
             onChange={e => setTeamForm({ ...teamForm, branchId: e.target.value })}
           >
-            <option value="">Default Branch ({orgContext.branchName})</option>
+            <option value="">မူလဌာနခွဲ ({orgContext.branchName})</option>
             {branches.map(b => (
               <option key={b.id} value={b.id}>
                 {b.name} ({b.code})
@@ -1387,12 +1388,12 @@ export default function SalesTeamsPage() {
             ))}
           </Select>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={() => setCreateTeamDialogOpen(false)}>
-              Cancel
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setCreateTeamDialogOpen(false)} className="w-full sm:w-auto">
+              မလုပ်တော့ပါ
             </Button>
-            <Button type="submit" variant="primary">
-              Create Team
+            <Button type="submit" variant="primary" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
+              အရောင်းအဖွဲ့ ဖွဲ့စည်းမည်
             </Button>
           </div>
         </form>
@@ -1402,7 +1403,7 @@ export default function SalesTeamsPage() {
       <Dialog
         open={addMemberDialogOpen}
         onOpenChange={setAddMemberDialogOpen}
-        title={selectedTeam ? `Add Member to ${selectedTeam.name} (အဖွဲ့ဝင်ထည့်ရန်)` : 'Add Team Member (အဖွဲ့ဝင်ထည့်ရန်)'}
+        title={selectedTeam ? `${selectedTeam.name} သို့ အဖွဲ့ဝင် ထည့်သွင်းရန်` : 'အဖွဲ့ဝင် ထည့်သွင်းရန်'}
         maxWidth="lg"
       >
         <div className="space-y-4">
@@ -1416,7 +1417,7 @@ export default function SalesTeamsPage() {
                   : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
                 }`}
             >
-              👥 Select Existing Staff (ရှိပြီးသား ဝန်ထမ်းရွေးရန်)
+              👥 ရှိပြီးသား ဝန်ထမ်းရွေးရန်
             </button>
             <button
               type="button"
@@ -1426,7 +1427,7 @@ export default function SalesTeamsPage() {
                   : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
                 }`}
             >
-              ✨ + Register New Salesman (အရောင်းဝန်ထမ်းသစ် ဖွင့်ရန်)
+              ✨ + အရောင်းဝန်ထမ်းသစ် ဖွင့်ရန်
             </button>
           </div>
 
@@ -1434,12 +1435,12 @@ export default function SalesTeamsPage() {
           {addMemberTab === 'select' && (
             <form onSubmit={handleAddMember} className="space-y-3.5 pt-1">
               <Select
-                label="Select Staff Member (ဝန်ထမ်း ရွေးချယ်ပါ) *"
+                label="ဝန်ထမ်း ရွေးချယ်ပါ *"
                 value={memberForm.userId}
                 onChange={e => setMemberForm({ ...memberForm, userId: e.target.value })}
                 required
               >
-                <option value="">Choose staff user...</option>
+                <option value="">ဝန်ထမ်း ရွေးချယ်ပါ...</option>
                 {users.map(u => (
                   <option key={u.id} value={u.id}>
                     {u.name} — {u.email} {u.phoneNumber ? `(${u.phoneNumber})` : ''}
@@ -1449,18 +1450,18 @@ export default function SalesTeamsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Select
-                  label="Team Role (တာဝန်/ရာထူး) *"
+                  label="တာဝန် / ရာထူး *"
                   value={memberForm.role}
                   onChange={e => setMemberForm({ ...memberForm, role: e.target.value as 'LEADER' | 'MEMBER' })}
                   required
                 >
-                  <option value="MEMBER">MEMBER (အရောင်းဝန်ထမ်း)</option>
-                  <option value="LEADER">LEADER (အဖွဲ့ခေါင်းဆောင်)</option>
+                  <option value="MEMBER">အဖွဲ့ဝင် (Member / Salesman)</option>
+                  <option value="LEADER">အဖွဲ့ခေါင်းဆောင် (Team Leader)</option>
                 </Select>
 
                 <Input
                   type="date"
-                  label="Joined Date (စတင်သည့်ရက်) *"
+                  label="စတင်သည့်ရက်စွဲ *"
                   value={memberForm.joinedDate}
                   onChange={e => setMemberForm({ ...memberForm, joinedDate: e.target.value })}
                   required
@@ -1469,10 +1470,10 @@ export default function SalesTeamsPage() {
 
               <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
                 <Button type="button" variant="outline" onClick={() => setAddMemberDialogOpen(false)} className="w-full sm:w-auto">
-                  Cancel
+                  မလုပ်တော့ပါ
                 </Button>
                 <Button type="submit" variant="primary" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
-                  Add to Team (အဖွဲ့ထဲထည့်မည်)
+                  အဖွဲ့ထဲ ထည့်သွင်းမည်
                 </Button>
               </div>
             </form>
@@ -1484,7 +1485,7 @@ export default function SalesTeamsPage() {
               <div className="p-3 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-xs text-blue-700 dark:text-blue-300 space-y-1">
                 <p className="font-bold flex items-center gap-1.5">
                   <UserPlus className="h-4 w-4 shrink-0" />
-                  <span>Instant Account Creation & Login Access</span>
+                  <span>ဝန်ထမ်းအကောင့် အသစ်ဖွင့်၍ တိုက်ရိုက် Login ပေးပို့ခြင်း</span>
                 </p>
                 <p className="text-[11px] leading-relaxed text-blue-600 dark:text-blue-400">
                   ဤနေရာတွင် အကောင့်ဖွင့်ပေးလိုက်ပါက အဆိုပါ ဝန်ထမ်းသည် <strong>Tenant ID: {orgContext.tenantId}</strong>၊ ဖြည့်သွင်းခဲ့သော <strong>Email</strong> နှင့် <strong>Password</strong> ဖြင့် စနစ်ထဲသို့ တိုက်ရိုက် Login ဝင်ရောက်နိုင်မည် ဖြစ်သည်။
@@ -1492,8 +1493,8 @@ export default function SalesTeamsPage() {
               </div>
 
               <Input
-                label="Full Name (ဝန်ထမ်းအမည်) *"
-                placeholder="e.g. Ko Kyaw Kyaw, Ma Hla Hla"
+                label="ဝန်ထမ်းအမည် *"
+                placeholder="ဥပမာ - ကိုကျော်ကျော်၊ မလှလှ"
                 value={newSalesmanForm.name}
                 onChange={e => setNewSalesmanForm({ ...newSalesmanForm, name: e.target.value })}
                 required
@@ -1502,7 +1503,7 @@ export default function SalesTeamsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Input
                   type="email"
-                  label="Login Email (အီးမေးလ်) *"
+                  label="အီးမေးလ် (Login Email) *"
                   placeholder="e.g. kyawkyaw@naya.com"
                   value={newSalesmanForm.email}
                   onChange={e => setNewSalesmanForm({ ...newSalesmanForm, email: e.target.value })}
@@ -1511,8 +1512,8 @@ export default function SalesTeamsPage() {
 
                 <Input
                   type="password"
-                  label="Password (စကားဝှက်) *"
-                  placeholder="Min 6 characters"
+                  label="စကားဝှက် (Password) *"
+                  placeholder="အနည်းဆုံး ၆ လုံး"
                   value={newSalesmanForm.password}
                   onChange={e => setNewSalesmanForm({ ...newSalesmanForm, password: e.target.value })}
                   required
@@ -1521,15 +1522,15 @@ export default function SalesTeamsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Input
-                  label="Phone Number (ဖုန်းနံပါတ်)"
-                  placeholder="e.g. 09123456789"
+                  label="ဖုန်းနံပါတ်"
+                  placeholder="ဥပမာ - 09123456789"
                   value={newSalesmanForm.phoneNumber}
                   onChange={e => setNewSalesmanForm({ ...newSalesmanForm, phoneNumber: e.target.value })}
                 />
 
                 <Input
-                  label="Address / Township (လိပ်စာ/မြို့နယ်)"
-                  placeholder="e.g. Chanayethazan, Mandalay"
+                  label="လိပ်စာ / မြို့နယ်"
+                  placeholder="ဥပမာ - ချမ်းအေးသာစံမြို့နယ်၊ မန္တလေး"
                   value={newSalesmanForm.address}
                   onChange={e => setNewSalesmanForm({ ...newSalesmanForm, address: e.target.value })}
                 />
@@ -1537,11 +1538,11 @@ export default function SalesTeamsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <Select
-                  label="Branch (ဘဏ်ခွဲ / ဌာနခွဲ)"
+                  label="ဌာနခွဲ"
                   value={newSalesmanForm.branchId}
                   onChange={e => setNewSalesmanForm({ ...newSalesmanForm, branchId: e.target.value })}
                 >
-                  <option value="">Default Branch ({orgContext.branchName})</option>
+                  <option value="">မူလဌာနခွဲ ({orgContext.branchName})</option>
                   {branches.map(b => (
                     <option key={b.id} value={b.id}>
                       {b.name} ({b.code})
@@ -1550,18 +1551,18 @@ export default function SalesTeamsPage() {
                 </Select>
 
                 <Select
-                  label="Role in Team (ရာထူး) *"
+                  label="တာဝန် / ရာထူး *"
                   value={newSalesmanForm.role}
                   onChange={e => setNewSalesmanForm({ ...newSalesmanForm, role: e.target.value as 'LEADER' | 'MEMBER' })}
                   required
                 >
-                  <option value="MEMBER">MEMBER (အရောင်းဝန်ထမ်း)</option>
-                  <option value="LEADER">LEADER (အဖွဲ့ခေါင်းဆောင်)</option>
+                  <option value="MEMBER">အဖွဲ့ဝင် (Member / Salesman)</option>
+                  <option value="LEADER">အဖွဲ့ခေါင်းဆောင် (Team Leader)</option>
                 </Select>
 
                 <Input
                   type="date"
-                  label="Joined Date (စတင်သည့်ရက်) *"
+                  label="စတင်သည့်ရက်စွဲ *"
                   value={newSalesmanForm.joinedDate}
                   onChange={e => setNewSalesmanForm({ ...newSalesmanForm, joinedDate: e.target.value })}
                   required
@@ -1570,10 +1571,10 @@ export default function SalesTeamsPage() {
 
               <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
                 <Button type="button" variant="outline" onClick={() => setAddMemberDialogOpen(false)} className="w-full sm:w-auto">
-                  Cancel
+                  မလုပ်တော့ပါ
                 </Button>
                 <Button type="submit" variant="primary" className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700">
-                  Register & Add to Team (အကောင့်ဖွင့်၍ အဖွဲ့သွင်းမည်)
+                  အကောင့်ဖွင့်၍ အဖွဲ့ထဲထည့်မည်
                 </Button>
               </div>
             </form>
@@ -1582,16 +1583,16 @@ export default function SalesTeamsPage() {
       </Dialog>
 
       {/* ─── MODAL: DISPATCH SHIPMENT ──────────────────────────────── */}
-      <Dialog open={dispatchDialogOpen} onOpenChange={setDispatchDialogOpen} title="Dispatch Shipment (ပစ္စည်းပို့ဆောင်လွှာ ဖွင့်ရန်)" maxWidth="lg">
+      <Dialog open={dispatchDialogOpen} onOpenChange={setDispatchDialogOpen} title="ပစ္စည်းပို့ဆောင်လွှာ ဖွင့်ရန်" maxWidth="lg">
         <form onSubmit={handleSubmitDispatch} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Select
-              label="Source Warehouse (ထုတ်ယူမည့် ဂိုဒေါင်) *"
+              label="ထုတ်ယူမည့် ဂိုဒေါင် *"
               value={dispatchForm.warehouseId}
               onChange={e => setDispatchForm({ ...dispatchForm, warehouseId: e.target.value })}
               required
             >
-              <option value="">Select Warehouse...</option>
+              <option value="">ဂိုဒေါင် ရွေးချယ်ပါ...</option>
               {warehouses.map(w => (
                 <option key={w.id} value={w.id}>
                   {w.name}
@@ -1601,7 +1602,7 @@ export default function SalesTeamsPage() {
 
             <Input
               type="date"
-              label="Shipment Date (ပို့ဆောင်သည့်ရက်) *"
+              label="ပို့ဆောင်သည့်ရက်စွဲ *"
               value={dispatchForm.shipmentDate}
               onChange={e => setDispatchForm({ ...dispatchForm, shipmentDate: e.target.value })}
               required
@@ -1610,7 +1611,7 @@ export default function SalesTeamsPage() {
 
           <div>
             <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1.5">
-              Items to Dispatch (ပို့ဆောင်မည့် ပစ္စည်းပမာဏများ)
+              ပို့ဆောင်မည့် ပစ္စည်းများ (Items to Dispatch)
             </label>
             <div className="space-y-2 border border-zinc-200 dark:border-zinc-800 p-3 rounded-lg bg-zinc-50/50 dark:bg-zinc-900/40">
               {dispatchForm.items.map((it, idx) => (
@@ -1641,27 +1642,27 @@ export default function SalesTeamsPage() {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={() => setDispatchDialogOpen(false)}>
-              Cancel
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setDispatchDialogOpen(false)} className="w-full sm:w-auto">
+              မလုပ်တော့ပါ
             </Button>
-            <Button type="submit" variant="primary" className="bg-blue-600">
-              Create Shipment Draft
+            <Button type="submit" variant="primary" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
+              ပို့ဆောင်လွှာ မူကြမ်းဖွင့်မည်
             </Button>
           </div>
         </form>
       </Dialog>
 
       {/* ─── MODAL: COLLECT CUSTOMER PAYMENT ───────────────────────── */}
-      <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen} title="Collect Customer Payment (ဖောက်သည်ထံမှ ငွေလက်ခံစာရင်း သွင်းရန်)" maxWidth="md">
+      <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen} title="ဖောက်သည်ထံမှ ငွေလက်ခံစာရင်း သွင်းရန်" maxWidth="md">
         <form onSubmit={handleSubmitPayment} className="space-y-4">
           <Select
-            label="Customer (ဝယ်ယူသူ) *"
+            label="ဝယ်ယူသူ *"
             value={paymentForm.customerId}
             onChange={e => setPaymentForm({ ...paymentForm, customerId: e.target.value })}
             required
           >
-            <option value="">Select Customer...</option>
+            <option value="">ဝယ်ယူသူ ရွေးချယ်ပါ...</option>
             {customers.map(c => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -1672,7 +1673,7 @@ export default function SalesTeamsPage() {
           <Input
             type="number"
             min={1}
-            label="Payment Amount (လက်ခံရရှိငွေပမာဏ - MMK) *"
+            label="လက်ခံရရှိငွေပမာဏ (ကျပ်) *"
             value={paymentForm.amount}
             onChange={e => setPaymentForm({ ...paymentForm, amount: Number(e.target.value) })}
             required
@@ -1680,19 +1681,19 @@ export default function SalesTeamsPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <Select
-              label="Payment Method (ငွေပေးချေမှုပုံစံ) *"
+              label="ငွေပေးချေမှုပုံစံ *"
               value={paymentForm.paymentMethod}
               onChange={e => setPaymentForm({ ...paymentForm, paymentMethod: e.target.value as any })}
               required
             >
-              <option value="CASH">CASH (လက်ငင်းငွေသား)</option>
-              <option value="BANK">BANK (ဘဏ်လွှဲငွေ)</option>
-              <option value="OTHER">OTHER (အခြား)</option>
+              <option value="CASH">လက်ငင်းငွေသား (Cash)</option>
+              <option value="BANK">ဘဏ်လွှဲငွေ (Bank)</option>
+              <option value="OTHER">အခြား (Other)</option>
             </Select>
 
             <Input
               type="date"
-              label="Payment Date (ရက်စွဲ) *"
+              label="ရက်စွဲ *"
               value={paymentForm.paymentDate}
               onChange={e => setPaymentForm({ ...paymentForm, paymentDate: e.target.value })}
               required
@@ -1700,37 +1701,37 @@ export default function SalesTeamsPage() {
           </div>
 
           <Input
-            label="Notes / Voucher Ref (မှတ်ချက် / ပြေစာအမှတ်)"
-            placeholder="e.g. KBZPay transfer ref, Cash voucher #12"
+            label="မှတ်ချက် / ပြေစာအမှတ်"
+            placeholder="ဥပမာ - KBZPay လွှဲပြေစာအမှတ်၊ လက်ခံပြေစာ #12"
             value={paymentForm.description}
             onChange={e => setPaymentForm({ ...paymentForm, description: e.target.value })}
           />
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={() => setPaymentDialogOpen(false)}>
-              Cancel
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setPaymentDialogOpen(false)} className="w-full sm:w-auto">
+              မလုပ်တော့ပါ
             </Button>
-            <Button type="submit" variant="primary" className="bg-emerald-600 hover:bg-emerald-700">
-              Record Payment & Post GL
+            <Button type="submit" variant="primary" className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700">
+              ငွေလက်ခံစာရင်း သွင်းမည်
             </Button>
           </div>
         </form>
       </Dialog>
 
       {/* ─── MODAL: POST SHIPMENT WAREHOUSE SELECT ──────────────────── */}
-      <Dialog open={postShipmentDialogOpen} onOpenChange={setPostShipmentDialogOpen} title="Confirm Shipment Delivery & GL Posting" maxWidth="sm">
+      <Dialog open={postShipmentDialogOpen} onOpenChange={setPostShipmentDialogOpen} title="ပစ္စည်းပို့ဆောင်မှု အတည်ပြုခြင်းနှင့် စာရင်းချုပ်ခြင်း" maxWidth="sm">
         <form onSubmit={handlePostShipment} className="space-y-4">
           <p className="text-xs text-zinc-500">
-            Confirming this shipment will deduct stock quantities and auto-post Accounts Receivable & Revenue entries to General Ledger.
+            ပို့ဆောင်မှုကို အတည်ပြုပါက စတော့စာရင်းမှ ဖြတ်တောက်မည်ဖြစ်ပြီး အရောင်းရငွေနှင့် ရရန်ရှိငွေများကို စာရင်းဇယားထဲသို့ အလိုအလျောက် ထည့်သွင်းပေးမည် ဖြစ်ပါသည်။
           </p>
 
           <Select
-            label="Source Warehouse (ထုတ်ယူမည့် ဂိုဒေါင်) *"
+            label="ထုတ်ယူမည့် ဂိုဒေါင် *"
             value={postWarehouseId}
             onChange={e => setPostWarehouseId(e.target.value)}
             required
           >
-            <option value="">Select Warehouse...</option>
+            <option value="">ဂိုဒေါင် ရွေးချယ်ပါ...</option>
             {warehouses.map(w => (
               <option key={w.id} value={w.id}>
                 {w.name}
@@ -1738,12 +1739,12 @@ export default function SalesTeamsPage() {
             ))}
           </Select>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={() => setPostShipmentDialogOpen(false)}>
-              Cancel
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setPostShipmentDialogOpen(false)} className="w-full sm:w-auto">
+              မလုပ်တော့ပါ
             </Button>
-            <Button type="submit" variant="primary" className="bg-emerald-600">
-              Confirm & Post GL
+            <Button type="submit" variant="primary" className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700">
+              အတည်ပြု စာရင်းသွင်းမည်
             </Button>
           </div>
         </form>
@@ -1753,13 +1754,13 @@ export default function SalesTeamsPage() {
       <Dialog
         open={printDialogOpen}
         onOpenChange={setPrintDialogOpen}
-        title={printType === 'INVOICE' ? 'Print Sales Invoice / Receipt' : 'Print Delivery Order (DO)'}
+        title={printType === 'INVOICE' ? 'အရောင်းပြေစာ ပရင့်ထုတ်ရန်' : 'ပစ္စည်းပို့ဆောင်လွှာ (DO) ပရင့်ထုတ်ရန်'}
         maxWidth="lg"
       >
         <div className="space-y-4 text-xs">
           <div className="space-y-2">
             <label className="font-semibold text-zinc-700 dark:text-zinc-300">
-              Select Output Document Format (ပုံနှိပ်မည့် ပုံစံရွေးချယ်ပါ)
+              ပုံနှိပ်မည့် ပုံစံရွေးချယ်ပါ (Select Document Format)
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div
@@ -1771,10 +1772,10 @@ export default function SalesTeamsPage() {
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
                   <Receipt className="h-4 w-4 text-emerald-600" />
-                  <span>🧾 80mm Mobile Bluetooth Thermal Slip</span>
+                  <span>🧾 80mm အပူပေးစလစ်ပြေစာ (Bluetooth Slip)</span>
                 </div>
                 <p className="text-[11px] text-zinc-500 mt-1">
-                  Optimized for portable handheld van receipt printers, mobile salesmen, and instant customer bills.
+                  နယ်လှည့်အရောင်းဝန်ထမ်းများ၊ ကားအရောင်းနှင့် မိုဘိုင်းဘလူးတုသ်ပရင်တာများဖြင့် ပြေစာထုတ်ပေးရန် သင့်တော်သည်။
                 </p>
               </div>
 
@@ -1787,10 +1788,10 @@ export default function SalesTeamsPage() {
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
                   <Scale className="h-4 w-4 text-blue-600" />
-                  <span>📄 A4 Formal Commercial Document</span>
+                  <span>📄 A4 တရားဝင် ကုန်သွယ်လုပ်ငန်းသုံး စာရွက်စာတမ်း</span>
                 </div>
                 <p className="text-[11px] text-zinc-500 mt-1">
-                  Official multi-column page with letterhead, item breakdown, and 3-column verification seals.
+                  လုပ်ငန်းခေါင်းစီး၊ ကုန်ပစ္စည်းအသေးစိတ်ဇယားနှင့် လက်မှတ်/တံဆိပ်တုံး နေရာများပါဝင်သော ရုံးသုံးပုံစံ။
                 </p>
               </div>
             </div>
@@ -1805,7 +1806,7 @@ export default function SalesTeamsPage() {
                 className="rounded border-zinc-300 h-4 w-4 text-blue-600"
               />
               <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                Include Official Enterprise Letterhead (လုပ်ငန်းခေါင်းစီးနှင့် လိပ်စာ)
+                လုပ်ငန်းခေါင်းစီးနှင့် လိပ်စာ ထည့်သွင်းမည် (Letterhead)
               </span>
             </label>
 
@@ -1817,18 +1818,18 @@ export default function SalesTeamsPage() {
                 className="rounded border-zinc-300 h-4 w-4 text-blue-600"
               />
               <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                Include Signatures & Verification Block (အရောင်းဝန်ထမ်း/ပစ္စည်းပို့သူ/ဖောက်သည် လက်မှတ်များ)
+                အရောင်းဝန်ထမ်း / ဖောက်သည် လက်မှတ်ရေးထိုးရန် နေရာများ ထည့်သွင်းမည်
               </span>
             </label>
           </div>
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setPrintDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="button" variant="primary" onClick={handleExecutePrint} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 gap-1.5">
               <Printer className="h-4 w-4" />
-              <span>Print Document (ပရင့်ထုတ်ပါ)</span>
+              <span>ပရင့်ထုတ်မည်</span>
             </Button>
           </div>
         </div>
@@ -1875,30 +1876,30 @@ export default function SalesTeamsPage() {
             <div className="max-w-[76mm] mx-auto text-black font-mono text-[11px] leading-tight p-1 space-y-2">
               <div className="text-center space-y-0.5 border-b border-dashed border-black pb-2">
                 <h2 className="text-sm font-bold uppercase">{orgContext.tenantName || 'NAYA-ERA ERP'}</h2>
-                <p className="text-[10px]">{orgContext.branchName || 'Sales Division'}</p>
-                <p className="text-[10px] uppercase font-bold mt-1">*** SALES BILL / INVOICE ***</p>
-                <p className="text-[9px]">SO#: {selectedPrintOrder.orderNo}</p>
-                <p className="text-[9px]">Date: {formatDate(selectedPrintOrder.orderDate)}</p>
+                <p className="text-[10px]">{orgContext.branchName || 'အရောင်းဌာန'}</p>
+                <p className="text-[10px] uppercase font-bold mt-1">*** အရောင်းပြေစာ / INVOICE ***</p>
+                <p className="text-[9px]">အမှာစာအမှတ်: {selectedPrintOrder.orderNo}</p>
+                <p className="text-[9px]">ရက်စွဲ: {formatDate(selectedPrintOrder.orderDate)}</p>
               </div>
 
               <div className="border-b border-dashed border-black py-1 space-y-0.5 text-[10px]">
-                <p>Customer: <span className="font-bold">{selectedPrintOrder.customer?.name || 'Customer'}</span></p>
-                {selectedPrintOrder.customer?.phoneNumber && <p>Phone: {selectedPrintOrder.customer.phoneNumber}</p>}
-                {selectedPrintOrder.customer?.address && <p className="truncate">Address: {selectedPrintOrder.customer.address}</p>}
-                <p>Salesman: {user?.name || 'Sales Staff'}</p>
+                <p>ဝယ်ယူသူ: <span className="font-bold">{selectedPrintOrder.customer?.name || 'ဝယ်ယူသူ'}</span></p>
+                {selectedPrintOrder.customer?.phoneNumber && <p>ဖုန်း: {selectedPrintOrder.customer.phoneNumber}</p>}
+                {selectedPrintOrder.customer?.address && <p className="truncate">လိပ်စာ: {selectedPrintOrder.customer.address}</p>}
+                <p>အရောင်းဝန်ထမ်း: {user?.name || 'အရောင်းဝန်ထမ်း'}</p>
               </div>
 
               <div className="border-b border-dashed border-black py-1 space-y-1">
                 <div className="grid grid-cols-12 font-bold text-[10px] border-b border-dashed border-black pb-1">
-                  <span className="col-span-7">ITEM</span>
-                  <span className="col-span-2 text-right">QTY</span>
-                  <span className="col-span-3 text-right">AMOUNT</span>
+                  <span className="col-span-7">ပစ္စည်းအမည်</span>
+                  <span className="col-span-2 text-right">အရေအတွက်</span>
+                  <span className="col-span-3 text-right">ကျသင့်ငွေ</span>
                 </div>
                 {(selectedPrintOrder.items || []).map((it, i) => (
                   <div key={i} className="grid grid-cols-12 text-[10px] py-0.5">
                     <div className="col-span-7 truncate">
-                      <p className="font-bold">{it.product?.name || `Item #${it.productId}`}</p>
-                      <p className="text-[9px] text-gray-700 font-normal">@{formatCurrency(it.rate)} {it.isFoc ? '(FOC)' : ''}</p>
+                      <p className="font-bold">{it.product?.name || `ပစ္စည်း #${it.productId}`}</p>
+                      <p className="text-[9px] text-gray-700 font-normal">@{formatCurrency(it.rate)} {it.isFoc ? '(လက်ဆောင်/FOC)' : ''}</p>
                     </div>
                     <span className="col-span-2 text-right font-bold">{it.qty} {it.uom?.symbol || it.uom?.name || ''}</span>
                     <span className="col-span-3 text-right font-bold">{it.isFoc ? '0' : formatCurrency(it.amount)}</span>
@@ -1908,7 +1909,7 @@ export default function SalesTeamsPage() {
 
               <div className="space-y-1 py-1 text-[10px]">
                 <div className="flex justify-between font-bold text-xs">
-                  <span>TOTAL PAYABLE:</span>
+                  <span>စုစုပေါင်း ကျသင့်ငွေ:</span>
                   <span>
                     {formatCurrency(
                       (selectedPrintOrder.items || []).reduce((s, it) => s + (it.isFoc ? 0 : Number(it.amount || 0)), 0)
@@ -1916,7 +1917,7 @@ export default function SalesTeamsPage() {
                   </span>
                 </div>
                 <div className="flex justify-between text-[9px]">
-                  <span>Status:</span>
+                  <span>အခြေအနေ:</span>
                   <span className="uppercase font-bold">{selectedPrintOrder.status}</span>
                 </div>
               </div>
@@ -1924,14 +1925,14 @@ export default function SalesTeamsPage() {
               <div className="pt-3 text-[9px] space-y-4 border-t border-dashed border-black">
                 <div className="space-y-3">
                   <div>
-                    <p>Salesman Sign: _________________</p>
+                    <p>အရောင်းဝန်ထမ်း လက်မှတ်: _________________</p>
                   </div>
                   <div>
-                    <p>Customer Received: _________________</p>
+                    <p>ဝယ်ယူသူ လက်ခံလက်မှတ်: _________________</p>
                   </div>
                 </div>
                 <div className="text-center text-[8px] pt-1">
-                  <p>Thank You For Ordering!</p>
+                  <p>ဝယ်ယူအားပေးမှုအတွက် ကျေးဇူးတင်ပါသည်</p>
                   <p>NAYA-ERA Mobile Sales Portal</p>
                 </div>
               </div>
@@ -1949,18 +1950,18 @@ export default function SalesTeamsPage() {
                       </h1>
                     </div>
                     <p className="text-xs text-gray-700 font-medium">
-                      Branch: {orgContext.branchName || 'Head Office'} • Field Operations
+                      ဌာနခွဲ: {orgContext.branchName || 'ရုံးချုပ်'} • အရောင်းနှင့် ဖြန့်ချိရေးဌာန
                     </p>
                     <p className="text-[11px] text-gray-600">
-                      Official Commercial Sales Bill & Order Invoice
+                      တရားဝင် အရောင်းပြေစာ / Official Commercial Sales Bill & Order Invoice
                     </p>
                   </div>
 
                   <div className="text-right text-xs space-y-0.5">
-                    <p className="font-bold font-mono text-sm">INVOICE NO: {selectedPrintOrder.orderNo}</p>
-                    <p className="text-gray-600">Order Date: {formatDate(selectedPrintOrder.orderDate)}</p>
-                    <p className="text-gray-600">Delivery Target: {formatDate(selectedPrintOrder.deliveryDate)}</p>
-                    <p className="text-gray-600">Status: <span className="font-bold uppercase">{selectedPrintOrder.status}</span></p>
+                    <p className="font-bold font-mono text-sm">ပြေစာအမှတ်: {selectedPrintOrder.orderNo}</p>
+                    <p className="text-gray-600">အမှာစာရက်စွဲ: {formatDate(selectedPrintOrder.orderDate)}</p>
+                    <p className="text-gray-600">ပို့ဆောင်ရမည့်ရက်: {formatDate(selectedPrintOrder.deliveryDate)}</p>
+                    <p className="text-gray-600">အခြေအနေ: <span className="font-bold uppercase">{selectedPrintOrder.status}</span></p>
                   </div>
                 </div>
               )}
@@ -1974,15 +1975,15 @@ export default function SalesTeamsPage() {
               {/* Customer & Billing Details */}
               <div className="grid grid-cols-2 gap-4 text-xs p-3.5 border border-gray-300 rounded bg-gray-50">
                 <div className="space-y-1">
-                  <p className="font-bold uppercase text-[10px] text-gray-500">Customer Details</p>
-                  <p className="font-bold text-sm">{selectedPrintOrder.customer?.name || 'Customer'}</p>
-                  <p className="text-gray-600">Phone: {selectedPrintOrder.customer?.phoneNumber || '-'}</p>
-                  <p className="text-gray-600">Address: {selectedPrintOrder.customer?.address || '-'}</p>
+                  <p className="font-bold uppercase text-[10px] text-gray-500">ဝယ်ယူသူ အချက်အလက်</p>
+                  <p className="font-bold text-sm">{selectedPrintOrder.customer?.name || 'ဝယ်ယူသူ'}</p>
+                  <p className="text-gray-600">ဖုန်း: {selectedPrintOrder.customer?.phoneNumber || '-'}</p>
+                  <p className="text-gray-600">လိပ်စာ: {selectedPrintOrder.customer?.address || '-'}</p>
                 </div>
                 <div className="space-y-1 text-right">
-                  <p className="font-bold uppercase text-[10px] text-gray-500">Sales Representative</p>
-                  <p className="font-bold text-sm">{user?.name || 'Sales Officer'}</p>
-                  <p className="text-gray-600">Email: {user?.email || '-'}</p>
+                  <p className="font-bold uppercase text-[10px] text-gray-500">အရောင်းကိုယ်စားလှယ်</p>
+                  <p className="font-bold text-sm">{user?.name || 'အရောင်းဝန်ထမ်း'}</p>
+                  <p className="text-gray-600">အီးမေးလ်: {user?.email || '-'}</p>
                 </div>
               </div>
 
@@ -1991,12 +1992,12 @@ export default function SalesTeamsPage() {
                 <table className="w-full text-xs border border-gray-300">
                   <thead className="bg-gray-100 border-b border-gray-300 text-[10px] uppercase">
                     <tr>
-                      <th className="p-2 text-left w-12">No.</th>
-                      <th className="p-2 text-left">Item Description</th>
-                      <th className="p-2 text-center">Unit</th>
-                      <th className="p-2 text-right">Qty</th>
-                      <th className="p-2 text-right">Unit Price (MMK)</th>
-                      <th className="p-2 text-right">Amount (MMK)</th>
+                      <th className="p-2 text-left w-12">စဉ်</th>
+                      <th className="p-2 text-left">ကုန်ပစ္စည်းအမည်</th>
+                      <th className="p-2 text-center">ယူနစ်</th>
+                      <th className="p-2 text-right">အရေအတွက်</th>
+                      <th className="p-2 text-right">နှုန်းထား (ကျပ်)</th>
+                      <th className="p-2 text-right">ကျသင့်ငွေ (ကျပ်)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -2013,7 +2014,7 @@ export default function SalesTeamsPage() {
                   </tbody>
                   <tfoot className="bg-gray-100 font-bold border-t-2 border-black">
                     <tr>
-                      <td colSpan={5} className="p-2 text-right uppercase">Net Total (စုစုပေါင်း ကျသင့်ငွေ):</td>
+                      <td colSpan={5} className="p-2 text-right uppercase">စုစုပေါင်း ကျသင့်ငွေ (Net Total):</td>
                       <td className="p-2 text-right font-mono text-sm">
                         {formatCurrency(
                           (selectedPrintOrder.items || []).reduce((s, it) => s + (it.isFoc ? 0 : Number(it.amount || 0)), 0)
@@ -2029,20 +2030,20 @@ export default function SalesTeamsPage() {
                 <div className="pt-8 border-t border-gray-300 mt-8 space-y-6">
                   <div className="grid grid-cols-2 gap-12 text-center text-xs">
                     <div className="space-y-8">
-                      <p className="font-bold uppercase text-[10px] text-gray-600">Salesman (အရောင်းစာရေး)</p>
+                      <p className="font-bold uppercase text-[10px] text-gray-600">အရောင်းတာဝန်ခံ (Salesman)</p>
                       <div className="border-b border-gray-400 mx-8"></div>
                       <div>
-                        <p className="font-semibold">{user?.name || 'Sales Staff'}</p>
-                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                        <p className="font-semibold">{user?.name || 'အရောင်းဝန်ထမ်း'}</p>
+                        <p className="text-[10px] text-gray-500">ရက်စွဲ: ____/____/202___</p>
                       </div>
                     </div>
 
                     <div className="space-y-8">
-                      <p className="font-bold uppercase text-[10px] text-gray-600">Customer Received By (ဝယ်ယူသူ)</p>
+                      <p className="font-bold uppercase text-[10px] text-gray-600">ဝယ်ယူလက်ခံသူ (Customer)</p>
                       <div className="border-b border-gray-400 mx-8"></div>
                       <div>
-                        <p className="font-semibold">{selectedPrintOrder.customer?.name || 'Customer'}</p>
-                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                        <p className="font-semibold">{selectedPrintOrder.customer?.name || 'ဝယ်ယူသူ'}</p>
+                        <p className="text-[10px] text-gray-500">ရက်စွဲ: ____/____/202___</p>
                       </div>
                     </div>
                   </div>
@@ -2062,27 +2063,27 @@ export default function SalesTeamsPage() {
             <div className="max-w-[76mm] mx-auto text-black font-mono text-[11px] leading-tight p-1 space-y-2">
               <div className="text-center space-y-0.5 border-b border-dashed border-black pb-2">
                 <h2 className="text-sm font-bold uppercase">{orgContext.tenantName || 'NAYA-ERA ERP'}</h2>
-                <p className="text-[10px] uppercase font-bold mt-1">*** DELIVERY ORDER (DO) ***</p>
-                <p className="text-[9px]">DO#: {selectedPrintShipment.shipmentNo}</p>
-                <p className="text-[9px]">Date: {formatDate(selectedPrintShipment.shipmentDate)}</p>
+                <p className="text-[10px] uppercase font-bold mt-1">*** ပစ္စည်းပို့ဆောင်လွှာ (DO) ***</p>
+                <p className="text-[9px]">ပို့ဆောင်လွှာအမှတ်: {selectedPrintShipment.shipmentNo}</p>
+                <p className="text-[9px]">ရက်စွဲ: {formatDate(selectedPrintShipment.shipmentDate)}</p>
               </div>
 
               <div className="border-b border-dashed border-black py-1 space-y-0.5 text-[10px]">
-                <p>Deliver To: <span className="font-bold">{selectedPrintShipment.salesOrder?.customer?.name || 'Customer'}</span></p>
+                <p>ပို့ဆောင်မည့်နေရာ: <span className="font-bold">{selectedPrintShipment.salesOrder?.customer?.name || 'ဝယ်ယူသူ'}</span></p>
                 {selectedPrintShipment.salesOrder?.customer?.address && (
-                  <p className="truncate">Address: {selectedPrintShipment.salesOrder.customer.address}</p>
+                  <p className="truncate">လိပ်စာ: {selectedPrintShipment.salesOrder.customer.address}</p>
                 )}
-                <p>Team: {selectedPrintShipment.salesTeam?.name || 'Van Unit'}</p>
+                <p>အရောင်းအဖွဲ့: {selectedPrintShipment.salesTeam?.name || 'ယာဉ်အဖွဲ့'}</p>
               </div>
 
               <div className="border-b border-dashed border-black py-1 space-y-1">
                 <div className="grid grid-cols-12 font-bold text-[10px] border-b border-dashed border-black pb-1">
-                  <span className="col-span-8">PRODUCT</span>
-                  <span className="col-span-4 text-right">QTY</span>
+                  <span className="col-span-8">ကုန်ပစ္စည်း</span>
+                  <span className="col-span-4 text-right">အရေအတွက်</span>
                 </div>
                 {(selectedPrintShipment.items || []).map((it, i) => (
                   <div key={i} className="grid grid-cols-12 text-[10px] py-0.5">
-                    <span className="col-span-8 truncate font-semibold">{it.product?.name || `Product #${it.productId}`}</span>
+                    <span className="col-span-8 truncate font-semibold">{it.product?.name || `ပစ္စည်း #${it.productId}`}</span>
                     <span className="col-span-4 text-right font-bold font-mono">{it.qty} {it.uom?.symbol || ''}</span>
                   </div>
                 ))}
@@ -2091,10 +2092,10 @@ export default function SalesTeamsPage() {
               <div className="pt-3 text-[9px] space-y-4 border-t border-dashed border-black">
                 <div className="space-y-3">
                   <div>
-                    <p>Driver / Delivery Sign: _________________</p>
+                    <p>ယာဉ်မောင်း/ပို့ဆောင်သူ လက်မှတ်: _________________</p>
                   </div>
                   <div>
-                    <p>Customer Receiver Sign: _________________</p>
+                    <p>ဝယ်ယူလက်ခံသူ လက်မှတ်: _________________</p>
                   </div>
                 </div>
                 <div className="text-center text-[8px] pt-1">
@@ -2115,17 +2116,17 @@ export default function SalesTeamsPage() {
                       </h1>
                     </div>
                     <p className="text-xs text-gray-700 font-medium">
-                      Branch: {orgContext.branchName || 'Head Office'} • Logistics Division
+                      ဌာနခွဲ: {orgContext.branchName || 'ရုံးချုပ်'} • ကုန်စည်ပို့ဆောင်ရေးဌာန
                     </p>
                     <p className="text-[11px] text-gray-600">
-                      Official Delivery Order & Gate Pass
+                      တရားဝင် ပစ္စည်းပို့ဆောင်လွှာနှင့် ဂိတ်ဖြတ်လက်မှတ် / Official Delivery Order & Gate Pass
                     </p>
                   </div>
 
                   <div className="text-right text-xs space-y-0.5">
-                    <p className="font-bold font-mono text-sm">DO NO: {selectedPrintShipment.shipmentNo}</p>
-                    <p className="text-gray-600">Dispatch Date: {formatDate(selectedPrintShipment.shipmentDate)}</p>
-                    <p className="text-gray-600">Status: <span className="font-bold uppercase">{selectedPrintShipment.status}</span></p>
+                    <p className="font-bold font-mono text-sm">ပို့ဆောင်လွှာအမှတ်: {selectedPrintShipment.shipmentNo}</p>
+                    <p className="text-gray-600">ပို့ဆောင်သည့်ရက်: {formatDate(selectedPrintShipment.shipmentDate)}</p>
+                    <p className="text-gray-600">အခြေအနေ: <span className="font-bold uppercase">{selectedPrintShipment.status}</span></p>
                   </div>
                 </div>
               )}
@@ -2139,15 +2140,15 @@ export default function SalesTeamsPage() {
               {/* Destination */}
               <div className="grid grid-cols-2 gap-4 text-xs p-3.5 border border-gray-300 rounded bg-gray-50">
                 <div className="space-y-1">
-                  <p className="font-bold uppercase text-[10px] text-gray-500">Destination</p>
-                  <p className="font-bold text-sm">{selectedPrintShipment.salesOrder?.customer?.name || 'Customer'}</p>
-                  <p className="text-gray-600">Phone: {selectedPrintShipment.salesOrder?.customer?.phoneNumber || '-'}</p>
-                  <p className="text-gray-600">Address: {selectedPrintShipment.salesOrder?.customer?.address || '-'}</p>
+                  <p className="font-bold uppercase text-[10px] text-gray-500">ပို့ဆောင်မည့်နေရာ</p>
+                  <p className="font-bold text-sm">{selectedPrintShipment.salesOrder?.customer?.name || 'ဝယ်ယူသူ'}</p>
+                  <p className="text-gray-600">ဖုန်း: {selectedPrintShipment.salesOrder?.customer?.phoneNumber || '-'}</p>
+                  <p className="text-gray-600">လိပ်စာ: {selectedPrintShipment.salesOrder?.customer?.address || '-'}</p>
                 </div>
                 <div className="space-y-1 text-right">
-                  <p className="font-bold uppercase text-[10px] text-gray-500">Logistics Unit</p>
-                  <p className="font-bold text-sm">{selectedPrintShipment.salesTeam?.name || 'Field Fleet'}</p>
-                  <p className="text-gray-600">Driver/Officer: {user?.name || 'Staff'}</p>
+                  <p className="font-bold uppercase text-[10px] text-gray-500">ပို့ဆောင်ရေးအဖွဲ့</p>
+                  <p className="font-bold text-sm">{selectedPrintShipment.salesTeam?.name || 'ယာဉ်အဖွဲ့'}</p>
+                  <p className="text-gray-600">ပို့ဆောင်သူ: {user?.name || 'တာဝန်ခံ'}</p>
                 </div>
               </div>
 
@@ -2156,10 +2157,10 @@ export default function SalesTeamsPage() {
                 <table className="w-full text-xs border border-gray-300">
                   <thead className="bg-gray-100 border-b border-gray-300 text-[10px] uppercase">
                     <tr>
-                      <th className="p-2 text-left w-12">No.</th>
-                      <th className="p-2 text-left">Product Name</th>
-                      <th className="p-2 text-center">Unit</th>
-                      <th className="p-2 text-right">Quantity</th>
+                      <th className="p-2 text-left w-12">စဉ်</th>
+                      <th className="p-2 text-left">ကုန်ပစ္စည်းအမည်</th>
+                      <th className="p-2 text-center">ယူနစ်</th>
+                      <th className="p-2 text-right">အရေအတွက်</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -2180,20 +2181,20 @@ export default function SalesTeamsPage() {
                 <div className="pt-8 border-t border-gray-300 mt-8 space-y-6">
                   <div className="grid grid-cols-2 gap-12 text-center text-xs">
                     <div className="space-y-8">
-                      <p className="font-bold uppercase text-[10px] text-gray-600">Delivery Driver / Salesman (ပို့ဆောင်သူ)</p>
+                      <p className="font-bold uppercase text-[10px] text-gray-600">ယာဉ်မောင်း / ပို့ဆောင်သူ (Delivery Driver)</p>
                       <div className="border-b border-gray-400 mx-8"></div>
                       <div>
-                        <p className="font-semibold">{user?.name || 'Driver'}</p>
-                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                        <p className="font-semibold">{user?.name || 'ပို့ဆောင်သူ'}</p>
+                        <p className="text-[10px] text-gray-500">ရက်စွဲ: ____/____/202___</p>
                       </div>
                     </div>
 
                     <div className="space-y-8">
-                      <p className="font-bold uppercase text-[10px] text-gray-600">Customer Receiver (လက်ခံရရှိသူ)</p>
+                      <p className="font-bold uppercase text-[10px] text-gray-600">ဝယ်ယူလက်ခံသူ (Customer Receiver)</p>
                       <div className="border-b border-gray-400 mx-8"></div>
                       <div>
-                        <p className="font-semibold">{selectedPrintShipment.salesOrder?.customer?.name || 'Customer'}</p>
-                        <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                        <p className="font-semibold">{selectedPrintShipment.salesOrder?.customer?.name || 'ဝယ်ယူသူ'}</p>
+                        <p className="text-[10px] text-gray-500">ရက်စွဲ: ____/____/202___</p>
                       </div>
                     </div>
                   </div>
