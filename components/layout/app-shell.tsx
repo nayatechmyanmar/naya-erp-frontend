@@ -37,12 +37,12 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { title: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { title: 'ပင်မစာမျက်နှာ', href: '/', icon: LayoutDashboard },
   { title: 'အခြေခံအချက်အလက်များ', href: '/products', icon: Package },
   { title: 'အဝယ်နှင့် ကုန်လက်ခံလွှာ', href: '/purchasing', icon: ShoppingCart },
   { title: 'စတော့နှင့် သိုလှောင်ရုံ', href: '/inventory', icon: Boxes },
   { title: 'ထုတ်လုပ်မှု လုပ်ငန်းစဉ်များ', href: '/manufacturing', icon: Factory },
-  { title: 'အရောင်းနှင့် ပို့ဆောင်ရေး ', href: '/sales', icon: TrendingUp },
+  { title: 'အရောင်းနှင့် ပို့ဆောင်ရေး', href: '/sales', icon: TrendingUp },
   { title: 'အရောင်းအဖွဲ့နှင့် လုပ်ငန်းခွင်', href: '/sales-teams', icon: Users },
   { title: 'အသုံးပြုသူစီမံခန့်ခွဲမှု', href: '/users', icon: ShieldCheck },
   { title: 'ဘဏ္ဍာရေးနှင့် စာရင်းကိုင်', href: '/accounting', icon: Landmark },
@@ -102,7 +102,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex h-screen w-full items-center justify-center bg-zinc-50 dark:bg-zinc-950">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-          <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Loading ERP Workspace...</p>
+          <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">ERP စနစ် တင်ဆောင်နေပါသည်...</p>
         </div>
       </div>
     );
@@ -147,7 +147,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Building2 className="h-3.5 w-3.5 text-blue-600 shrink-0" />
               <div className="truncate text-xs">
                 <div className="font-semibold text-zinc-800 dark:text-zinc-200 truncate">{orgContext.tenantName}</div>
-                <div className="text-[10px] text-zinc-500 truncate">Tenant #{orgContext.tenantId}</div>
+                <div className="text-[10px] text-zinc-500 truncate">လုပ်ငန်းကုဒ် #{orgContext.tenantId}</div>
               </div>
             </div>
           </div>
@@ -237,8 +237,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               })}
             </nav>
             <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
-              <Button variant="outline" size="sm" onClick={logout} className="w-full justify-center gap-2 text-red-600">
-                <LogOut className="h-4 w-4" /> Logout
+              <Button variant="outline" size="sm" onClick={logout} className="w-full justify-center gap-2 text-red-600 cursor-pointer">
+                <LogOut className="h-4 w-4" /> အကောင့်ထွက်ရန် (Logout)
               </Button>
             </div>
           </div>
@@ -258,7 +258,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden h-8 w-8 text-zinc-600"
+              className="md:hidden h-8 w-8 text-zinc-600 cursor-pointer"
               onClick={() => setMobileMenuOpen(true)}
             >
               <Menu className="h-5 w-5" />
@@ -271,7 +271,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50/80 px-2.5 py-1 text-xs font-medium text-zinc-800 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800/80 dark:text-zinc-200 cursor-pointer"
               >
                 <GitBranch className="h-3.5 w-3.5 text-blue-600" />
-                <span className="font-semibold">{orgContext.branchName || 'Head Office'}</span>
+                <span className="font-semibold">{orgContext.branchName || 'ရုံးချုပ်'}</span>
                 <ChevronDown className="h-3 w-3 text-zinc-400" />
               </button>
 
@@ -280,10 +280,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <div className="fixed inset-0 z-40" onClick={() => setBranchDropdownOpen(false)} />
                   <div className="absolute left-0 mt-1.5 w-56 rounded-lg border border-zinc-200 bg-white p-1.5 shadow-xl z-50 dark:border-zinc-800 dark:bg-zinc-900 animate-in fade-in-50 zoom-in-95">
                     <p className="px-2 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
-                      Switch Branch
+                      ဌာနခွဲ ပြောင်းလဲရန် (Switch Branch)
                     </p>
                     {branches.length === 0 ? (
-                      <div className="px-2 py-1.5 text-xs text-zinc-500">Head Office (HQ)</div>
+                      <div className="px-2 py-1.5 text-xs text-zinc-500">ရုံးချုပ် (HQ)</div>
                     ) : (
                       branches.map(b => (
                         <button
@@ -323,8 +323,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
-              className="h-8 w-8 text-zinc-600 dark:text-zinc-300"
-              title={isDark ? 'Switch to Light mode' : 'Switch to Dark mode'}
+              className="h-8 w-8 text-zinc-600 dark:text-zinc-300 cursor-pointer"
+              title={isDark ? 'အလင်းပုံစံသို့ ပြောင်းမည်' : 'အမှောင်ပုံစံသို့ ပြောင်းမည်'}
             >
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
@@ -358,7 +358,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       className="mt-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer font-medium"
                     >
                       <LogOut className="h-3.5 w-3.5" />
-                      <span>Sign Out</span>
+                      <span>အကောင့်မှ ထွက်မည်</span>
                     </button>
                   </div>
                 </>
