@@ -103,7 +103,7 @@ export default function UsersPage() {
     setLoading(true);
     try {
       const [usersRes, rolesRes, branchesRes, permsRes] = await Promise.all([
-        apiFetch<UserProfile[]>('/api/users'),
+        apiFetch<UserProfile[]>('/api/users?limit=1000'),
         apiFetch<Role[]>('/api/roles'),
         apiFetch<Branch[]>('/api/master/branches'),
         apiFetch<{ all: Permission[]; grouped: Record<string, Permission[]> }>('/api/roles/permissions'),
@@ -130,7 +130,7 @@ export default function UsersPage() {
         setPermissionsGrouped(permsRes.data.grouped || {});
       }
     } catch (e: any) {
-      error('Error', 'Failed to load user management data');
+      error('အချက်အလက် ရယူ၍မရပါ', 'အသုံးပြုသူနှင့် လုပ်ပိုင်ခွင့် အချက်အလက်များ မရရှိနိုင်ပါ');
     } finally {
       setLoading(false);
     }
@@ -144,7 +144,7 @@ export default function UsersPage() {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userForm.name || !userForm.email || !userForm.password || !userForm.roleId) {
-      error('Validation Error', 'Please fill in all required fields');
+      error('လိုအပ်ချက်', 'ကျေးဇူးပြု၍ လိုအပ်သောအချက်အလက်များအားလုံး ဖြည့်သွင်းပါ');
       return;
     }
 
@@ -166,7 +166,7 @@ export default function UsersPage() {
       });
 
       if (res.success) {
-        success('Success', 'User created successfully');
+        success('အောင်မြင်ပါသည်', 'အသုံးပြုသူ အကောင့်အသစ် ဖန်တီးပြီးပါပြီ');
         setIsCreateUserOpen(false);
         setUserForm({
           name: '',
@@ -179,10 +179,10 @@ export default function UsersPage() {
         });
         fetchAllData();
       } else {
-        error('Failed', res.message || 'Could not create user');
+        error('မအောင်မြင်ပါ', res.message || 'အသုံးပြုသူအသစ် ဖွင့်၍မရပါ');
       }
     } catch {
-      error('Error', 'An unexpected error occurred');
+      error('ချို့ယွင်းချက်', 'အသုံးပြုသူအသစ် ဖွင့်ရာတွင် ချို့ယွင်းချက်ဖြစ်ပေါ်ပါသည်');
     } finally {
       setSubmitting(false);
     }
@@ -222,14 +222,14 @@ export default function UsersPage() {
       });
 
       if (res.success) {
-        success('Success', 'User updated successfully');
+        success('အောင်မြင်ပါသည်', 'အသုံးပြုသူ အချက်အလက် ပြင်ဆင်ပြီးပါပြီ');
         setIsEditUserOpen(false);
         fetchAllData();
       } else {
-        error('Failed', res.message || 'Could not update user');
+        error('မအောင်မြင်ပါ', res.message || 'အချက်အလက် ပြင်ဆင်၍မရပါ');
       }
     } catch {
-      error('Error', 'An error occurred while updating user');
+      error('ချို့ယွင်းချက်', 'ပြင်ဆင်ရာတွင် ချို့ယွင်းချက်ဖြစ်ပေါ်ပါသည်');
     } finally {
       setSubmitting(false);
     }
@@ -245,15 +245,15 @@ export default function UsersPage() {
 
       if (res.success) {
         success(
-          'Status Updated',
-          newStatus ? `User ${user.name} activated` : `User ${user.name} deactivated`
+          'အခြေအနေ ပြောင်းလဲပြီးပါပြီ',
+          newStatus ? `${user.name} ၏ အကောင့်ကို အသုံးပြုခွင့် ဖွင့်ပေးလိုက်ပါပြီ` : `${user.name} ၏ အကောင့်ကို ပိတ်သိမ်းလိုက်ပါပြီ`
         );
         fetchAllData();
       } else {
-        error('Action Denied', res.message || 'Cannot update status');
+        error('လုပ်ဆောင်၍မရပါ', res.message || 'အခြေအနေ ပြောင်းလဲ၍မရပါ');
       }
     } catch {
-      error('Error', 'Status toggle failed');
+      error('ချို့ယွင်းချက်', 'အကောင့်အခြေအနေ ပြောင်းလဲမှု မအောင်မြင်ပါ');
     }
   };
 
@@ -267,11 +267,11 @@ export default function UsersPage() {
     e.preventDefault();
     if (!selectedUser) return;
     if (resetPasswordForm.newPassword.length < 6) {
-      error('Validation Error', 'Password must be at least 6 characters');
+      error('လိုအပ်ချက်', 'Password သည် အနည်းဆုံး စာလုံးရေ ၆ လုံး ရှိရပါမည်');
       return;
     }
     if (resetPasswordForm.newPassword !== resetPasswordForm.confirmPassword) {
-      error('Validation Error', 'Passwords do not match');
+      error('ကိုက်ညီမှုမရှိပါ', 'ရိုက်ထည့်ထားသော Password နှစ်ခု တူညီမှုမရှိပါ');
       return;
     }
 
@@ -283,33 +283,33 @@ export default function UsersPage() {
       });
 
       if (res.success) {
-        success('Password Reset', `Password updated for ${selectedUser.name}`);
+        success('Password ပြောင်းလဲပြီးပါပြီ', `${selectedUser.name} ၏ Password အသစ် သတ်မှတ်ပြီးပါပြီ`);
         setIsResetPasswordOpen(false);
       } else {
-        error('Failed', res.message || 'Could not reset password');
+        error('မအောင်မြင်ပါ', res.message || 'Password ပြောင်းလဲ၍မရပါ');
       }
     } catch {
-      error('Error', 'Reset password failed');
+      error('ချို့ယွင်းချက်', 'Password ပြောင်းလဲခြင်း မအောင်မြင်ပါ');
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDeleteUser = async (user: UserProfile) => {
-    if (!confirm(`Are you sure you want to delete user '${user.name}'? This action cannot be undone.`)) {
+    if (!confirm(`အသုံးပြုသူ '${user.name}' အား စနစ်မှ အပြီးတိုင် ဖျက်ပစ်ရန် သေချာပါသလား?`)) {
       return;
     }
 
     try {
       const res = await apiFetch(`/api/users/${user.id}`, { method: 'DELETE' });
       if (res.success) {
-        success('Deleted', 'User deleted successfully');
+        success('ဖျက်ပစ်ပြီးပါပြီ', 'အသုံးပြုသူ အကောင့်ကို ဖျက်ပစ်ပြီးပါပြီ');
         fetchAllData();
       } else {
-        error('Failed', res.message || 'Could not delete user');
+        error('ဖျက်၍မရပါ', res.message || 'အသုံးပြုသူအား ဖျက်၍မရပါ');
       }
     } catch {
-      error('Error', 'Delete user failed');
+      error('ချို့ယွင်းချက်', 'အသုံးပြုသူအား ဖျက်ပစ်ရာတွင် ချို့ယွင်းချက်ဖြစ်ပေါ်ပါသည်');
     }
   };
 
@@ -317,7 +317,7 @@ export default function UsersPage() {
   const handleCreateRole = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!roleForm.name) {
-      error('Validation Error', 'Role name is required');
+      error('လိုအပ်ချက်', 'Role အမည် ရိုက်ထည့်ရန် လိုအပ်ပါသည်');
       return;
     }
 
@@ -335,15 +335,15 @@ export default function UsersPage() {
       });
 
       if (res.success) {
-        success('Success', 'Custom role created successfully');
+        success('အောင်မြင်ပါသည်', 'Role အသစ် အောင်မြင်စွာ ဖန်တီးပြီးပါပြီ');
         setIsCreateRoleOpen(false);
         setRoleForm({ name: '', description: '', selectedPermissionIds: [] });
         fetchAllData();
       } else {
-        error('Failed', res.message || 'Could not create role');
+        error('မအောင်မြင်ပါ', res.message || 'Role အသစ် ဖန်တီး၍မရပါ');
       }
     } catch {
-      error('Error', 'Create role failed');
+      error('ချို့ယွင်းချက်', 'Role အသစ် ဖန်တီးရာတွင် ချို့ယွင်းချက်ဖြစ်ပေါ်ပါသည်');
     } finally {
       setSubmitting(false);
     }
@@ -392,32 +392,32 @@ export default function UsersPage() {
       });
 
       if (res.success) {
-        success('Success', 'Role updated successfully');
+        success('အောင်မြင်ပါသည်', 'Role လုပ်ပိုင်ခွင့်များ ပြင်ဆင်ပြီးပါပြီ');
         setIsEditRoleOpen(false);
         fetchAllData();
       } else {
-        error('Failed', res.message || 'Could not update role');
+        error('မအောင်မြင်ပါ', res.message || 'Role ပြင်ဆင်၍မရပါ');
       }
     } catch {
-      error('Error', 'Update role failed');
+      error('ချို့ယွင်းချက်', 'Role ပြင်ဆင်ရာတွင် ချို့ယွင်းချက်ဖြစ်ပေါ်ပါသည်');
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDeleteRole = async (role: Role) => {
-    if (!confirm(`Are you sure you want to delete role '${role.name}'?`)) return;
+    if (!confirm(`Role '${role.name}' အား ဖျက်ပစ်ရန် သေချာပါသလား?`)) return;
 
     try {
       const res = await apiFetch(`/api/roles/${role.id}`, { method: 'DELETE' });
       if (res.success) {
-        success('Deleted', 'Role deleted successfully');
+        success('ဖျက်ပစ်ပြီးပါပြီ', 'Role အား အောင်မြင်စွာ ဖျက်ပစ်ပြီးပါပြီ');
         fetchAllData();
       } else {
-        error('Failed', res.message || 'Cannot delete role');
+        error('ဖျက်၍မရပါ', res.message || 'Role အား ဖျက်ပစ်၍ မရပါ');
       }
     } catch {
-      error('Error', 'Delete role failed');
+      error('ချို့ယွင်းချက်', 'Role ဖျက်ပစ်ရာတွင် ချို့ယွင်းချက်ဖြစ်ပေါ်ပါသည်');
     }
   };
 
@@ -502,10 +502,10 @@ export default function UsersPage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2.5">
             <ShieldCheck className="h-6 w-6 text-blue-600" />
-            Users & Access Control
+            အသုံးပြုသူများနှင့် လုပ်ပိုင်ခွင့် စီမံခန့်ခွဲမှု
           </h1>
           <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-            Enterprise Role-Based Access Control (RBAC), Staff Directory & Permissions Matrix
+            လုပ်ငန်းသုံး အခန်းကဏ္ဍအလိုက် လုပ်ပိုင်ခွင့်သတ်မှတ်ခြင်း (RBAC)၊ ဝန်ထမ်းစာရင်းနှင့် ခွင့်ပြုချက်ဇယား
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -517,7 +517,7 @@ export default function UsersPage() {
             className="h-9 gap-1.5 text-xs cursor-pointer"
           >
             <RefreshCw className={cn('h-3.5 w-3.5', loading && 'animate-spin')} />
-            Refresh
+            ပြန်လည်ရယူရန်
           </Button>
           {activeTab === 'users' && (
             <Button
@@ -525,7 +525,7 @@ export default function UsersPage() {
               onClick={() => setIsCreateUserOpen(true)}
               className="h-9 gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs cursor-pointer shadow-xs"
             >
-              <Plus className="h-4 w-4" /> Add User
+              <Plus className="h-4 w-4" /> + ဝန်ထမ်းအသစ် ဖွင့်ရန်
             </Button>
           )}
           {activeTab === 'roles' && (
@@ -534,7 +534,7 @@ export default function UsersPage() {
               onClick={() => setIsCreateRoleOpen(true)}
               className="h-9 gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs cursor-pointer shadow-xs"
             >
-              <Plus className="h-4 w-4" /> Add Custom Role
+              <Plus className="h-4 w-4" /> + Role အသစ် ဖန်တီးရန်
             </Button>
           )}
         </div>
@@ -544,46 +544,46 @@ export default function UsersPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div className="bg-white dark:bg-zinc-900 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Total Users</span>
+            <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">စုစုပေါင်း အသုံးပြုသူ</span>
             <div className="h-8 w-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center text-blue-600 dark:text-blue-400">
               <Users className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100">{totalUsers}</div>
-          <div className="mt-1 text-[11px] text-zinc-400">Registered system accounts</div>
+          <div className="mt-1 text-[11px] text-zinc-400">စနစ်တွင် မှတ်ပုံတင်ထားသော အကောင့်များ</div>
         </div>
 
         <div className="bg-white dark:bg-zinc-900 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Active Accounts</span>
+            <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">အသုံးပြုခွင့် ရရှိထားသူများ</span>
             <div className="h-8 w-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <UserCheck className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">{activeUsers}</div>
-          <div className="mt-1 text-[11px] text-zinc-400">{Math.round((activeUsers / (totalUsers || 1)) * 100)}% active rate</div>
+          <div className="mt-1 text-[11px] text-zinc-400">{Math.round((activeUsers / (totalUsers || 1)) * 100)}% အသုံးပြုဆဲ အကောင့်များ</div>
         </div>
 
         <div className="bg-white dark:bg-zinc-900 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">System Roles</span>
+            <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">သတ်မှတ်ထားသော Roles</span>
             <div className="h-8 w-8 rounded-lg bg-purple-50 dark:bg-purple-950/60 flex items-center justify-center text-purple-600 dark:text-purple-400">
               <ShieldCheck className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100">{totalRoles}</div>
-          <div className="mt-1 text-[11px] text-zinc-400">{allPermissions.length} granular permissions</div>
+          <div className="mt-1 text-[11px] text-zinc-400">ခွင့်ပြုချက် {allPermissions.length} မျိုး သတ်မှတ်ထားသည်</div>
         </div>
 
         <div className="bg-white dark:bg-zinc-900 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Admins</span>
+            <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">ပင်မ အက်ဒမင်များ (Admins)</span>
             <div className="h-8 w-8 rounded-lg bg-amber-50 dark:bg-amber-950/60 flex items-center justify-center text-amber-600 dark:text-amber-400">
               <KeyRound className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-2 text-2xl font-bold text-amber-600 dark:text-amber-400">{adminUsers}</div>
-          <div className="mt-1 text-[11px] text-zinc-400">Full system access</div>
+          <div className="mt-1 text-[11px] text-zinc-400">စနစ်တစ်ခုလုံး စီမံခန့်ခွဲခွင့် ရှိသည်</div>
         </div>
       </div>
 
@@ -599,7 +599,7 @@ export default function UsersPage() {
           )}
         >
           <Users className="h-4 w-4" />
-          Staff Directory ({users.length})
+          👥 ဝန်ထမ်းနှင့် အသုံးပြုသူများ စာရင်း ({users.length})
         </button>
         <button
           onClick={() => setActiveTab('roles')}
@@ -611,7 +611,7 @@ export default function UsersPage() {
           )}
         >
           <ShieldCheck className="h-4 w-4" />
-          Roles & Permissions ({roles.length})
+          🛡️ အခန်းကဏ္ဍနှင့် လုပ်ပိုင်ခွင့်များ ({roles.length})
         </button>
         <button
           onClick={() => setActiveTab('matrix')}
@@ -623,7 +623,7 @@ export default function UsersPage() {
           )}
         >
           <Eye className="h-4 w-4" />
-          Permissions Matrix
+          👁️ လုပ်ပိုင်ခွင့် အသေးစိတ် ဇယား (Permissions Matrix)
         </button>
       </div>
 
@@ -635,7 +635,7 @@ export default function UsersPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
               <Input
-                placeholder="Search by name, email, phone..."
+                placeholder="အမည်၊ အီးမေးလ် သို့မဟုတ် ဖုန်းနံပါတ်ဖြင့် ရှာဖွေရန်..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 className="pl-9 h-9 text-xs"
@@ -647,7 +647,7 @@ export default function UsersPage() {
                 onChange={e => setRoleFilter(e.target.value)}
                 className="h-9 px-3 text-xs rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 cursor-pointer"
               >
-                <option value="ALL">All Roles</option>
+                <option value="ALL">Roles အားလုံး</option>
                 {roles.map(r => (
                   <option key={r.id} value={String(r.id)}>
                     {r.name}
@@ -660,7 +660,7 @@ export default function UsersPage() {
                 onChange={e => setBranchFilter(e.target.value)}
                 className="h-9 px-3 text-xs rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 cursor-pointer"
               >
-                <option value="ALL">All Branches</option>
+                <option value="ALL">ဌာနခွဲ အားလုံး</option>
                 {branches.map(b => (
                   <option key={b.id} value={String(b.id)}>
                     {b.name}
@@ -673,9 +673,9 @@ export default function UsersPage() {
                 onChange={e => setStatusFilter(e.target.value)}
                 className="h-9 px-3 text-xs rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 cursor-pointer"
               >
-                <option value="ALL">All Status</option>
-                <option value="ACTIVE">Active</option>
-                <option value="INACTIVE">Disabled</option>
+                <option value="ALL">အခြေအနေ အားလုံး</option>
+                <option value="ACTIVE">အသုံးပြုခွင့် ရရှိထားသူ</option>
+                <option value="INACTIVE">အကောင့်ပိတ်ထားသူ</option>
               </select>
             </div>
           </div>
@@ -685,19 +685,19 @@ export default function UsersPage() {
             <table className="w-full text-left text-xs">
               <thead className="bg-zinc-50 dark:bg-zinc-800/60 text-zinc-500 border-b border-zinc-200 dark:border-zinc-800 uppercase tracking-wider font-semibold">
                 <tr>
-                  <th className="px-4 py-3">User</th>
-                  <th className="px-4 py-3">Contact</th>
-                  <th className="px-4 py-3">Role</th>
-                  <th className="px-4 py-3">Branch</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
+                  <th className="px-4 py-3">အသုံးပြုသူ အမည် / အီးမေးလ်</th>
+                  <th className="px-4 py-3">ဖုန်း / ဆက်သွယ်ရန်</th>
+                  <th className="px-4 py-3">အခန်းကဏ္ဍ (Role)</th>
+                  <th className="px-4 py-3">တာဝန်ကျ ဌာနခွဲ</th>
+                  <th className="px-4 py-3">အခြေအနေ</th>
+                  <th className="px-4 py-3 text-right">လုပ်ဆောင်ချက်</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                 {filteredUsers.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-zinc-500">
-                      No users match the search criteria.
+                      ရှာဖွေမှုနှင့် ကိုက်ညီသော အသုံးပြုသူ မရှိပါ။
                     </td>
                   </tr>
                 ) : (
@@ -738,7 +738,7 @@ export default function UsersPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">
-                          {branch ? `${branch.name} (${branch.code})` : 'All Branches'}
+                          {branch ? `${branch.name} (${branch.code})` : 'ဌာနခွဲအားလုံး'}
                         </td>
                         <td className="px-4 py-3">
                           <span
@@ -750,7 +750,7 @@ export default function UsersPage() {
                             )}
                           >
                             {u.isActive ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
-                            {u.isActive ? 'Active' : 'Disabled'}
+                            {u.isActive ? 'အသုံးပြုဆဲ' : 'ပိတ်ထားသည်'}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-right">
@@ -760,7 +760,7 @@ export default function UsersPage() {
                               size="sm"
                               onClick={() => handleOpenEditUser(u)}
                               className="h-7 w-7 p-0 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer"
-                              title="Edit user profile"
+                              title="အချက်အလက် ပြင်ဆင်ရန်"
                             >
                               <Edit2 className="h-3.5 w-3.5" />
                             </Button>
@@ -769,7 +769,7 @@ export default function UsersPage() {
                               size="sm"
                               onClick={() => handleOpenResetPassword(u)}
                               className="h-7 w-7 p-0 text-amber-600 hover:text-amber-700 dark:hover:text-amber-400 cursor-pointer"
-                              title="Reset password"
+                              title="Password ပြန်သတ်မှတ်ရန်"
                             >
                               <Lock className="h-3.5 w-3.5" />
                             </Button>
@@ -781,7 +781,7 @@ export default function UsersPage() {
                                 'h-7 w-7 p-0 cursor-pointer',
                                 u.isActive ? 'text-zinc-400 hover:text-red-600' : 'text-emerald-600 hover:text-emerald-700'
                               )}
-                              title={u.isActive ? 'Deactivate user' : 'Activate user'}
+                              title={u.isActive ? 'အကောင့်ပိတ်သိမ်းရန်' : 'အကောင့်ဖွင့်ပေးရန်'}
                             >
                               {u.isActive ? <XCircle className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
                             </Button>
@@ -790,7 +790,7 @@ export default function UsersPage() {
                               size="sm"
                               onClick={() => handleDeleteUser(u)}
                               className="h-7 w-7 p-0 text-red-500 hover:text-red-700 cursor-pointer"
-                              title="Delete user"
+                              title="အကောင့်ဖျက်ပစ်ရန်"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
@@ -808,7 +808,7 @@ export default function UsersPage() {
           <div className="md:hidden space-y-3">
             {filteredUsers.length === 0 ? (
               <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl text-center text-zinc-500 text-xs">
-                No users found.
+                အသုံးပြုသူ မရှိသေးပါ။
               </div>
             ) : (
               filteredUsers.map(u => {
@@ -837,22 +837,22 @@ export default function UsersPage() {
                             : 'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300'
                         )}
                       >
-                        {u.isActive ? 'Active' : 'Disabled'}
+                        {u.isActive ? 'အသုံးပြုဆဲ' : 'ပိတ်ထားသည်'}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-zinc-100 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300">
                       <div>
-                        <span className="text-zinc-400 text-[10px] block">ROLE</span>
+                        <span className="text-zinc-400 text-[10px] block">အခန်းကဏ္ဍ (ROLE)</span>
                         <span className="font-medium">{role?.name || `Role #${u.roleId}`}</span>
                       </div>
                       <div>
-                        <span className="text-zinc-400 text-[10px] block">BRANCH</span>
-                        <span className="font-medium">{branch ? branch.name : 'HQ'}</span>
+                        <span className="text-zinc-400 text-[10px] block">တာဝန်ကျ ဌာနခွဲ</span>
+                        <span className="font-medium">{branch ? branch.name : 'ရုံးချုပ်'}</span>
                       </div>
                       {u.phoneNumber && (
                         <div className="col-span-2">
-                          <span className="text-zinc-400 text-[10px] block">PHONE</span>
+                          <span className="text-zinc-400 text-[10px] block">ဖုန်းနံပါတ်</span>
                           <span>{u.phoneNumber}</span>
                         </div>
                       )}
@@ -865,7 +865,7 @@ export default function UsersPage() {
                         onClick={() => handleOpenEditUser(u)}
                         className="h-8 text-xs gap-1"
                       >
-                        <Edit2 className="h-3 w-3" /> Edit
+                        <Edit2 className="h-3 w-3" /> ပြင်ဆင်မည်
                       </Button>
                       <Button
                         variant="outline"
@@ -873,7 +873,7 @@ export default function UsersPage() {
                         onClick={() => handleOpenResetPassword(u)}
                         className="h-8 text-xs gap-1 text-amber-600"
                       >
-                        <Lock className="h-3 w-3" /> Reset Pass
+                        <Lock className="h-3 w-3" /> Password
                       </Button>
                       <Button
                         variant="outline"
@@ -881,7 +881,7 @@ export default function UsersPage() {
                         onClick={() => handleToggleUserStatus(u)}
                         className={cn('h-8 text-xs', u.isActive ? 'text-red-600' : 'text-emerald-600')}
                       >
-                        {u.isActive ? 'Disable' : 'Enable'}
+                        {u.isActive ? 'ပိတ်မည်' : 'ဖွင့်မည်'}
                       </Button>
                     </div>
                   </div>
@@ -907,31 +907,31 @@ export default function UsersPage() {
                       <h3 className="font-bold text-sm text-zinc-900 dark:text-zinc-100">{role.name}</h3>
                       {role.isSystem ? (
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300">
-                          System Role
+                          စနစ်သတ်မှတ် Role
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
-                          Custom
+                          စိတ်ကြိုက်သတ်မှတ် Role
                         </span>
                       )}
                     </div>
                   </div>
 
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2 line-clamp-2">
-                    {role.description || 'No description provided.'}
+                    {role.description || 'ဖော်ပြချက် မရှိပါ။'}
                   </p>
 
                   <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs">
                     <div>
-                      <span className="text-zinc-400 text-[10px] block">ASSIGNED USERS</span>
+                      <span className="text-zinc-400 text-[10px] block">တာဝန်ပေးထားသူ</span>
                       <span className="font-semibold text-zinc-800 dark:text-zinc-200">
-                        {role.userCount ?? users.filter(u => u.roleId === role.id).length} users
+                        {role.userCount ?? users.filter(u => u.roleId === role.id).length} ဦး
                       </span>
                     </div>
                     <div>
-                      <span className="text-zinc-400 text-[10px] block">PERMISSIONS</span>
+                      <span className="text-zinc-400 text-[10px] block">လုပ်ပိုင်ခွင့် ခွင့်ပြုချက်</span>
                       <span className="font-semibold text-zinc-800 dark:text-zinc-200">
-                        {role.permissionCount ?? (role.permissions || []).length} granted
+                        {role.permissionCount ?? (role.permissions || []).length} မျိုး
                       </span>
                     </div>
                   </div>
@@ -944,7 +944,7 @@ export default function UsersPage() {
                     onClick={() => handleOpenEditRole(role)}
                     className="h-8 text-xs gap-1.5 cursor-pointer"
                   >
-                    <Edit2 className="h-3 w-3" /> Edit Permissions
+                    <Edit2 className="h-3 w-3" /> လုပ်ပိုင်ခွင့် ပြင်ဆင်မည်
                   </Button>
                   {!role.isSystem && (
                     <Button
@@ -952,7 +952,7 @@ export default function UsersPage() {
                       size="sm"
                       onClick={() => handleDeleteRole(role)}
                       className="h-8 w-8 p-0 text-red-500 hover:text-red-700 cursor-pointer"
-                      title="Delete role"
+                      title="Role ဖျက်ပစ်မည်"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
@@ -970,8 +970,8 @@ export default function UsersPage() {
           <table className="w-full text-left text-xs border-collapse">
             <thead className="bg-zinc-50 dark:bg-zinc-800/60 text-zinc-600 dark:text-zinc-300 font-bold border-b border-zinc-200 dark:border-zinc-800">
               <tr>
-                <th className="px-4 py-3 min-w-[200px]">Module / Permission</th>
-                <th className="px-4 py-3 min-w-[120px]">Code</th>
+                <th className="px-4 py-3 min-w-[200px]">လုပ်ငန်းကဏ္ဍ / လုပ်ပိုင်ခွင့်အမည်</th>
+                <th className="px-4 py-3 min-w-[120px]">ကုဒ် (Code)</th>
                 {roles.map(r => (
                   <th key={r.id} className="px-3 py-3 text-center min-w-[100px]">
                     <div className="truncate max-w-[100px]">{r.name}</div>
@@ -985,7 +985,7 @@ export default function UsersPage() {
                   {/* Module Header Row */}
                   <tr className="bg-zinc-100/80 dark:bg-zinc-800/40 font-bold text-zinc-700 dark:text-zinc-200">
                     <td colSpan={2 + roles.length} className="px-4 py-2 text-[11px] tracking-wider uppercase">
-                      📁 Module: {module} ({perms.length} actions)
+                      📁 လုပ်ငန်းကဏ္ဍ: {module} ({perms.length} မျိုး)
                     </td>
                   </tr>
                   {/* Permission Rows */}
@@ -1025,17 +1025,17 @@ export default function UsersPage() {
       {isCreateUserOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 overflow-y-auto">
           <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 max-w-md w-full shadow-2xl animate-in fade-in-50 zoom-in-95 my-8">
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-1">Create New Staff User</h2>
-            <p className="text-xs text-zinc-500 mb-4">Register account with tenant-scoped role & branch assignment</p>
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-1">ဝန်ထမ်း အသုံးပြုသူ အသစ်ဖွင့်ရန်</h2>
+            <p className="text-xs text-zinc-500 mb-4">လုပ်ငန်းခွဲနှင့် Role အလိုက် အကောင့်သတ်မှတ်ဖွင့်လှစ်ခြင်း</p>
 
             <form onSubmit={handleCreateUser} className="space-y-3.5 text-xs">
               <div>
                 <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                  Full Name <span className="text-red-500">*</span>
+                  အမည်အပြည့်အစုံ <span className="text-red-500">*</span>
                 </label>
                 <Input
                   required
-                  placeholder="e.g. Daw Aye Aye"
+                  placeholder="ဥပမာ - ဒေါ်အေးအေး"
                   value={userForm.name}
                   onChange={e => setUserForm({ ...userForm, name: e.target.value })}
                 />
@@ -1043,12 +1043,12 @@ export default function UsersPage() {
 
               <div>
                 <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                  Email Address <span className="text-red-500">*</span>
+                  အီးမေးလ် လိပ်စာ <span className="text-red-500">*</span>
                 </label>
                 <Input
                   required
                   type="email"
-                  placeholder="e.g. staff@demo.com"
+                  placeholder="ဥပမာ - staff@nayaera.com"
                   value={userForm.email}
                   onChange={e => setUserForm({ ...userForm, email: e.target.value })}
                 />
@@ -1061,7 +1061,7 @@ export default function UsersPage() {
                 <Input
                   required
                   type="password"
-                  placeholder="Min 6 characters"
+                  placeholder="အနည်းဆုံး စာလုံးရေ ၆ လုံး"
                   value={userForm.password}
                   onChange={e => setUserForm({ ...userForm, password: e.target.value })}
                 />
@@ -1070,7 +1070,7 @@ export default function UsersPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                    Role <span className="text-red-500">*</span>
+                    အခန်းကဏ္ဍ (Role) <span className="text-red-500">*</span>
                   </label>
                   <select
                     required
@@ -1078,7 +1078,7 @@ export default function UsersPage() {
                     onChange={e => setUserForm({ ...userForm, roleId: e.target.value })}
                     className="w-full h-9 px-3 text-xs rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
                   >
-                    <option value="">Select Role</option>
+                    <option value="">Role ရွေးချယ်ပါ</option>
                     {roles.map(r => (
                       <option key={r.id} value={String(r.id)}>
                         {r.name}
@@ -1088,13 +1088,13 @@ export default function UsersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">Branch</label>
+                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">တာဝန်ကျ ဌာနခွဲ</label>
                   <select
                     value={userForm.branchId}
                     onChange={e => setUserForm({ ...userForm, branchId: e.target.value })}
                     className="w-full h-9 px-3 text-xs rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
                   >
-                    <option value="">Head Office (Default)</option>
+                    <option value="">ရုံးချုပ် (မူလသတ်မှတ်ချက်)</option>
                     {branches.map(b => (
                       <option key={b.id} value={String(b.id)}>
                         {b.name} ({b.code})
@@ -1105,7 +1105,7 @@ export default function UsersPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">Phone Number</label>
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">ဖုန်းနံပါတ်</label>
                 <Input
                   placeholder="09..."
                   value={userForm.phoneNumber}
@@ -1114,9 +1114,9 @@ export default function UsersPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">Address</label>
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">နေရပ်လိပ်စာ</label>
                 <Input
-                  placeholder="Township, City"
+                  placeholder="မြို့နယ်၊ မြို့"
                   value={userForm.address}
                   onChange={e => setUserForm({ ...userForm, address: e.target.value })}
                 />
@@ -1130,10 +1130,10 @@ export default function UsersPage() {
                   onClick={() => setIsCreateUserOpen(false)}
                   disabled={submitting}
                 >
-                  Cancel
+                  မလုပ်တော့ပါ
                 </Button>
-                <Button type="submit" size="sm" disabled={submitting} className="bg-blue-600 text-white">
-                  {submitting ? 'Creating...' : 'Create User'}
+                <Button type="submit" size="sm" disabled={submitting} className="bg-blue-600 hover:bg-blue-700 text-white">
+                  {submitting ? 'ဖန်တီးနေသည်...' : 'အသုံးပြုသူ ဖွင့်မည်'}
                 </Button>
               </div>
             </form>
@@ -1145,12 +1145,12 @@ export default function UsersPage() {
       {isEditUserOpen && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 overflow-y-auto">
           <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 max-w-md w-full shadow-2xl animate-in fade-in-50 zoom-in-95 my-8">
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-1">Edit User Profile</h2>
-            <p className="text-xs text-zinc-500 mb-4">Modify staff details and role assignments</p>
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-1">အသုံးပြုသူ အချက်အလက် ပြင်ဆင်ရန်</h2>
+            <p className="text-xs text-zinc-500 mb-4">ဝန်ထမ်း အချက်အလက်နှင့် Role ခွဲဝေမှုများ ပြင်ဆင်ခြင်း</p>
 
             <form onSubmit={handleUpdateUser} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">Full Name</label>
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">အမည်အပြည့်အစုံ</label>
                 <Input
                   required
                   value={editUserForm.name}
@@ -1159,7 +1159,7 @@ export default function UsersPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">Email Address</label>
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">အီးမေးလ် လိပ်စာ</label>
                 <Input
                   required
                   type="email"
@@ -1170,7 +1170,7 @@ export default function UsersPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">Role</label>
+                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">အခန်းကဏ္ဍ (Role)</label>
                   <select
                     value={editUserForm.roleId}
                     onChange={e => setEditUserForm({ ...editUserForm, roleId: e.target.value })}
@@ -1185,16 +1185,16 @@ export default function UsersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">Branch</label>
+                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">တာဝန်ကျ ဌာနခွဲ</label>
                   <select
                     value={editUserForm.branchId}
                     onChange={e => setEditUserForm({ ...editUserForm, branchId: e.target.value })}
                     className="w-full h-9 px-3 text-xs rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
                   >
-                    <option value="">Head Office</option>
+                    <option value="">ရုံးချုပ်</option>
                     {branches.map(b => (
                       <option key={b.id} value={String(b.id)}>
-                        {b.name}
+                        {b.name} ({b.code})
                       </option>
                     ))}
                   </select>
@@ -1202,7 +1202,7 @@ export default function UsersPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">Phone Number</label>
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">ဖုန်းနံပါတ်</label>
                 <Input
                   value={editUserForm.phoneNumber}
                   onChange={e => setEditUserForm({ ...editUserForm, phoneNumber: e.target.value })}
@@ -1210,7 +1210,7 @@ export default function UsersPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">Address</label>
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">နေရပ်လိပ်စာ</label>
                 <Input
                   value={editUserForm.address}
                   onChange={e => setEditUserForm({ ...editUserForm, address: e.target.value })}
@@ -1225,10 +1225,10 @@ export default function UsersPage() {
                   onClick={() => setIsEditUserOpen(false)}
                   disabled={submitting}
                 >
-                  Cancel
+                  မလုပ်တော့ပါ
                 </Button>
-                <Button type="submit" size="sm" disabled={submitting} className="bg-blue-600 text-white">
-                  {submitting ? 'Saving...' : 'Save Changes'}
+                <Button type="submit" size="sm" disabled={submitting} className="bg-blue-600 hover:bg-blue-700 text-white">
+                  {submitting ? 'သိမ်းဆည်းနေသည်...' : 'အချက်အလက် သိမ်းမည်'}
                 </Button>
               </div>
             </form>
@@ -1240,18 +1240,18 @@ export default function UsersPage() {
       {isResetPasswordOpen && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
           <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 max-w-sm w-full shadow-2xl animate-in fade-in-50 zoom-in-95">
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-1">Reset Password</h2>
-            <p className="text-xs text-zinc-500 mb-4">Set a new password for '{selectedUser.name}'</p>
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-1">Password အသစ် ပြန်လည်သတ်မှတ်ရန်</h2>
+            <p className="text-xs text-zinc-500 mb-4">'{selectedUser.name}' အတွက် Password အသစ် သတ်မှတ်ပေးခြင်း</p>
 
             <form onSubmit={handleResetPassword} className="space-y-3 text-xs">
               <div>
                 <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                  New Password (min 6 chars)
+                  Password အသစ် (အနည်းဆုံး စာလုံးရေ ၆ လုံး)
                 </label>
                 <Input
                   required
                   type="password"
-                  placeholder="Enter new password"
+                  placeholder="Password အသစ် ရိုက်ထည့်ပါ"
                   value={resetPasswordForm.newPassword}
                   onChange={e => setResetPasswordForm({ ...resetPasswordForm, newPassword: e.target.value })}
                 />
@@ -1259,12 +1259,12 @@ export default function UsersPage() {
 
               <div>
                 <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                  Confirm New Password
+                  Password အသစ် ထပ်မံရိုက်ထည့်ပါ
                 </label>
                 <Input
                   required
                   type="password"
-                  placeholder="Confirm new password"
+                  placeholder="Password အသစ် ပြန်ရိုက်ပါ"
                   value={resetPasswordForm.confirmPassword}
                   onChange={e => setResetPasswordForm({ ...resetPasswordForm, confirmPassword: e.target.value })}
                 />
@@ -1278,10 +1278,10 @@ export default function UsersPage() {
                   onClick={() => setIsResetPasswordOpen(false)}
                   disabled={submitting}
                 >
-                  Cancel
+                  မလုပ်တော့ပါ
                 </Button>
-                <Button type="submit" size="sm" disabled={submitting} className="bg-amber-600 text-white">
-                  {submitting ? 'Resetting...' : 'Reset Password'}
+                <Button type="submit" size="sm" disabled={submitting} className="bg-amber-600 hover:bg-amber-700 text-white">
+                  {submitting ? 'လုပ်ဆောင်နေသည်...' : 'Password ပြောင်းမည်'}
                 </Button>
               </div>
             </form>
@@ -1293,26 +1293,26 @@ export default function UsersPage() {
       {isCreateRoleOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 overflow-y-auto">
           <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 max-w-2xl w-full shadow-2xl animate-in fade-in-50 zoom-in-95 my-8 max-h-[90vh] flex flex-col">
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-1">Create Custom Role</h2>
-            <p className="text-xs text-zinc-500 mb-4">Define a new role and choose specific module permissions</p>
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-1">Role အသစ် ဖန်တီးရန်</h2>
+            <p className="text-xs text-zinc-500 mb-4">အခန်းကဏ္ဍ အမည်နှင့် လုပ်ငန်းခွင့်ပြုချက်များ ရွေးချယ်သတ်မှတ်ခြင်း</p>
 
             <form onSubmit={handleCreateRole} className="space-y-4 text-xs flex-1 overflow-y-auto pr-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                    Role Name <span className="text-red-500">*</span>
+                    Role အမည် <span className="text-red-500">*</span>
                   </label>
                   <Input
                     required
-                    placeholder="e.g. INVENTORY_SUPERVISOR"
+                    placeholder="ဥပမာ - INVENTORY_SUPERVISOR"
                     value={roleForm.name}
                     onChange={e => setRoleForm({ ...roleForm, name: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">Description</label>
+                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">ဖော်ပြချက်</label>
                   <Input
-                    placeholder="Role responsibilities and scope"
+                    placeholder="တာဝန်နှင့် လုပ်ပိုင်ခွင့် နယ်ပယ်"
                     value={roleForm.description}
                     onChange={e => setRoleForm({ ...roleForm, description: e.target.value })}
                   />
@@ -1321,7 +1321,7 @@ export default function UsersPage() {
 
               <div>
                 <label className="block text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-2">
-                  Select Permissions ({roleForm.selectedPermissionIds.length} selected)
+                  လုပ်ပိုင်ခွင့်များ ရွေးချယ်ပါ ({roleForm.selectedPermissionIds.length} မျိုး ရွေးချယ်ထားသည်)
                 </label>
                 <div className="space-y-3 max-h-72 overflow-y-auto border border-zinc-200 dark:border-zinc-800 rounded-lg p-3">
                   {Object.entries(permissionsGrouped).map(([module, perms]) => {
@@ -1337,7 +1337,7 @@ export default function UsersPage() {
                             onClick={() => toggleModulePermissions(module, false)}
                             className="text-[10px] text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer"
                           >
-                            {allChecked ? 'Deselect All' : 'Select All'}
+                            {allChecked ? 'အားလုံး ပြန်ဖြုတ်မည်' : 'အားလုံး ရွေးမည်'}
                           </button>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
@@ -1381,10 +1381,10 @@ export default function UsersPage() {
                   onClick={() => setIsCreateRoleOpen(false)}
                   disabled={submitting}
                 >
-                  Cancel
+                  မလုပ်တော့ပါ
                 </Button>
-                <Button type="submit" size="sm" disabled={submitting} className="bg-blue-600 text-white">
-                  {submitting ? 'Creating...' : 'Create Role'}
+                <Button type="submit" size="sm" disabled={submitting} className="bg-blue-600 hover:bg-blue-700 text-white">
+                  {submitting ? 'ဖန်တီးနေသည်...' : 'Role အသစ် ဖွင့်မည်'}
                 </Button>
               </div>
             </form>
@@ -1397,18 +1397,18 @@ export default function UsersPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 overflow-y-auto">
           <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 max-w-2xl w-full shadow-2xl animate-in fade-in-50 zoom-in-95 my-8 max-h-[90vh] flex flex-col">
             <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-1">
-              Edit Role: {selectedRole.name}
+              Role ပြင်ဆင်ခြင်း: {selectedRole.name}
             </h2>
             <p className="text-xs text-zinc-500 mb-4">
               {selectedRole.isSystem
-                ? 'System role — you can inspect or reconfigure module permissions'
-                : 'Modify custom role details and permissions'}
+                ? 'စနစ်သတ်မှတ် Role ဖြစ်ပါသည် — လုပ်ပိုင်ခွင့် ခွင့်ပြုချက်များကို စစ်ဆေး/ပြင်ဆင်သတ်မှတ်နိုင်ပါသည်'
+                : 'စိတ်ကြိုက်သတ်မှတ်ထားသော Role အချက်အလက်နှင့် ခွင့်ပြုချက်များ ပြင်ဆင်ခြင်း'}
             </p>
 
             <form onSubmit={handleUpdateRole} className="space-y-4 text-xs flex-1 overflow-y-auto pr-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">Role Name</label>
+                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">Role အမည်</label>
                   <Input
                     disabled={selectedRole.isSystem}
                     value={editRoleForm.name}
@@ -1416,7 +1416,7 @@ export default function UsersPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">Description</label>
+                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">ဖော်ပြချက်</label>
                   <Input
                     value={editRoleForm.description}
                     onChange={e => setEditRoleForm({ ...editRoleForm, description: e.target.value })}
@@ -1426,7 +1426,7 @@ export default function UsersPage() {
 
               <div>
                 <label className="block text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-2">
-                  Role Permissions ({editRoleForm.selectedPermissionIds.length} granted)
+                  Role လုပ်ပိုင်ခွင့်များ ({editRoleForm.selectedPermissionIds.length} မျိုး ခွင့်ပြုထားသည်)
                 </label>
                 <div className="space-y-3 max-h-72 overflow-y-auto border border-zinc-200 dark:border-zinc-800 rounded-lg p-3">
                   {Object.entries(permissionsGrouped).map(([module, perms]) => {
@@ -1442,7 +1442,7 @@ export default function UsersPage() {
                             onClick={() => toggleModulePermissions(module, true)}
                             className="text-[10px] text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer"
                           >
-                            {allChecked ? 'Deselect All' : 'Select All'}
+                            {allChecked ? 'အားလုံး ပြန်ဖြုတ်မည်' : 'အားလုံး ရွေးမည်'}
                           </button>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
@@ -1486,10 +1486,10 @@ export default function UsersPage() {
                   onClick={() => setIsEditRoleOpen(false)}
                   disabled={submitting}
                 >
-                  Cancel
+                  မလုပ်တော့ပါ
                 </Button>
-                <Button type="submit" size="sm" disabled={submitting} className="bg-blue-600 text-white">
-                  {submitting ? 'Saving...' : 'Save Permissions'}
+                <Button type="submit" size="sm" disabled={submitting} className="bg-blue-600 hover:bg-blue-700 text-white">
+                  {submitting ? 'သိမ်းဆည်းနေသည်...' : 'လုပ်ပိုင်ခွင့်များ သိမ်းမည်'}
                 </Button>
               </div>
             </form>
