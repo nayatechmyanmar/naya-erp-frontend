@@ -136,7 +136,7 @@ export default function ReportsPage() {
       case 'shipments':
         return 'Sales Team Logistics & Dispatch Summary (အရောင်းအဖွဲ့အလိုက် ပို့ဆောင်မှု အစီရင်ခံစာ)';
       default:
-        return 'Enterprise Management Audit Report';
+        return 'လုပ်ငန်းသုံး စီမံခန့်ခွဲမှု စာရင်းအစီရင်ခံစာ';
     }
   };
 
@@ -186,24 +186,24 @@ export default function ReportsPage() {
             </h1>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
-            Sales analytics, stock valuation, spend audit, cash flow, and trial balance
+            အရောင်းစစ်တမ်း၊ စတော့တန်ဖိုး၊ ဝယ်ယူမှုစာရင်း၊ ငွေစီးဆင်းမှုနှင့် စမ်းသပ်ရှင်းတမ်း အစီရင်ခံစာများ
           </p>
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-          <Button variant="outline" size="sm" onClick={loadReportsData} className="gap-1.5 h-8 text-xs shrink-0">
+          <Button variant="outline" size="sm" onClick={loadReportsData} className="gap-1.5 h-8 text-xs shrink-0 cursor-pointer">
             <RefreshCw className={isLoading ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />
-            <span className="hidden sm:inline">Refresh (ပြန်ဖွင့်)</span>
-            <span className="sm:hidden">Refresh</span>
+            <span className="hidden sm:inline">ပြန်လည်ရယူရန်</span>
+            <span className="sm:hidden">ပြန်ရယူ</span>
           </Button>
           <Button
             variant="primary"
             size="sm"
             onClick={() => setPrintDialogOpen(true)}
-            className="gap-1.5 h-8 text-xs bg-blue-600 hover:bg-blue-700 shrink-0"
+            className="gap-1.5 h-8 text-xs bg-blue-600 hover:bg-blue-700 shrink-0 cursor-pointer"
           >
             <Printer className="h-3.5 w-3.5" />
-            <span>Print / Export PDF (ပရင့်ထုတ်ရန်)</span>
+            <span>ပရင့် / PDF ထုတ်ယူရန်</span>
           </Button>
         </div>
       </div>
@@ -211,10 +211,10 @@ export default function ReportsPage() {
       {/* ─── DATE FILTER BAR ───────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-3 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs shadow-xs no-print">
         <span className="font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
-          <Filter className="h-3.5 w-3.5 text-blue-600" /> Date Range Filter:
+          <Filter className="h-3.5 w-3.5 text-blue-600" /> ရက်စွဲ စစ်ထုတ်ရန်:
         </span>
         <div className="flex items-center gap-1.5">
-          <span className="text-zinc-400 text-[11px]">From:</span>
+          <span className="text-zinc-400 text-[11px]">စတင်ရက်:</span>
           <Input
             type="date"
             className="h-8 text-xs w-36"
@@ -223,7 +223,7 @@ export default function ReportsPage() {
           />
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-zinc-400 text-[11px]">To:</span>
+          <span className="text-zinc-400 text-[11px]">ကုန်ဆုံးရက်:</span>
           <Input
             type="date"
             className="h-8 text-xs w-36"
@@ -236,9 +236,9 @@ export default function ReportsPage() {
             variant="ghost"
             size="sm"
             onClick={() => setDateRange({ from: '', to: '' })}
-            className="h-8 text-xs text-zinc-500 hover:text-zinc-800"
+            className="h-8 text-xs text-zinc-500 hover:text-zinc-800 cursor-pointer"
           >
-            Clear Filter (ရက်စွဲဖျက်ရန်)
+            ရက်စွဲဖျက်ရန်
           </Button>
         )}
       </div>
@@ -248,22 +248,22 @@ export default function ReportsPage() {
         <div className="overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
           <TabsList className="w-max sm:w-full justify-start">
             <TabsTrigger value="sales">
-              📈 Sales Analysis (အရောင်းပိုင်း)
+              📈 အရောင်း စစ်တမ်း (Sales)
             </TabsTrigger>
             <TabsTrigger value="inventory">
-              📦 Stock Summary (စတော့အစီရင်ခံစာ)
+              📦 စတော့ အစီရင်ခံစာ (Stock)
             </TabsTrigger>
             <TabsTrigger value="purchasing">
-              🛒 Procurement (အဝယ်ပိုင်း)
+              🛒 အဝယ် စစ်တမ်း (Procurement)
             </TabsTrigger>
             <TabsTrigger value="cashflow">
-              💵 Cash Flow (ငွေစီးဆင်းမှု)
+              💵 ငွေစီးဆင်းမှု (Cash Flow)
             </TabsTrigger>
             <TabsTrigger value="trial-balance">
-              ⚖️ Trial Balance (စမ်းသပ်ရှင်းတမ်း)
+              ⚖️ စမ်းသပ်ရှင်းတမ်း (Trial Balance)
             </TabsTrigger>
             <TabsTrigger value="shipments">
-              🚚 Team Shipments (ပို့ဆောင်မှုများ)
+              🚚 ပို့ဆောင်မှု မှတ်တမ်း (Shipments)
             </TabsTrigger>
           </TabsList>
         </div>
@@ -273,35 +273,35 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <Card>
               <CardContent className="p-4 space-y-1">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Total Sales Revenue (စုစုပေါင်း ရောင်းရငွေ)</p>
+                <p className="text-xs font-semibold text-zinc-500 uppercase">စုစုပေါင်း ရောင်းရငွေ (Total Revenue)</p>
                 <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-mono">
                   {formatCurrency(salesSummary?.totalRevenue ?? 0)}
                 </p>
                 <p className="text-[11px] text-zinc-400">
-                  From {salesSummary?.totalOrders ?? 0} total sales orders
+                  အရောင်းအမှာစာ စုစုပေါင်း {salesSummary?.totalOrders ?? 0} စောင်မှ
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardContent className="p-4 space-y-1">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Total Orders (အမှာစာ စုစုပေါင်း)</p>
+                <p className="text-xs font-semibold text-zinc-500 uppercase">အမှာစာ စုစုပေါင်း (Total Orders)</p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 font-mono">
                   {salesSummary?.totalOrders ?? 0}
                 </p>
                 <p className="text-[11px] text-emerald-600 font-medium">
-                  {salesSummary?.shippedOrders ?? 0} fully fulfilled
+                  {salesSummary?.shippedOrders ?? 0} စောင် ပို့ဆောင်ပြီး
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardContent className="p-4 space-y-1">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Pending Fulfillment (ပို့ဆောင်ရန် ကျန်)</p>
+                <p className="text-xs font-semibold text-zinc-500 uppercase">ပို့ဆောင်ရန် ကျန်ရှိသော အမှာစာ</p>
                 <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 font-mono">
                   {Math.max((salesSummary?.totalOrders ?? 0) - (salesSummary?.shippedOrders ?? 0), 0)}
                 </p>
-                <p className="text-[11px] text-zinc-400">Awaiting dispatch fulfillment</p>
+                <p className="text-[11px] text-zinc-400">ပို့ဆောင်မှု စောင့်ဆိုင်းဆဲ</p>
               </CardContent>
             </Card>
           </div>
@@ -310,7 +310,7 @@ export default function ReportsPage() {
           <Card>
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                အရောင်းရဆုံး ဖောက်သည်များ
+                အရောင်းရဆုံး ဖောက်သည်များ စာရင်း
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-2">
@@ -325,7 +325,7 @@ export default function ReportsPage() {
                         <span className="font-semibold text-zinc-800 dark:text-zinc-200">{cust.customerName}</span>
                       </div>
                       <div className="flex items-center gap-4">
-                        <span className="text-zinc-500">{cust.orderCount} order(s)</span>
+                        <span className="text-zinc-500">{cust.orderCount} မှာယူမှု</span>
                         <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100">
                           {formatCurrency(cust.totalAmount)}
                         </span>
@@ -334,7 +334,7 @@ export default function ReportsPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-6 text-zinc-400 text-xs">No sales data in selected range.</div>
+                <div className="text-center py-6 text-zinc-400 text-xs">ရွေးချယ်ထားသော ရက်စွဲအတွင်း အရောင်းအချက်အလက် မရှိပါ။</div>
               )}
             </CardContent>
           </Card>
@@ -345,31 +345,31 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <Card>
               <CardContent className="p-4 space-y-1">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Total Tracked Items (စတော့အမျိုးအစား စုစုပေါင်း)</p>
+                <p className="text-xs font-semibold text-zinc-500 uppercase">စတော့အမျိုးအစား စုစုပေါင်း</p>
                 <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 font-mono">
                   {stockSummary?.totalItems ?? 0}
                 </p>
-                <p className="text-[11px] text-zinc-400">Across all warehouses</p>
+                <p className="text-[11px] text-zinc-400">ဂိုဒေါင်အားလုံး စုစုပေါင်း</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardContent className="p-4 space-y-1">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Low Stock Alerts (စတော့နည်း သတိပေးချက်)</p>
+                <p className="text-xs font-semibold text-zinc-500 uppercase">စတော့နည်း သတိပေးချက်</p>
                 <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 font-mono">
                   {stockSummary?.lowStockCount ?? 0}
                 </p>
-                <p className="text-[11px] text-amber-600">Below safety reorder threshold</p>
+                <p className="text-[11px] text-amber-600">အနည်းဆုံးထားရှိရမည့် စတော့ပမာဏအောက် ရောက်ရှိနေသော ပစ္စည်းများ</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardContent className="p-4 space-y-1">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Total Stock Quantity (စုစုပေါင်း လက်ကျန်အရေအတွက်)</p>
+                <p className="text-xs font-semibold text-zinc-500 uppercase">စုစုပေါင်း လက်ကျန်အရေအတွက်</p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 font-mono">
                   {dashboardKpis?.totalStockQty ?? 0}
                 </p>
-                <p className="text-[11px] text-zinc-400">Units available</p>
+                <p className="text-[11px] text-zinc-400">လက်ကျန်ရရှိနိုင်သော အရေအတွက်</p>
               </CardContent>
             </Card>
           </div>
@@ -385,11 +385,11 @@ export default function ReportsPage() {
                 <table className="w-full text-left text-xs">
                   <thead className="bg-zinc-100 dark:bg-zinc-800/60 text-[10px] text-zinc-500 uppercase">
                     <tr>
-                      <th className="p-2.5">Warehouse</th>
-                      <th className="p-2.5">Product Name</th>
-                      <th className="p-2.5">SKU</th>
-                      <th className="p-2.5">Type</th>
-                      <th className="p-2.5 text-right">On Hand Qty</th>
+                      <th className="p-2.5">ဂိုဒေါင် (Warehouse)</th>
+                      <th className="p-2.5">ကုန်ပစ္စည်း အမည်</th>
+                      <th className="p-2.5">ဘားကုဒ် / SKU</th>
+                      <th className="p-2.5">အမျိုးအစား</th>
+                      <th className="p-2.5 text-right">လက်ကျန် အရေအတွက်</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -420,21 +420,21 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Card>
               <CardContent className="p-4 space-y-1">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Total Procurement Spend (စုစုပေါင်း အဝယ်တန်ဖိုး)</p>
+                <p className="text-xs font-semibold text-zinc-500 uppercase">စုစုပေါင်း အဝယ်တန်ဖိုး (Total Procurement Spend)</p>
                 <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 font-mono">
                   {formatCurrency(purchaseSummary?.totalSpend ?? 0)}
                 </p>
-                <p className="text-[11px] text-zinc-400">Across {purchaseSummary?.totalOrders ?? 0} Purchase Orders</p>
+                <p className="text-[11px] text-zinc-400">အဝယ်အမှာစာ စုစုပေါင်း {purchaseSummary?.totalOrders ?? 0} စောင်မှ</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardContent className="p-4 space-y-1">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Received Purchase Orders (လက်ခံပြီး အဝယ်အမှာစာ)</p>
+                <p className="text-xs font-semibold text-zinc-500 uppercase">လက်ခံပြီး အဝယ်အမှာစာများ (Received POs)</p>
                 <p className="text-2xl font-bold text-emerald-600 font-mono">
                   {purchaseSummary?.receivedOrders ?? 0}
                 </p>
-                <p className="text-[11px] text-zinc-400">Fully received goods</p>
+                <p className="text-[11px] text-zinc-400">ပစ္စည်းလက်ခံစစ်ဆေးပြီး အမှာစာများ</p>
               </CardContent>
             </Card>
           </div>
@@ -442,7 +442,7 @@ export default function ReportsPage() {
           <Card>
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                အများဆုံး ဝယ်ယူခဲ့သော ကုန်ပေးသွင်းသူများ
+                အများဆုံး ဝယ်ယူခဲ့သော ကုန်သွင်းသူများ
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-2">
@@ -457,7 +457,7 @@ export default function ReportsPage() {
                         <span className="font-semibold text-zinc-800 dark:text-zinc-200">{supp.supplierName}</span>
                       </div>
                       <div className="flex items-center gap-4">
-                        <span className="text-zinc-500">{supp.orderCount} order(s)</span>
+                        <span className="text-zinc-500">{supp.orderCount} မှာယူမှု</span>
                         <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100">
                           {formatCurrency(supp.totalAmount)}
                         </span>
@@ -466,7 +466,7 @@ export default function ReportsPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-6 text-zinc-400 text-xs">No procurement data in selected range.</div>
+                <div className="text-center py-6 text-zinc-400 text-xs">ရွေးချယ်ထားသော ရက်စွဲအတွင်း အဝယ်အချက်အလက် မရှိပါ။</div>
               )}
             </CardContent>
           </Card>
@@ -478,7 +478,7 @@ export default function ReportsPage() {
             <Card>
               <CardContent className="p-4 space-y-1">
                 <p className="text-xs font-semibold text-zinc-500 uppercase flex items-center gap-1">
-                  <ArrowUpRight className="h-3.5 w-3.5 text-emerald-600" /> Cash Inflow (ငွေဝင် - ရောင်းရငွေ)
+                  <ArrowUpRight className="h-3.5 w-3.5 text-emerald-600" /> ငွေဝင် စုစုပေါင်း (+) (Cash Inflow)
                 </p>
                 <p className="text-2xl font-bold text-emerald-600 font-mono">
                   {formatCurrency(cashflow?.inflow ?? 0)}
@@ -489,7 +489,7 @@ export default function ReportsPage() {
             <Card>
               <CardContent className="p-4 space-y-1">
                 <p className="text-xs font-semibold text-zinc-500 uppercase flex items-center gap-1">
-                  <ArrowDownRight className="h-3.5 w-3.5 text-red-600" /> Cash Outflow (ငွေထွက် - အဝယ်/အသုံးစရိတ်)
+                  <ArrowDownRight className="h-3.5 w-3.5 text-red-600" /> ငွေထွက် စုစုပေါင်း (-) (Cash Outflow)
                 </p>
                 <p className="text-2xl font-bold text-red-600 font-mono">
                   {formatCurrency(cashflow?.outflow ?? 0)}
@@ -499,7 +499,7 @@ export default function ReportsPage() {
 
             <Card>
               <CardContent className="p-4 space-y-1">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Net Cashflow (အသားတင် ငွေစီးဆင်းမှု)</p>
+                <p className="text-xs font-semibold text-zinc-500 uppercase">အသားတင် ငွေစီးဆင်းမှု (Net Cashflow)</p>
                 <p className={`text-2xl font-bold font-mono ${(cashflow?.net ?? 0) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                   {formatCurrency(cashflow?.net ?? 0)}
                 </p>
@@ -510,7 +510,7 @@ export default function ReportsPage() {
           <Card>
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                လတ်တလော ငွေပေးငွေယူ စာရင်းများ
+                လတ်တလော ငွေပေးငွေယူ မှတ်တမ်းများ
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-2">
@@ -518,11 +518,11 @@ export default function ReportsPage() {
                 <table className="w-full text-left text-xs">
                   <thead className="bg-zinc-100 dark:bg-zinc-800/60 text-[10px] text-zinc-500 uppercase">
                     <tr>
-                      <th className="p-2.5">Date</th>
-                      <th className="p-2.5">Voucher #</th>
-                      <th className="p-2.5">Type</th>
-                      <th className="p-2.5">Method</th>
-                      <th className="p-2.5 text-right">Amount</th>
+                      <th className="p-2.5">ရက်စွဲ</th>
+                      <th className="p-2.5">ပြေစာ / ဘောက်ချာ #</th>
+                      <th className="p-2.5">အမျိုးအစား</th>
+                      <th className="p-2.5">ပေးချေနည်းလမ်း</th>
+                      <th className="p-2.5 text-right">ငွေပမာဏ</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -535,7 +535,7 @@ export default function ReportsPage() {
                             variant={p.paymentType === 'CUSTOMER_PAYMENT' ? 'success' : 'outline'}
                             className="text-[10px]"
                           >
-                            {p.paymentType}
+                            {p.paymentType === 'CUSTOMER_PAYMENT' ? 'ဝယ်ယူသူထံမှ ရငွေ' : p.paymentType === 'SUPPLIER_PAYMENT' ? 'ကုန်သွင်းသူသို့ ပေးငွေ' : 'အသုံးစရိတ်'}
                           </Badge>
                         </td>
                         <td className="p-2.5">{p.paymentMethod}</td>
@@ -559,7 +559,7 @@ export default function ReportsPage() {
                 General Ledger စမ်းသပ်ရှင်းတမ်း - နှစ်ဖက်စာရင်းကိုက် စစ်ဆေးချက်
               </CardTitle>
               <Badge variant={trialBalance?.isBalanced ? 'success' : 'destructive'}>
-                {trialBalance?.isBalanced ? '✓ PERFECTLY BALANCED' : '⚠️ UNBALANCED'}
+                {trialBalance?.isBalanced ? '✓ စာရင်းနှစ်ဖက် ကိုက်ညီသည် (BALANCED)' : '⚠️ စာရင်း မကိုက်ညီပါ (UNBALANCED)'}
               </Badge>
             </CardHeader>
 
@@ -568,12 +568,12 @@ export default function ReportsPage() {
                 <table className="w-full text-left text-xs">
                   <thead className="bg-zinc-100 dark:bg-zinc-800/60 text-[10px] text-zinc-500 uppercase">
                     <tr>
-                      <th className="p-2.5">Account Code</th>
-                      <th className="p-2.5">Account Name</th>
-                      <th className="p-2.5">Type</th>
-                      <th className="p-2.5 text-right">Debit Total</th>
-                      <th className="p-2.5 text-right">Credit Total</th>
-                      <th className="p-2.5 text-right">Net Balance</th>
+                      <th className="p-2.5">စာရင်းကုဒ် (Code)</th>
+                      <th className="p-2.5">စာရင်းခေါင်းစဉ် အမည်</th>
+                      <th className="p-2.5">အမျိုးအစား</th>
+                      <th className="p-2.5 text-right">ဒေဘစ် စုစုပေါင်း (DR)</th>
+                      <th className="p-2.5 text-right">ခရက်ဒစ် စုစုပေါင်း (CR)</th>
+                      <th className="p-2.5 text-right">အသားတင် လက်ကျန်</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -595,7 +595,7 @@ export default function ReportsPage() {
                   <tfoot className="bg-zinc-100/80 dark:bg-zinc-800/80 font-bold border-t-2 border-zinc-300 dark:border-zinc-700">
                     <tr>
                       <td colSpan={3} className="p-2.5 text-right uppercase text-[11px]">
-                        Grand Totals (စုစုပေါင်း):
+                        စုစုပေါင်း (Grand Totals):
                       </td>
                       <td className="p-2.5 text-right font-mono text-emerald-600">
                         {formatCurrency(trialBalance?.totalDebit ?? 0)}
@@ -619,7 +619,7 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Card>
               <CardContent className="p-4 space-y-1">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Total Dispatches (စုစုပေါင်း ပို့ဆောင်မှု)</p>
+                <p className="text-xs font-semibold text-zinc-500 uppercase">ပို့ဆောင်မှု စုစုပေါင်း (Total Dispatches)</p>
                 <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 font-mono">
                   {shipmentSummary?.totalShipments ?? 0}
                 </p>
@@ -628,7 +628,7 @@ export default function ReportsPage() {
 
             <Card>
               <CardContent className="p-4 space-y-1">
-                <p className="text-xs font-semibold text-zinc-500 uppercase">Posted / Delivered (ပြီးစီးသော ပို့ဆောင်မှု)</p>
+                <p className="text-xs font-semibold text-zinc-500 uppercase">ပြီးစီးသော ပို့ဆောင်မှုများ (Delivered / Posted)</p>
                 <p className="text-2xl font-bold text-emerald-600 font-mono">
                   {shipmentSummary?.postedShipments ?? 0}
                 </p>
@@ -650,9 +650,9 @@ export default function ReportsPage() {
                     <span className="font-semibold text-zinc-800 dark:text-zinc-200">{t.teamName}</span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="text-zinc-500">{t.shipmentCount} total shipments</span>
+                    <span className="text-zinc-500">{t.shipmentCount} ပို့ဆောင်မှု စုစုပေါင်း</span>
                     <Badge variant="success" className="text-[10px]">
-                      {t.postedCount} posted
+                      {t.postedCount} ပြီးစီး
                     </Badge>
                   </div>
                 </div>
@@ -666,13 +666,13 @@ export default function ReportsPage() {
       <Dialog
         open={printDialogOpen}
         onOpenChange={setPrintDialogOpen}
-        title="Print & Export Document Options (စာရွက်ထုတ်ရန် ပုံစံရွေးချယ်ပါ)"
+        title="စာရွက်ထုတ်ရန် ပုံစံရွေးချယ်ပါ (Print & Export Options)"
         maxWidth="md"
       >
         <div className="space-y-4 text-xs">
           <div>
             <label className="font-bold text-zinc-700 dark:text-zinc-300 block mb-1.5">
-              Printer Format / Paper Size (စာရွက်အရွယ်အစား ပုံစံ) *
+              စာရွက်အရွယ်အစား ပုံစံ (Printer Format / Paper Size) *
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div
@@ -684,10 +684,10 @@ export default function ReportsPage() {
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
                   <FileText className="h-4 w-4 text-blue-600" />
-                  <span>📄 A4 / Letter (Office Statement)</span>
+                  <span>📄 A4 / Letter ရုံးချုပ် စာရင်းရှင်းတမ်း</span>
                 </div>
                 <p className="text-[11px] text-zinc-500 mt-1">
-                  Standard formal audit report with letterhead, metrics, full tables & signature blocks.
+                  စာရင်းစစ်၊ စီမံခန့်ခွဲမှု အစည်းအဝေးနှင့် မော်ကွန်းထိန်းသိမ်းရန် တရားဝင် A4 စာရွက်ပုံစံ
                 </p>
               </div>
 
@@ -700,22 +700,22 @@ export default function ReportsPage() {
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
                   <Receipt className="h-4 w-4 text-emerald-600" />
-                  <span>🧾 80mm / 58mm Thermal (POS Slip)</span>
+                  <span>🧾 80mm / 58mm အပူပေးစလစ် (POS Slip)</span>
                 </div>
                 <p className="text-[11px] text-zinc-500 mt-1">
-                  Compact roll receipt format for bluetooth printers and instant mobile POS slips.
+                  ကောင်တာငွေကိုင်နှင့် Bluetooth/POS ပရင်တာများအတွက် အမြန်ထုတ် စလစ်ပြေစာပုံစံ
                 </p>
               </div>
             </div>
           </div>
 
           <Select
-            label="Report Scope (ထုတ်ယူမည့် အစီရင်ခံစာ အပိုင်း)"
+            label="ထုတ်ယူမည့် အစီရင်ခံစာ အပိုင်း (Report Scope)"
             value={printConfig.targetScope}
             onChange={e => setPrintConfig({ ...printConfig, targetScope: e.target.value as 'ACTIVE_TAB' | 'ALL_EXECUTIVE' })}
           >
-            <option value="ACTIVE_TAB">Current View: {getTabTitle(activeTab).split('(')[0]}</option>
-            <option value="ALL_EXECUTIVE">Full Executive Business Summary (အလုံးစုံ စာရင်းချုပ် အစီရင်ခံစာ)</option>
+            <option value="ACTIVE_TAB">လက်ရှိကြည့်ရှုနေသော ကဏ္ဍ: {getTabTitle(activeTab).split('(')[0]}</option>
+            <option value="ALL_EXECUTIVE">အလုံးစုံ စာရင်းချုပ် အစီရင်ခံစာ (Full Executive Business Summary)</option>
           </Select>
 
           <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
@@ -727,7 +727,7 @@ export default function ReportsPage() {
                 className="rounded border-zinc-300 h-4 w-4 text-blue-600"
               />
               <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                Include Official Enterprise Letterhead (လုပ်ငန်းခေါင်းစီးနှင့် လိပ်စာ ထည့်သွင်းမည်)
+                လုပ်ငန်းခေါင်းစီးနှင့် လိပ်စာ ထည့်သွင်းမည် (Include Official Letterhead)
               </span>
             </label>
 
@@ -739,18 +739,18 @@ export default function ReportsPage() {
                 className="rounded border-zinc-300 h-4 w-4 text-blue-600"
               />
               <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                Include Signatures & Audit Seal Block (ပြုစုသူ/စစ်ဆေးသူ/အတည်ပြုသူ လက်မှတ်ကွက်များ)
+                ပြုစုသူ/စစ်ဆေးသူ/အတည်ပြုသူ လက်မှတ်ကွက်များ ထည့်သွင်းမည် (Include Signatures Block)
               </span>
             </label>
           </div>
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={() => setPrintDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+            <Button type="button" variant="outline" onClick={() => setPrintDialogOpen(false)} className="w-full sm:w-auto cursor-pointer">
+              မလုပ်တော့ပါ
             </Button>
-            <Button type="button" variant="primary" onClick={handleExecutePrint} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 gap-1.5">
+            <Button type="button" variant="primary" onClick={handleExecutePrint} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 gap-1.5 cursor-pointer">
               <Printer className="h-4 w-4" />
-              <span>Print Document (ပရင့်ထုတ်ပါ)</span>
+              <span>ပရင့်ထုတ်မည် (Print Document)</span>
             </Button>
           </div>
         </div>
@@ -763,25 +763,25 @@ export default function ReportsPage() {
           <div className="max-w-[76mm] mx-auto text-black font-mono text-[11px] leading-tight p-1 space-y-2">
             <div className="text-center space-y-0.5 border-b border-dashed border-black pb-2">
               <h2 className="text-sm font-bold uppercase">{orgContext.tenantName || 'NAYA-ERA ERP'}</h2>
-              <p className="text-[10px]">{orgContext.branchName || 'Head Office'}</p>
+              <p className="text-[10px]">{orgContext.branchName || 'ရုံးချုပ်'}</p>
               <p className="text-[10px] uppercase font-bold mt-1">*** {getTabTitle(activeTab).split('(')[0]} ***</p>
-              <p className="text-[9px]">Period: {dateRange.from || 'Start'} to {dateRange.to || 'Present'}</p>
-              <p className="text-[9px]">Printed: {new Date().toLocaleString()}</p>
+              <p className="text-[9px]">ကာလ: {dateRange.from || 'အစမှ'} မှ {dateRange.to || 'ယနေ့အထိ'}</p>
+              <p className="text-[9px]">ထုတ်ယူချိန်: {new Date().toLocaleString()}</p>
             </div>
 
             {/* Sales Summary Docket */}
             {(printConfig.targetScope === 'ALL_EXECUTIVE' || activeTab === 'sales') && (
               <div className="space-y-1 py-1 border-b border-dashed border-black">
                 <div className="flex justify-between font-bold">
-                  <span>TOTAL SALES:</span>
+                  <span>ရောင်းရငွေ စုစုပေါင်း:</span>
                   <span>{formatCurrency(salesSummary?.totalRevenue ?? 0)}</span>
                 </div>
                 <div className="flex justify-between text-[10px]">
-                  <span>Total Orders:</span>
+                  <span>အမှာစာ စုစုပေါင်း:</span>
                   <span>{salesSummary?.totalOrders ?? 0}</span>
                 </div>
                 <div className="flex justify-between text-[10px]">
-                  <span>Fulfilled:</span>
+                  <span>ပို့ဆောင်ပြီး:</span>
                   <span>{salesSummary?.shippedOrders ?? 0}</span>
                 </div>
               </div>
@@ -791,15 +791,15 @@ export default function ReportsPage() {
             {(printConfig.targetScope === 'ALL_EXECUTIVE' || activeTab === 'purchasing') && (
               <div className="space-y-1 py-1 border-b border-dashed border-black">
                 <div className="flex justify-between font-bold">
-                  <span>PROCUREMENT SPEND:</span>
+                  <span>အဝယ်တန်ဖိုး စုစုပေါင်း:</span>
                   <span>{formatCurrency(purchaseSummary?.totalSpend ?? 0)}</span>
                 </div>
                 <div className="flex justify-between text-[10px]">
-                  <span>Total PO Orders:</span>
+                  <span>အဝယ်အမှာစာ စုစုပေါင်း:</span>
                   <span>{purchaseSummary?.totalOrders ?? 0}</span>
                 </div>
                 <div className="flex justify-between text-[10px]">
-                  <span>Received POs:</span>
+                  <span>လက်ခံပြီး PO:</span>
                   <span>{purchaseSummary?.receivedOrders ?? 0}</span>
                 </div>
               </div>
@@ -809,15 +809,15 @@ export default function ReportsPage() {
             {(printConfig.targetScope === 'ALL_EXECUTIVE' || activeTab === 'cashflow') && (
               <div className="space-y-1 py-1 border-b border-dashed border-black">
                 <div className="flex justify-between text-[10px]">
-                  <span>Cash Inflow:</span>
+                  <span>ငွေဝင် (+):</span>
                   <span>+{formatCurrency(cashflow?.inflow ?? 0)}</span>
                 </div>
                 <div className="flex justify-between text-[10px]">
-                  <span>Cash Outflow:</span>
+                  <span>ငွေထွက် (-):</span>
                   <span>-{formatCurrency(cashflow?.outflow ?? 0)}</span>
                 </div>
                 <div className="flex justify-between font-bold">
-                  <span>NET BALANCE:</span>
+                  <span>အသားတင် လက်ကျန်:</span>
                   <span>{formatCurrency(cashflow?.net ?? 0)}</span>
                 </div>
               </div>
@@ -827,15 +827,15 @@ export default function ReportsPage() {
             {(printConfig.targetScope === 'ALL_EXECUTIVE' || activeTab === 'inventory') && (
               <div className="space-y-1 py-1 border-b border-dashed border-black">
                 <div className="flex justify-between text-[10px]">
-                  <span>Tracked Items:</span>
+                  <span>ပစ္စည်းအမျိုးအစား:</span>
                   <span>{stockSummary?.totalItems ?? 0}</span>
                 </div>
                 <div className="flex justify-between text-[10px]">
-                  <span>Total Stock Qty:</span>
-                  <span>{dashboardKpis?.totalStockQty ?? 0} units</span>
+                  <span>လက်ကျန် စုစုပေါင်း:</span>
+                  <span>{dashboardKpis?.totalStockQty ?? 0} ခု</span>
                 </div>
                 <div className="flex justify-between text-[10px]">
-                  <span>Low Stock Warnings:</span>
+                  <span>စတော့နည်း ပစ္စည်း:</span>
                   <span>{stockSummary?.lowStockCount ?? 0}</span>
                 </div>
               </div>
@@ -845,11 +845,11 @@ export default function ReportsPage() {
             {(printConfig.targetScope === 'ALL_EXECUTIVE' || activeTab === 'shipments') && (
               <div className="space-y-1 py-1 border-b border-dashed border-black">
                 <div className="flex justify-between font-bold">
-                  <span>TOTAL SHIPMENTS:</span>
+                  <span>ပို့ဆောင်မှု စုစုပေါင်း:</span>
                   <span>{shipmentSummary?.totalShipments ?? 0}</span>
                 </div>
                 <div className="flex justify-between text-[10px]">
-                  <span>Delivered / Posted:</span>
+                  <span>ပြီးစီးမှု:</span>
                   <span>{shipmentSummary?.postedShipments ?? 0}</span>
                 </div>
               </div>
@@ -859,23 +859,23 @@ export default function ReportsPage() {
             {(printConfig.targetScope === 'ALL_EXECUTIVE' || activeTab === 'trial-balance') && (
               <div className="space-y-1 py-1 border-b border-dashed border-black text-[10px]">
                 <div className="flex justify-between">
-                  <span>Debit Total:</span>
+                  <span>ဒေဘစ် စုစုပေါင်း:</span>
                   <span>{formatCurrency(trialBalance?.totalDebit ?? 0)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Credit Total:</span>
+                  <span>ခရက်ဒစ် စုစုပေါင်း:</span>
                   <span>{formatCurrency(trialBalance?.totalCredit ?? 0)}</span>
                 </div>
                 <div className="flex justify-between font-bold">
-                  <span>GL Balance:</span>
-                  <span>{trialBalance?.isBalanced ? '✓ BALANCED' : '⚠️ UNBALANCED'}</span>
+                  <span>GL နှစ်ဖက်ကိုက်:</span>
+                  <span>{trialBalance?.isBalanced ? '✓ ကိုက်ညီသည်' : '⚠️ မကိုက်ညီပါ'}</span>
                 </div>
               </div>
             )}
 
             <div className="text-center pt-2 text-[9px] space-y-0.5 border-t border-dashed border-black">
-              <p className="font-bold">*** OFFICIAL RECEIPT DOCKET ***</p>
-              <p>User: {user?.name || 'Authorized Staff'}</p>
+              <p className="font-bold">*** တရားဝင် စာရင်းစလစ်မှတ်တမ်း ***</p>
+              <p>ထုတ်ယူသူ: {user?.name || 'တာဝန်ခံ'}</p>
               <p>NAYA-ERA Cloud ERP System</p>
             </div>
           </div>
@@ -893,17 +893,17 @@ export default function ReportsPage() {
                     </h1>
                   </div>
                   <p className="text-xs text-gray-700 font-medium">
-                    Branch: {orgContext.branchName || 'Head Office (Mandalay)'} • Tenant ID: {orgContext.tenantId || 1}
+                    ဌာနခွဲ: {orgContext.branchName || 'ရုံးချုပ်'} • လုပ်ငန်းကုဒ် (Tenant ID): {orgContext.tenantId || 1}
                   </p>
                   <p className="text-[11px] text-gray-600">
-                    Official Financial & Operations Audit System
+                    တရားဝင် ဘဏ္ဍာရေးနှင့် လုပ်ငန်းလည်ပတ်မှု စာရင်းစစ်ဆေးရေး စနစ်
                   </p>
                 </div>
 
                 <div className="text-right text-xs space-y-0.5">
                   <p className="font-bold font-mono">STATEMENT ID: STMT-{new Date().getFullYear()}-{String(Date.now()).slice(-6)}</p>
-                  <p className="text-gray-600">Generated: {new Date().toLocaleString()}</p>
-                  <p className="text-gray-600">Prepared By: {user?.name || 'Administrator'}</p>
+                  <p className="text-gray-600">ထုတ်ယူချိန်: {new Date().toLocaleString()}</p>
+                  <p className="text-gray-600">ပြုစုသူ: {user?.name || 'စနစ်အုပ်ချုပ်သူ'}</p>
                 </div>
               </div>
             )}
@@ -916,7 +916,7 @@ export default function ReportsPage() {
                   : getTabTitle(activeTab)}
               </h2>
               <p className="text-xs text-gray-600 mt-0.5 font-medium">
-                Reporting Period: <span className="font-bold">{dateRange.from || 'Beginning'}</span> to <span className="font-bold">{dateRange.to || 'Present'}</span>
+                ကာလ: <span className="font-bold">{dateRange.from || 'အစမှ'}</span> မှ <span className="font-bold">{dateRange.to || 'ယနေ့အထိ'}</span>
               </p>
             </div>
 
@@ -925,20 +925,20 @@ export default function ReportsPage() {
               <div className="space-y-3">
                 <h3 className="text-xs font-bold uppercase tracking-wider border-b border-gray-400 pb-1 flex items-center gap-1.5">
                   <TrendingUp className="h-4 w-4" />
-                  <span>1. Sales Performance & Top Customers Breakdown</span>
+                  <span>၁။ အရောင်းစွမ်းဆောင်ရည်နှင့် ထိပ်တန်းဖောက်သည်များ စာရင်း</span>
                 </h3>
 
                 <div className="grid grid-cols-3 gap-3 text-xs">
                   <div className="p-3 border border-gray-300 rounded bg-gray-50">
-                    <span className="text-[10px] uppercase font-bold text-gray-600">Total Sales Revenue</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-600">စုစုပေါင်း ရောင်းရငွေ (Revenue)</span>
                     <p className="text-base font-bold font-mono mt-1">{formatCurrency(salesSummary?.totalRevenue ?? 0)}</p>
                   </div>
                   <div className="p-3 border border-gray-300 rounded bg-gray-50">
-                    <span className="text-[10px] uppercase font-bold text-gray-600">Total Sales Orders</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-600">အမှာစာ စုစုပေါင်း (Orders)</span>
                     <p className="text-base font-bold font-mono mt-1">{salesSummary?.totalOrders ?? 0}</p>
                   </div>
                   <div className="p-3 border border-gray-300 rounded bg-gray-50">
-                    <span className="text-[10px] uppercase font-bold text-gray-600">Fulfilled Orders</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-600">ပို့ဆောင်ပြီး အမှာစာ</span>
                     <p className="text-base font-bold font-mono mt-1">{salesSummary?.shippedOrders ?? 0}</p>
                   </div>
                 </div>
@@ -947,10 +947,10 @@ export default function ReportsPage() {
                   <table className="w-full text-xs border border-gray-300 mt-2">
                     <thead className="bg-gray-100 border-b border-gray-300 text-[10px] uppercase">
                       <tr>
-                        <th className="p-2 text-left">No</th>
-                        <th className="p-2 text-left">Customer Name</th>
-                        <th className="p-2 text-right">Orders Count</th>
-                        <th className="p-2 text-right">Total Revenue (MMK)</th>
+                        <th className="p-2 text-left">စဉ်</th>
+                        <th className="p-2 text-left">ဖောက်သည် အမည်</th>
+                        <th className="p-2 text-right">အမှာစာ အရေအတွက်</th>
+                        <th className="p-2 text-right">စုစုပေါင်း ရောင်းရငွေ (MMK)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -973,17 +973,17 @@ export default function ReportsPage() {
               <div className="space-y-3">
                 <h3 className="text-xs font-bold uppercase tracking-wider border-b border-gray-400 pb-1 flex items-center gap-1.5">
                   <Boxes className="h-4 w-4" />
-                  <span>2. Warehouse Stock & Physical Inventory Audit</span>
+                  <span>၂။ ဂိုဒေါင်အလိုက် စတော့လက်ကျန်နှင့် တန်ဖိုးစစ်ဆေးချက်</span>
                 </h3>
 
                 <table className="w-full text-xs border border-gray-300">
                   <thead className="bg-gray-100 border-b border-gray-300 text-[10px] uppercase">
                     <tr>
-                      <th className="p-2 text-left">Warehouse</th>
-                      <th className="p-2 text-left">Product Name</th>
-                      <th className="p-2 text-left">SKU</th>
-                      <th className="p-2 text-left">Type</th>
-                      <th className="p-2 text-right">Physical On Hand</th>
+                      <th className="p-2 text-left">ဂိုဒေါင်</th>
+                      <th className="p-2 text-left">ကုန်ပစ္စည်း အမည်</th>
+                      <th className="p-2 text-left">ဘားကုဒ် / SKU</th>
+                      <th className="p-2 text-left">အမျိုးအစား</th>
+                      <th className="p-2 text-right">လက်ကျန် အရေအတွက်</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -1008,16 +1008,16 @@ export default function ReportsPage() {
               <div className="space-y-3">
                 <h3 className="text-xs font-bold uppercase tracking-wider border-b border-gray-400 pb-1 flex items-center gap-1.5">
                   <ShoppingCart className="h-4 w-4" />
-                  <span>3. Procurement & Supplier Spend Audit</span>
+                  <span>၃။ ကုန်ပစ္စည်းဝယ်ယူမှုနှင့် ကုန်သွင်းသူ ကုန်ကျစရိတ် စာရင်း</span>
                 </h3>
 
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div className="p-3 border border-gray-300 rounded bg-gray-50">
-                    <span className="text-[10px] uppercase font-bold text-gray-600">Total Procurement Spend</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-600">စုစုပေါင်း အဝယ်တန်ဖိုး (Total Spend)</span>
                     <p className="text-base font-bold font-mono mt-1">{formatCurrency(purchaseSummary?.totalSpend ?? 0)}</p>
                   </div>
                   <div className="p-3 border border-gray-300 rounded bg-gray-50">
-                    <span className="text-[10px] uppercase font-bold text-gray-600">Received Purchase Orders</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-600">လက်ခံပြီး အဝယ်အမှာစာ</span>
                     <p className="text-base font-bold font-mono mt-1">{purchaseSummary?.receivedOrders ?? 0} / {purchaseSummary?.totalOrders ?? 0}</p>
                   </div>
                 </div>
@@ -1026,10 +1026,10 @@ export default function ReportsPage() {
                   <table className="w-full text-xs border border-gray-300 mt-2">
                     <thead className="bg-gray-100 border-b border-gray-300 text-[10px] uppercase">
                       <tr>
-                        <th className="p-2 text-left">No</th>
-                        <th className="p-2 text-left">Supplier Name</th>
-                        <th className="p-2 text-right">Orders Count</th>
-                        <th className="p-2 text-right">Total Spend (MMK)</th>
+                        <th className="p-2 text-left">စဉ်</th>
+                        <th className="p-2 text-left">ကုန်သွင်းသူ အမည်</th>
+                        <th className="p-2 text-right">အမှာစာ အရေအတွက်</th>
+                        <th className="p-2 text-right">စုစုပေါင်း ကုန်ကျငွေ (MMK)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -1052,20 +1052,20 @@ export default function ReportsPage() {
               <div className="space-y-3">
                 <h3 className="text-xs font-bold uppercase tracking-wider border-b border-gray-400 pb-1 flex items-center gap-1.5">
                   <DollarSign className="h-4 w-4" />
-                  <span>4. Cash Flow & Liquidity Statement</span>
+                  <span>၄။ ငွေစီးဆင်းမှုနှင့် ငွေကြေးအခြေအနေ ရှင်းတမ်း</span>
                 </h3>
 
                 <div className="grid grid-cols-3 gap-3 text-xs">
                   <div className="p-3 border border-gray-300 rounded bg-gray-50">
-                    <span className="text-[10px] uppercase font-bold text-gray-600">Total Cash Inflow</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-600">ငွေဝင် စုစုပေါင်း (+)</span>
                     <p className="text-base font-bold font-mono mt-1 text-emerald-700">+{formatCurrency(cashflow?.inflow ?? 0)}</p>
                   </div>
                   <div className="p-3 border border-gray-300 rounded bg-gray-50">
-                    <span className="text-[10px] uppercase font-bold text-gray-600">Total Cash Outflow</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-600">ငွေထွက် စုစုပေါင်း (-)</span>
                     <p className="text-base font-bold font-mono mt-1 text-red-700">-{formatCurrency(cashflow?.outflow ?? 0)}</p>
                   </div>
                   <div className="p-3 border border-gray-300 rounded bg-gray-50">
-                    <span className="text-[10px] uppercase font-bold text-gray-600">Net Cash Balance</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-600">အသားတင် ငွေစီးဆင်းမှု</span>
                     <p className="text-base font-bold font-mono mt-1">{formatCurrency(cashflow?.net ?? 0)}</p>
                   </div>
                 </div>
@@ -1077,16 +1077,16 @@ export default function ReportsPage() {
               <div className="space-y-3">
                 <h3 className="text-xs font-bold uppercase tracking-wider border-b border-gray-400 pb-1 flex items-center gap-1.5">
                   <Truck className="h-4 w-4" />
-                  <span>5. Sales Team Logistics & Fulfillment Audit</span>
+                  <span>၅။ အရောင်းအဖွဲ့အလိုက် ပို့ဆောင်မှု မှတ်တမ်း</span>
                 </h3>
 
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div className="p-3 border border-gray-300 rounded bg-gray-50">
-                    <span className="text-[10px] uppercase font-bold text-gray-600">Total Dispatches</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-600">ပို့ဆောင်မှု စုစုပေါင်း</span>
                     <p className="text-base font-bold font-mono mt-1">{shipmentSummary?.totalShipments ?? 0}</p>
                   </div>
                   <div className="p-3 border border-gray-300 rounded bg-gray-50">
-                    <span className="text-[10px] uppercase font-bold text-gray-600">Delivered / Completed</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-600">ပြီးစီးမှု / ပို့ဆောင်ပြီး</span>
                     <p className="text-base font-bold font-mono mt-1 text-emerald-700">{shipmentSummary?.postedShipments ?? 0}</p>
                   </div>
                 </div>
@@ -1095,10 +1095,10 @@ export default function ReportsPage() {
                   <table className="w-full text-xs border border-gray-300 mt-2">
                     <thead className="bg-gray-100 border-b border-gray-300 text-[10px] uppercase">
                       <tr>
-                        <th className="p-2 text-left">No</th>
-                        <th className="p-2 text-left">Sales Team Name</th>
-                        <th className="p-2 text-right">Total Shipments</th>
-                        <th className="p-2 text-right">Delivered / Posted</th>
+                        <th className="p-2 text-left">စဉ်</th>
+                        <th className="p-2 text-left">အရောင်းအဖွဲ့ အမည်</th>
+                        <th className="p-2 text-right">ပို့ဆောင်မှု စုစုပေါင်း</th>
+                        <th className="p-2 text-right">ပြီးစီးမှု</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -1122,22 +1122,22 @@ export default function ReportsPage() {
                 <div className="flex items-center justify-between border-b border-gray-400 pb-1">
                   <h3 className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
                     <Scale className="h-4 w-4" />
-                    <span>6. General Ledger Double-Entry Trial Balance</span>
+                    <span>၆။ General Ledger စမ်းသပ်ရှင်းတမ်း - နှစ်ဖက်စာရင်းကိုက်</span>
                   </h3>
                   <span className="text-xs font-bold">
-                    Status: {trialBalance?.isBalanced ? '✓ PERFECTLY BALANCED' : '⚠️ UNBALANCED'}
+                    အခြေအနေ: {trialBalance?.isBalanced ? '✓ စာရင်းနှစ်ဖက် ကိုက်ညီသည် (BALANCED)' : '⚠️ စာရင်း မကိုက်ညီပါ (UNBALANCED)'}
                   </span>
                 </div>
 
                 <table className="w-full text-xs border border-gray-300">
                   <thead className="bg-gray-100 border-b border-gray-300 text-[10px] uppercase">
                     <tr>
-                      <th className="p-2 text-left">Code</th>
-                      <th className="p-2 text-left">Account Name</th>
-                      <th className="p-2 text-left">Type</th>
-                      <th className="p-2 text-right">Debit (DR)</th>
-                      <th className="p-2 text-right">Credit (CR)</th>
-                      <th className="p-2 text-right">Net Balance</th>
+                      <th className="p-2 text-left">ကုဒ်</th>
+                      <th className="p-2 text-left">စာရင်းခေါင်းစဉ် အမည်</th>
+                      <th className="p-2 text-left">အမျိုးအစား</th>
+                      <th className="p-2 text-right">ဒေဘစ် (DR)</th>
+                      <th className="p-2 text-right">ခရက်ဒစ် (CR)</th>
+                      <th className="p-2 text-right">အသားတင် လက်ကျန်</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -1154,7 +1154,7 @@ export default function ReportsPage() {
                   </tbody>
                   <tfoot className="bg-gray-100 font-bold border-t-2 border-black">
                     <tr>
-                      <td colSpan={3} className="p-2 text-right uppercase">Total (စုစုပေါင်း):</td>
+                      <td colSpan={3} className="p-2 text-right uppercase">စုစုပေါင်း (Grand Totals):</td>
                       <td className="p-2 text-right font-mono">{formatCurrency(trialBalance?.totalDebit ?? 0)}</td>
                       <td className="p-2 text-right font-mono">{formatCurrency(trialBalance?.totalCredit ?? 0)}</td>
                       <td className="p-2 text-right font-mono">{trialBalance?.isBalanced ? '✓ 0.00' : 'Diff'}</td>
@@ -1172,8 +1172,8 @@ export default function ReportsPage() {
                     <p className="font-bold uppercase text-[10px] text-gray-600">Prepared By (ပြုစုသူ)</p>
                     <div className="border-b border-gray-400 mx-4"></div>
                     <div>
-                      <p className="font-semibold">{user?.name || 'Accountant / Staff'}</p>
-                      <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                      <p className="font-semibold">{user?.name || 'စာရင်းကိုင် / တာဝန်ခံ'}</p>
+                      <p className="text-[10px] text-gray-500">ရက်စွဲ: ____/____/202___</p>
                     </div>
                   </div>
 
@@ -1181,8 +1181,8 @@ export default function ReportsPage() {
                     <p className="font-bold uppercase text-[10px] text-gray-600">Checked By (စစ်ဆေးသူ)</p>
                     <div className="border-b border-gray-400 mx-4"></div>
                     <div>
-                      <p className="font-semibold">Internal Audit / Manager</p>
-                      <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                      <p className="font-semibold">Internal Audit / မန်နေဂျာ</p>
+                      <p className="text-[10px] text-gray-500">ရက်စွဲ: ____/____/202___</p>
                     </div>
                   </div>
 
@@ -1190,8 +1190,8 @@ export default function ReportsPage() {
                     <p className="font-bold uppercase text-[10px] text-gray-600">Approved By (အတည်ပြုသူ)</p>
                     <div className="border-b border-gray-400 mx-4"></div>
                     <div>
-                      <p className="font-semibold">Managing Director / Seal</p>
-                      <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                      <p className="font-semibold">Managing Director / တံဆိပ်တုံး</p>
+                      <p className="text-[10px] text-gray-500">ရက်စွဲ: ____/____/202___</p>
                     </div>
                   </div>
                 </div>
