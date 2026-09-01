@@ -111,7 +111,7 @@ export default function ManufacturingPage() {
       if (uomRes.success && Array.isArray(uomRes.data)) setUoms(uomRes.data);
       if (whRes.success && Array.isArray(whRes.data)) setWarehouses(whRes.data);
     } catch (err: any) {
-      error('Failed to load manufacturing data', err.message);
+      error('ကုန်ထုတ်လုပ်မှု အချက်အလက်များ ရယူ၍မရပါ', err.message);
     } finally {
       setIsLoading(false);
     }
@@ -154,7 +154,7 @@ export default function ManufacturingPage() {
   const handleCreateBom = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!bomForm.name || !bomForm.outputProductId || !bomForm.outputUomId) {
-      error('Please complete all required fields (အချက်အလက်များ ပြည့်စုံစွာ ဖြည့်ပါ)');
+      error('အချက်အလက်များ ပြည့်စုံစွာ ဖြည့်သွင်းပေးပါ');
       return;
     }
 
@@ -177,7 +177,7 @@ export default function ManufacturingPage() {
     });
 
     if (res.success) {
-      success('BOM Recipe Created (ကုန်ကြမ်းဖော်စပ်နည်း သိမ်းဆည်းပြီးပါပြီ)');
+      success('ကုန်ကြမ်းဖော်စပ်နည်း သိမ်းဆည်းပြီးပါပြီ');
       setBomDialogOpen(false);
       setBomForm({
         name: '',
@@ -189,7 +189,7 @@ export default function ManufacturingPage() {
       });
       loadManufacturingData();
     } else {
-      error('Failed to create BOM', res.message);
+      error('ဖော်စပ်နည်း သိမ်းဆည်း၍မရပါ', res.message);
     }
   };
 
@@ -198,12 +198,12 @@ export default function ManufacturingPage() {
     if (!selectedBom) return;
     const res = await apiFetch(`/api/manufacturing/boms/${selectedBom.id}`, { method: 'DELETE' });
     if (res.success) {
-      success('BOM Deleted', `${selectedBom.name} removed`);
+      success('ဖော်စပ်နည်း ဖျက်ပြီးပါပြီ', `${selectedBom.name} အား ဖျက်သိမ်းပြီးပါပြီ`);
       setDeleteBomConfirmOpen(false);
       setBomSheetOpen(false);
       loadManufacturingData();
     } else {
-      error('Delete failed', res.message);
+      error('ဖျက်သိမ်း၍မရပါ', res.message);
     }
   };
 
@@ -229,7 +229,7 @@ export default function ManufacturingPage() {
     e.preventDefault();
     if (!selectedBom) return;
     if (!editBomForm.name || !editBomForm.outputProductId || !editBomForm.outputUomId) {
-      error('Please fill all required fields (ပြည့်စုံစွာ ဖြည့်ပါ)');
+      error('အချက်အလက်များ ပြည့်စုံစွာ ဖြည့်သွင်းပေးပါ');
       return;
     }
 
@@ -252,12 +252,12 @@ export default function ManufacturingPage() {
     });
 
     if (res.success) {
-      success('BOM Updated (ဖော်စပ်နည်း ပြင်ဆင်ပြီးပါပြီ)');
+      success('ဖော်စပ်နည်း ပြင်ဆင်ပြီးပါပြီ');
       setEditBomDialogOpen(false);
       setBomSheetOpen(false);
       loadManufacturingData();
     } else {
-      error('Failed to update BOM', res.message);
+      error('ပြင်ဆင်၍မရပါ', res.message);
     }
   };
 
@@ -279,7 +279,7 @@ export default function ManufacturingPage() {
   const handleCreateProdOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prodForm.bomId || !prodForm.outputWarehouseId || Number(prodForm.plannedQty) <= 0) {
-      error('Please select BOM, destination warehouse and planned output quantity');
+      error('BOM ဖော်စပ်နည်း၊ သိမ်းဆည်းမည့်ဂိုဒေါင်နှင့် ထုတ်လုပ်မည့်အရေအတွက်ကို ပြည့်စုံစွာ ရွေးချယ်ပါ');
       return;
     }
 
@@ -302,11 +302,11 @@ export default function ManufacturingPage() {
     });
 
     if (res.success) {
-      success('Production Order Launched (ထုတ်လုပ်မှု အမှာစာ ဖွင့်ပြီးပါပြီ)');
+      success('ထုတ်လုပ်မှု အမှာစာ ဖွင့်ပြီးပါပြီ');
       setProdDialogOpen(false);
       loadManufacturingData();
     } else {
-      error('Failed to create production order', res.message);
+      error('အမှာစာဖွင့်၍မရပါ', res.message);
     }
   };
 
@@ -314,11 +314,11 @@ export default function ManufacturingPage() {
   const handleStartProdOrder = async (id: number) => {
     const res = await apiFetch(`/api/manufacturing/production-orders/${id}/start`, { method: 'PUT' });
     if (res.success) {
-      success('Production Started (ထုတ်လုပ်မှု စတင်ပါပြီ)');
+      success('ထုတ်လုပ်မှု စတင်ပါပြီ');
       loadManufacturingData();
       if (selectedProd?.id === id) inspectProd(selectedProd);
     } else {
-      error('Failed to start order', res.message);
+      error('ထုတ်လုပ်မှု စတင်၍မရပါ', res.message);
     }
   };
 
@@ -376,7 +376,7 @@ export default function ManufacturingPage() {
   const handleCompleteProdOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedProd || !completeForm.inputWarehouseId) {
-      error('Please select raw material input warehouse (ကုန်ကြမ်းထုတ်ယူမည့် ကုန်လှောင်ရုံရွေးပါ)');
+      error('ကုန်ကြမ်းထုတ်ယူမည့် ဂိုဒေါင်ကို ရွေးချယ်ပေးပါ');
       return;
     }
 
@@ -400,32 +400,32 @@ export default function ManufacturingPage() {
 
     if (res.success) {
       success(
-        'Production Completed & Stock Updated! (ထုတ်လုပ်မှု အောင်မြင်ပြီး စတော့စာရင်း ဖြည့်သွင်းပြီးပါပြီ)',
-        'Raw materials consumed & finished goods added to warehouse stock.'
+        'ထုတ်လုပ်မှု အောင်မြင်ပြီး စတော့စာရင်းများ အဆင့်မြှင့်တင်ပြီးပါပြီ',
+        'ကုန်ကြမ်းများ ဖြတ်တောက်ပြီး အချောထည်များကို ဂိုဒေါင်သို့ စာရင်းသွင်းပြီးပါပြီ။'
       );
       setCompleteDialogOpen(false);
       loadManufacturingData();
       if (prodSheetOpen) setProdSheetOpen(false);
     } else {
-      error('Completion failed', res.message);
+      error('ထုတ်လုပ်မှု အပြီးသတ်၍မရပါ', res.message);
     }
   };
 
   // Production Order Columns
   const prodColumns: Column<ProductionOrder>[] = [
-    { header: 'Order No', accessorKey: 'productionNo', sortable: true, className: 'font-mono font-bold text-purple-600' },
-    { header: 'Output Product (ထွက်ရှိမည့်ပစ္စည်း)', cell: r => r.outputProduct?.name || `Product #${r.outputProductId}` },
-    { header: 'BOM Recipe', cell: r => r.bom?.name || `BOM #${r.bomId}` },
+    { header: 'အမှာစာအမှတ်', accessorKey: 'productionNo', sortable: true, className: 'font-mono font-bold text-purple-600 dark:text-purple-400' },
+    { header: 'ထွက်ရှိမည့် အချောထည်', cell: r => r.outputProduct?.name || `ကုန်ပစ္စည်း #${r.outputProductId}` },
+    { header: 'ဖော်စပ်နည်း (BOM)', cell: r => r.bom?.name || `BOM #${r.bomId}` },
     {
-      header: 'Planned Quantity',
+      header: 'လျာထားအရေအတွက်',
       cell: r => `${formatQuantity(r.plannedQty)} ${r.outputUom?.symbol || ''}`,
       sortable: true,
     },
-    { header: 'Output WH', cell: r => r.outputWarehouse?.name || `WH #${r.outputWarehouseId}` },
-    { header: 'Date', cell: r => formatDate(r.productionDate), sortable: true },
-    { header: 'Status', cell: r => <StatusBadge status={r.status} /> },
+    { header: 'သိမ်းဆည်းမည့်ဂိုဒေါင်', cell: r => r.outputWarehouse?.name || `ဂိုဒေါင် #${r.outputWarehouseId}` },
+    { header: 'ရက်စွဲ', cell: r => formatDate(r.productionDate), sortable: true },
+    { header: 'အခြေအနေ', cell: r => <StatusBadge status={r.status} /> },
     {
-      header: 'Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => (
         <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
@@ -434,6 +434,7 @@ export default function ManufacturingPage() {
             size="sm"
             onClick={() => inspectProd(r)}
             className="h-7 text-xs"
+            title="အသေးစိတ်ကြည့်ရန်"
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
@@ -443,9 +444,9 @@ export default function ManufacturingPage() {
               variant="outline"
               size="sm"
               onClick={() => handleStartProdOrder(r.id)}
-              className="h-7 text-xs text-purple-600 gap-1 hover:bg-purple-50 dark:hover:bg-purple-950/40"
+              className="h-7 text-xs text-purple-600 dark:text-purple-400 gap-1 hover:bg-purple-50 dark:hover:bg-purple-950/40"
             >
-              <Play className="h-3 w-3" /> Start
+              <Play className="h-3 w-3" /> စတင်မည်
             </Button>
           )}
 
@@ -456,7 +457,7 @@ export default function ManufacturingPage() {
               onClick={() => handleOpenCompleteDialog(r)}
               className="h-7 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700"
             >
-              <CheckCircle2 className="h-3 w-3" /> Complete
+              <CheckCircle2 className="h-3 w-3" /> အပြီးသတ်မည်
             </Button>
           )}
         </div>
@@ -466,23 +467,23 @@ export default function ManufacturingPage() {
 
   // BOM Columns
   const bomColumns: Column<BOM>[] = [
-    { header: 'ID', accessorKey: 'id', sortable: true },
-    { header: 'BOM / Recipe Name (ဖော်စပ်နည်းအမည်)', accessorKey: 'name', sortable: true, className: 'font-semibold' },
-    { header: 'Target Output Product', cell: r => r.outputProduct?.name || `Product #${r.outputProductId}` },
+    { header: 'ကုဒ်', accessorKey: 'id', sortable: true },
+    { header: 'ဖော်စပ်နည်းအမည်', accessorKey: 'name', sortable: true, className: 'font-semibold' },
+    { header: 'ထွက်ရှိမည့် အချောထည်', cell: r => r.outputProduct?.name || `ကုန်ပစ္စည်း #${r.outputProductId}` },
     {
-      header: 'Batch Yield',
+      header: 'တစ်ကြိမ်ထွက်ရှိမှု နှုန်း',
       cell: r => `${formatQuantity(r.outputQty)} ${r.outputUom?.symbol || ''}`,
     },
     {
-      header: 'Ingredients (ပါဝင်သော ကုန်ကြမ်းများ)',
+      header: 'ပါဝင်သော ကုန်ကြမ်းများ',
       cell: r => (
         <span className="text-xs text-zinc-500 font-medium">
-          {(r.ingredients || []).length} components
+          {(r.ingredients || []).length} မျိုး
         </span>
       ),
     },
     {
-      header: 'Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => (
         <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
@@ -491,6 +492,7 @@ export default function ManufacturingPage() {
             size="sm"
             onClick={() => inspectBom(r)}
             className="h-7 text-xs"
+            title="အသေးစိတ်ကြည့်ရန်"
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
@@ -498,9 +500,9 @@ export default function ManufacturingPage() {
             variant="outline"
             size="sm"
             onClick={() => launchProductionFromBom(r)}
-            className="h-7 text-xs gap-1 text-purple-600"
+            className="h-7 text-xs gap-1 text-purple-600 dark:text-purple-400"
           >
-            <Play className="h-3 w-3" /> Run
+            <Play className="h-3 w-3" /> ထုတ်လုပ်မည်
           </Button>
         </div>
       ),
@@ -526,27 +528,27 @@ export default function ManufacturingPage() {
               <Factory className="h-3.5 w-3.5" />
             </div>
             <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">
-              {po.outputProduct?.name || `Product #${po.outputProductId}`}
+              {po.outputProduct?.name || `ကုန်ပစ္စည်း #${po.outputProductId}`}
             </h4>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400 pl-9">
-            <span className="truncate">Recipe: {po.bom?.name || `BOM #${po.bomId}`}</span>
-            <span>• WH: {po.outputWarehouse?.name || `WH #${po.outputWarehouseId}`}</span>
+            <span className="truncate">ဖော်စပ်နည်း: {po.bom?.name || `BOM #${po.bomId}`}</span>
+            <span>• ဂိုဒေါင်: {po.outputWarehouse?.name || `ဂိုဒေါင် #${po.outputWarehouseId}`}</span>
           </div>
         </div>
 
         {/* Output & Date Summary */}
         <div className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800 text-xs">
           <div className="space-y-0.5">
-            <span className="text-[10px] uppercase font-bold text-zinc-400">Planned Output</span>
+            <span className="text-[10px] uppercase font-bold text-zinc-400">လျာထား ထွက်ရှိမှု</span>
             <p className="font-mono font-bold text-purple-600 dark:text-purple-400 text-sm">
               {formatQuantity(po.plannedQty)} {po.outputUom?.symbol || ''}
             </p>
           </div>
 
           <div className="text-right space-y-0.5">
-            <span className="text-[10px] uppercase font-bold text-zinc-400">Production Date</span>
+            <span className="text-[10px] uppercase font-bold text-zinc-400">ထုတ်လုပ်သည့်ရက်စွဲ</span>
             <p className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
               {formatDate(po.productionDate)}
             </p>
@@ -560,10 +562,10 @@ export default function ManufacturingPage() {
             size="sm"
             onClick={() => inspectProd(po)}
             className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1"
-            title="Inspect"
+            title="အသေးစိတ်ကြည့်ရန်"
           >
             <Eye className="h-3.5 w-3.5" />
-            <span className="text-xs">Detail</span>
+            <span className="text-xs">အသေးစိတ်</span>
           </Button>
 
           <div className="flex items-center gap-1.5">
@@ -574,7 +576,7 @@ export default function ManufacturingPage() {
                 onClick={() => handleStartProdOrder(po.id)}
                 className="h-8 px-3 text-xs text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-950/40 gap-1"
               >
-                <Play className="h-3.5 w-3.5" /> Start Production
+                <Play className="h-3.5 w-3.5" /> စတင်မည်
               </Button>
             )}
 
@@ -585,7 +587,7 @@ export default function ManufacturingPage() {
                 onClick={() => handleOpenCompleteDialog(po)}
                 className="h-8 px-3 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700"
               >
-                <CheckCircle2 className="h-3.5 w-3.5" /> Complete Run
+                <CheckCircle2 className="h-3.5 w-3.5" /> အပြီးသတ်မည်
               </Button>
             )}
           </div>
@@ -605,7 +607,7 @@ export default function ManufacturingPage() {
             BOM #{b.id}
           </span>
           <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
-            {componentCount} ingredient{componentCount !== 1 ? 's' : ''}
+            ကုန်ကြမ်း {componentCount} မျိုး
           </Badge>
         </div>
 
@@ -615,14 +617,14 @@ export default function ManufacturingPage() {
             {b.name}
           </h4>
           <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-            Yield: <span className="font-semibold text-zinc-700 dark:text-zinc-300">{b.outputProduct?.name || `Product #${b.outputProductId}`}</span>
+            ထွက်ရှိမှု: <span className="font-semibold text-zinc-700 dark:text-zinc-300">{b.outputProduct?.name || `ကုန်ပစ္စည်း #${b.outputProductId}`}</span>
           </p>
         </div>
 
         {/* Batch Yield Metric */}
         <div className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800 text-xs">
           <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
-            Batch Output Yield:
+            တစ်ကြိမ်ထွက်ရှိမှု:
           </span>
           <span className="font-bold font-mono text-purple-600 dark:text-purple-400 text-sm">
             {formatQuantity(b.outputQty)} {b.outputUom?.symbol || ''}
@@ -636,10 +638,10 @@ export default function ManufacturingPage() {
             size="sm"
             onClick={() => inspectBom(b)}
             className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1"
-            title="Inspect"
+            title="အသေးစိတ်ကြည့်ရန်"
           >
             <Eye className="h-3.5 w-3.5" />
-            <span className="text-xs">Detail</span>
+            <span className="text-xs">အသေးစိတ်</span>
           </Button>
 
           <Button
@@ -648,7 +650,7 @@ export default function ManufacturingPage() {
             onClick={() => launchProductionFromBom(b)}
             className="h-8 px-3 text-xs text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-950/40 gap-1"
           >
-            <Play className="h-3.5 w-3.5" /> Launch Run (ထုတ်လုပ်ပါ)
+            <Play className="h-3.5 w-3.5" /> ထုတ်လုပ်မှု စတင်မည်
           </Button>
         </div>
       </div>
@@ -667,25 +669,25 @@ export default function ManufacturingPage() {
             </h1>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
-            BOM recipes, production runs, raw material consumption & finished goods output
+            ကုန်ကြမ်းဖော်စပ်နည်းများ၊ ထုတ်လုပ်မှုအမှာစာများ၊ ကုန်ကြမ်းသုံးစွဲမှုနှင့် အချောထည်ထွက်ရှိမှု မှတ်တမ်းများ
           </p>
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           <Button variant="outline" size="sm" onClick={loadManufacturingData} className="gap-1.5 h-8 text-xs shrink-0">
             <RefreshCw className={isLoading ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />
-            <span className="hidden sm:inline">Refresh (ပြန်ဖွင့်)</span>
+            <span className="hidden sm:inline">ပြန်လည်ရယူရန်</span>
             <span className="sm:hidden">Refresh</span>
           </Button>
           <Button variant="outline" size="sm" onClick={() => setBomDialogOpen(true)} className="gap-1.5 h-8 text-xs shrink-0">
             <Layers className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">+ New BOM (ဖော်စပ်နည်းအသစ်)</span>
+            <span className="hidden sm:inline">+ ဖော်စပ်နည်း အသစ် (BOM)</span>
             <span className="sm:hidden">+ BOM</span>
           </Button>
           <div className="hidden sm:block">
             <Button variant="primary" size="sm" onClick={() => setProdDialogOpen(true)} className="gap-1.5 h-8 text-xs bg-purple-600 hover:bg-purple-700">
               <Plus className="h-3.5 w-3.5" />
-              <span>+ Production Run (ထုတ်လုပ်မှုစတင်ရန်)</span>
+              <span>+ ထုတ်လုပ်မှု အမှာစာသစ်</span>
             </Button>
           </div>
         </div>
@@ -696,10 +698,10 @@ export default function ManufacturingPage() {
         <div className="overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
           <TabsList className="w-max sm:w-full justify-start">
             <TabsTrigger value="orders" count={productionOrders.length}>
-              🏭 Production Orders (ထုတ်လုပ်မှု အမှာစာများ)
+              🏭 ထုတ်လုပ်မှု အမှာစာများ (Orders)
             </TabsTrigger>
             <TabsTrigger value="boms" count={boms.length}>
-              📋 Bill of Materials (BOM ဖော်စပ်နည်းများ)
+              📋 ကုန်ကြမ်းဖော်စပ်နည်းများ (BOM)
             </TabsTrigger>
           </TabsList>
         </div>
@@ -709,7 +711,7 @@ export default function ManufacturingPage() {
           <DataTable
             data={productionOrders}
             columns={prodColumns}
-            searchPlaceholder="Search production orders by PROD# or output product (အမှာစာရှာရန်)..."
+            searchPlaceholder="အမှာစာအမှတ် သို့မဟုတ် အချောထည်ဖြင့် ရှာဖွေရန်..."
             searchKey="productionNo"
             isLoading={isLoading}
             renderCard={renderProdCard}
@@ -722,7 +724,7 @@ export default function ManufacturingPage() {
           <DataTable
             data={boms}
             columns={bomColumns}
-            searchPlaceholder="Search recipes & BOMs by name (ဖော်စပ်နည်းရှာရန်)..."
+            searchPlaceholder="ဖော်စပ်နည်းအမည်ဖြင့် ရှာဖွေရန်..."
             searchKey="name"
             isLoading={isLoading}
             renderCard={renderBomCard}
@@ -735,13 +737,13 @@ export default function ManufacturingPage() {
       <Dialog
         open={bomDialogOpen}
         onOpenChange={setBomDialogOpen}
-        title="Create Bill of Materials (BOM ဖော်စပ်နည်းအသစ်)"
-        maxWidth="xl"
+        title="ကုန်ကြမ်းဖော်စပ်နည်း အသစ်ထည့်ရန် (New BOM)"
+        maxWidth="3xl"
       >
         <form onSubmit={handleCreateBom} className="space-y-4">
           <Input
-            label="BOM Recipe Name (ဖော်စပ်နည်းအမည်) *"
-            placeholder="e.g. Bean Cake 100 pcs Standard Batch"
+            label="ဖော်စပ်နည်းအမည် *"
+            placeholder="ဥပမာ - ပဲမုန့် အခု ၁၀၀ စံနှုန်း"
             value={bomForm.name}
             onChange={e => setBomForm({ ...bomForm, name: e.target.value })}
             required
@@ -749,7 +751,7 @@ export default function ManufacturingPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Select
-              label="Output Finished Product (ထွက်ရှိမည့် အချောထည်) *"
+              label="ထွက်ရှိမည့် အချောထည် *"
               value={bomForm.outputProductId}
               onChange={e => {
                 const pId = e.target.value;
@@ -762,7 +764,7 @@ export default function ManufacturingPage() {
               }}
               required
             >
-              <option value="">Select Finished Good...</option>
+              <option value="">အချောထည် ရွေးချယ်ပါ...</option>
               {products.map(p => (
                 <option key={p.id} value={p.id}>
                   {p.name} ({p.sku})
@@ -771,12 +773,12 @@ export default function ManufacturingPage() {
             </Select>
 
             <Select
-              label="Output Unit (ယူနစ်) *"
+              label="ထွက်ရှိမည့် ယူနစ် *"
               value={bomForm.outputUomId}
               onChange={e => setBomForm({ ...bomForm, outputUomId: e.target.value })}
               required
             >
-              <option value="">Select Unit...</option>
+              <option value="">ယူနစ် ရွေးချယ်ပါ...</option>
               {uoms.map(u => (
                 <option key={u.id} value={u.id}>
                   {u.name} ({u.symbol})
@@ -787,7 +789,7 @@ export default function ManufacturingPage() {
             <Input
               type="number"
               step="any"
-              label="Batch Output Qty (အရေအတွက်) *"
+              label="တစ်ကြိမ်ထွက်ရှိမည့် အရေအတွက် *"
               value={bomForm.outputQty}
               onChange={e => setBomForm({ ...bomForm, outputQty: Number(e.target.value) })}
               required
@@ -795,11 +797,11 @@ export default function ManufacturingPage() {
           </div>
 
           <Select
-            label="Default Source Warehouse (ကုန်ကြမ်းထုတ်ယူမည့် ကုန်လှောင်ရုံ — optional)"
+            label="ပုံသေ ကုန်ကြမ်းထုတ်ယူမည့် ဂိုဒေါင် (ရှိပါက)"
             value={bomForm.defaultSourceWarehouseId}
             onChange={e => setBomForm({ ...bomForm, defaultSourceWarehouseId: e.target.value })}
           >
-            <option value="">Not specified (Production ချိန်တွင် ရွေးမည်)</option>
+            <option value="">မသတ်မှတ်ပါ (ထုတ်လုပ်ချိန်တွင် ရွေးချယ်မည်)</option>
             {warehouses.map(w => (
               <option key={w.id} value={w.id}>
                 {w.name}
@@ -810,11 +812,16 @@ export default function ManufacturingPage() {
           {/* Ingredients list */}
           <div className="space-y-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-                Required Ingredients (ပါဝင်သော ကုန်ကြမ်းများ)
-              </h4>
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                  ပါဝင်သော ကုန်ကြမ်းများ (Ingredients)
+                </h4>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                  စုစုပေါင်း ကုန်ကြမ်း {bomForm.ingredients.length} မျိုး
+                </p>
+              </div>
               <Button type="button" variant="outline" size="sm" onClick={addBomIngredient} className="h-7 text-xs gap-1">
-                <Plus className="h-3 w-3" /> Add Ingredient (ကုန်ကြမ်းထည့်ရန်)
+                <Plus className="h-3 w-3" /> + ကုန်ကြမ်းအသစ်ထည့်ရန်
               </Button>
             </div>
 
@@ -827,7 +834,7 @@ export default function ManufacturingPage() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold font-mono text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded-md">
-                      Ingredient #{idx + 1}
+                      ကုန်ကြမ်း #{idx + 1}
                     </span>
                     <Button
                       type="button"
@@ -837,17 +844,17 @@ export default function ManufacturingPage() {
                       disabled={bomForm.ingredients.length === 1}
                       className="h-7 px-2 text-rose-500 hover:text-rose-700 text-xs gap-1"
                     >
-                      <Trash2 className="h-3.5 w-3.5" /> Delete
+                      <Trash2 className="h-3.5 w-3.5" /> ဖျက်မည်
                     </Button>
                   </div>
 
                   <Select
-                    label="Raw Material (ကုန်ကြမ်းပစ္စည်း) *"
+                    label="ကုန်ကြမ်းပစ္စည်း *"
                     value={it.productId}
                     onChange={e => updateBomIngredient(idx, 'productId', e.target.value)}
                     required
                   >
-                    <option value="">Select Raw Material...</option>
+                    <option value="">ကုန်ကြမ်း ရွေးချယ်ပါ...</option>
                     {products.map(p => (
                       <option key={p.id} value={p.id}>
                         {p.name} ({p.sku})
@@ -857,12 +864,12 @@ export default function ManufacturingPage() {
 
                   <div className="grid grid-cols-2 gap-2">
                     <Select
-                      label="Unit (ယူနစ်) *"
+                      label="ယူနစ် *"
                       value={it.uomId}
                       onChange={e => updateBomIngredient(idx, 'uomId', e.target.value)}
                       required
                     >
-                      <option value="">Unit...</option>
+                      <option value="">ယူနစ်...</option>
                       {uoms.map(u => (
                         <option key={u.id} value={u.id}>
                           {u.symbol || u.name}
@@ -873,8 +880,8 @@ export default function ManufacturingPage() {
                     <Input
                       type="number"
                       step="any"
-                      label="Quantity (အရေအတွက်) *"
-                      placeholder="Qty"
+                      label="အရေအတွက် *"
+                      placeholder="အရေအတွက်"
                       value={it.qty}
                       onChange={e => updateBomIngredient(idx, 'qty', e.target.value)}
                       required
@@ -886,15 +893,22 @@ export default function ManufacturingPage() {
 
             {/* Desktop View: Table Rows */}
             <div className="hidden md:block space-y-2 max-h-56 overflow-y-auto pr-1">
+              <div className="flex items-center gap-2 px-2 py-1 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                <div className="flex-1 min-w-[200px]">ကုန်ကြမ်းပစ္စည်း *</div>
+                <div className="w-32 shrink-0">ယူနစ် *</div>
+                <div className="w-28 shrink-0">အရေအတွက် *</div>
+                <div className="w-8 shrink-0"></div>
+              </div>
+
               {bomForm.ingredients.map((it, idx) => (
-                <div key={idx} className="flex items-center gap-2 p-2 rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/60">
-                  <div className="flex-1">
+                <div key={idx} className="flex items-center gap-2 p-2 rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/60 transition-all hover:border-zinc-300 dark:hover:border-zinc-700">
+                  <div className="flex-1 min-w-[200px]">
                     <Select
                       value={it.productId}
                       onChange={e => updateBomIngredient(idx, 'productId', e.target.value)}
                       required
                     >
-                      <option value="">Select Raw Material...</option>
+                      <option value="">ကုန်ကြမ်း ရွေးချယ်ပါ...</option>
                       {products.map(p => (
                         <option key={p.id} value={p.id}>
                           {p.name} ({p.sku})
@@ -903,13 +917,13 @@ export default function ManufacturingPage() {
                     </Select>
                   </div>
 
-                  <div className="w-28">
+                  <div className="w-32 shrink-0">
                     <Select
                       value={it.uomId}
                       onChange={e => updateBomIngredient(idx, 'uomId', e.target.value)}
                       required
                     >
-                      <option value="">Unit...</option>
+                      <option value="">ယူနစ်...</option>
                       {uoms.map(u => (
                         <option key={u.id} value={u.id}>
                           {u.symbol || u.name}
@@ -918,7 +932,7 @@ export default function ManufacturingPage() {
                     </Select>
                   </div>
 
-                  <div className="w-24">
+                  <div className="w-28 shrink-0">
                     <Input
                       type="number"
                       step="any"
@@ -936,6 +950,7 @@ export default function ManufacturingPage() {
                     onClick={() => removeBomIngredient(idx)}
                     disabled={bomForm.ingredients.length === 1}
                     className="h-8 w-8 text-rose-500 hover:text-rose-700 shrink-0"
+                    title="ဖျက်သိမ်းရန်"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -946,10 +961,10 @@ export default function ManufacturingPage() {
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setBomDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700">
-              Save BOM Recipe (ဖော်စပ်နည်းသိမ်းရန်)
+              ဖော်စပ်နည်း သိမ်းဆည်းမည်
             </Button>
           </div>
         </form>
@@ -959,12 +974,12 @@ export default function ManufacturingPage() {
       <Dialog
         open={editBomDialogOpen}
         onOpenChange={setEditBomDialogOpen}
-        title={`Edit BOM: ${selectedBom?.name || ''}`}
-        maxWidth="xl"
+        title={`ဖော်စပ်နည်း ပြင်ဆင်ရန်: ${selectedBom?.name || ''}`}
+        maxWidth="3xl"
       >
         <form onSubmit={handleEditBom} className="space-y-4">
           <Input
-            label="BOM Recipe Name (ဖော်စပ်နည်းအမည်) *"
+            label="ဖော်စပ်နည်းအမည် *"
             value={editBomForm.name}
             onChange={e => setEditBomForm({ ...editBomForm, name: e.target.value })}
             required
@@ -972,7 +987,7 @@ export default function ManufacturingPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Select
-              label="Output Finished Product (အချောထည်) *"
+              label="ထွက်ရှိမည့် အချောထည် *"
               value={editBomForm.outputProductId}
               onChange={e => {
                 const pId = e.target.value;
@@ -985,7 +1000,7 @@ export default function ManufacturingPage() {
               }}
               required
             >
-              <option value="">Select Finished Good...</option>
+              <option value="">အချောထည် ရွေးချယ်ပါ...</option>
               {products.map(p => (
                 <option key={p.id} value={p.id}>
                   {p.name} ({p.sku})
@@ -994,12 +1009,12 @@ export default function ManufacturingPage() {
             </Select>
 
             <Select
-              label="Output Unit (ယူနစ်) *"
+              label="ထွက်ရှိမည့် ယူနစ် *"
               value={editBomForm.outputUomId}
               onChange={e => setEditBomForm({ ...editBomForm, outputUomId: e.target.value })}
               required
             >
-              <option value="">Select Unit...</option>
+              <option value="">ယူနစ် ရွေးချယ်ပါ...</option>
               {uoms.map(u => (
                 <option key={u.id} value={u.id}>
                   {u.name} ({u.symbol})
@@ -1010,7 +1025,7 @@ export default function ManufacturingPage() {
             <Input
               type="number"
               step="any"
-              label="Batch Output Qty *"
+              label="တစ်ကြိမ်ထွက်ရှိမည့် အရေအတွက် *"
               value={editBomForm.outputQty}
               onChange={e => setEditBomForm({ ...editBomForm, outputQty: Number(e.target.value) })}
               required
@@ -1018,11 +1033,11 @@ export default function ManufacturingPage() {
           </div>
 
           <Select
-            label="Default Source Warehouse (ကုန်ကြမ်းထုတ်ယူမည့် ကုန်လှောင်ရုံ — optional)"
+            label="ပုံသေ ကုန်ကြမ်းထုတ်ယူမည့် ဂိုဒေါင် (ရှိပါက)"
             value={editBomForm.defaultSourceWarehouseId}
             onChange={e => setEditBomForm({ ...editBomForm, defaultSourceWarehouseId: e.target.value })}
           >
-            <option value="">Not specified</option>
+            <option value="">မသတ်မှတ်ပါ (ထုတ်လုပ်ချိန်တွင် ရွေးချယ်မည်)</option>
             {warehouses.map(w => (
               <option key={w.id} value={w.id}>
                 {w.name}
@@ -1033,9 +1048,14 @@ export default function ManufacturingPage() {
           {/* Edit Ingredients list */}
           <div className="space-y-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-                Ingredients (ကုန်ကြမ်းများ) — Editing replaces all existing ingredients
-              </h4>
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                  ပါဝင်သော ကုန်ကြမ်းများ (Ingredients)
+                </h4>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                  စုစုပေါင်း ကုန်ကြမ်း {editBomForm.ingredients.length} မျိုး
+                </p>
+              </div>
               <Button
                 type="button"
                 variant="outline"
@@ -1043,13 +1063,20 @@ export default function ManufacturingPage() {
                 onClick={() => setEditBomForm(prev => ({ ...prev, ingredients: [...prev.ingredients, { productId: '', uomId: '', qty: 1 }] }))}
                 className="h-7 text-xs gap-1"
               >
-                <Plus className="h-3 w-3" /> Add Ingredient
+                <Plus className="h-3 w-3" /> + ကုန်ကြမ်းအသစ်ထည့်ရန်
               </Button>
             </div>
             <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+              <div className="flex items-center gap-2 px-2 py-1 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                <div className="flex-1 min-w-[200px]">ကုန်ကြမ်းပစ္စည်း *</div>
+                <div className="w-32 shrink-0">ယူနစ် *</div>
+                <div className="w-28 shrink-0">အရေအတွက် *</div>
+                <div className="w-8 shrink-0"></div>
+              </div>
+
               {editBomForm.ingredients.map((it, idx) => (
-                <div key={idx} className="flex items-center gap-2 p-2 rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/60">
-                  <div className="flex-1">
+                <div key={idx} className="flex items-center gap-2 p-2 rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/60 transition-all hover:border-zinc-300 dark:hover:border-zinc-700">
+                  <div className="flex-1 min-w-[200px]">
                     <Select
                       value={it.productId}
                       onChange={e => {
@@ -1063,7 +1090,7 @@ export default function ManufacturingPage() {
                       }}
                       required
                     >
-                      <option value="">Select Raw Material...</option>
+                      <option value="">ကုန်ကြမ်း ရွေးချယ်ပါ...</option>
                       {products.map(p => (
                         <option key={p.id} value={p.id}>
                           {p.name} ({p.sku})
@@ -1071,7 +1098,7 @@ export default function ManufacturingPage() {
                       ))}
                     </Select>
                   </div>
-                  <div className="w-28">
+                  <div className="w-32 shrink-0">
                     <Select
                       value={it.uomId}
                       onChange={e => {
@@ -1084,7 +1111,7 @@ export default function ManufacturingPage() {
                       }}
                       required
                     >
-                      <option value="">Unit...</option>
+                      <option value="">ယူနစ်...</option>
                       {uoms.map(u => (
                         <option key={u.id} value={u.id}>
                           {u.symbol || u.name}
@@ -1092,7 +1119,7 @@ export default function ManufacturingPage() {
                       ))}
                     </Select>
                   </div>
-                  <div className="w-24">
+                  <div className="w-28 shrink-0">
                     <Input
                       type="number"
                       step="any"
@@ -1116,6 +1143,7 @@ export default function ManufacturingPage() {
                     onClick={() => setEditBomForm(prev => ({ ...prev, ingredients: prev.ingredients.filter((_, i) => i !== idx) }))}
                     disabled={editBomForm.ingredients.length === 1}
                     className="h-8 w-8 text-rose-500 hover:text-rose-700 shrink-0"
+                    title="ဖျက်သိမ်းရန်"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -1126,10 +1154,10 @@ export default function ManufacturingPage() {
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setEditBomDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
-              Save Changes (ပြင်ဆင်ချက်သိမ်းရန်)
+              ပြင်ဆင်ချက်များ သိမ်းဆည်းမည်
             </Button>
           </div>
         </form>
@@ -1139,20 +1167,20 @@ export default function ManufacturingPage() {
       <Dialog
         open={prodDialogOpen}
         onOpenChange={setProdDialogOpen}
-        title="Launch Production Run (ထုတ်လုပ်မှု အမှာစာသစ်)"
+        title="ထုတ်လုပ်မှု အမှာစာသစ် ဖွင့်ရန်"
         maxWidth="lg"
       >
         <form onSubmit={handleCreateProdOrder} className="space-y-4">
           <Select
-            label="Bill of Materials (BOM Recipe) *"
+            label="ဖော်စပ်နည်း (BOM) *"
             value={prodForm.bomId}
             onChange={e => setProdForm({ ...prodForm, bomId: e.target.value })}
             required
           >
-            <option value="">Select BOM Recipe...</option>
+            <option value="">ဖော်စပ်နည်း ရွေးချယ်ပါ...</option>
             {boms.map(b => (
               <option key={b.id} value={b.id}>
-                {b.name} (Output: {b.outputProduct?.name || b.outputProductId})
+                {b.name} (အချောထည်: {b.outputProduct?.name || b.outputProductId})
               </option>
             ))}
           </Select>
@@ -1161,19 +1189,19 @@ export default function ManufacturingPage() {
             <Input
               type="number"
               step="any"
-              label="Planned Output Quantity (ထုတ်လုပ်မည့် အရေအတွက်) *"
+              label="ထုတ်လုပ်မည့် အရေအတွက် (လျာထားချက်) *"
               value={prodForm.plannedQty}
               onChange={e => setProdForm({ ...prodForm, plannedQty: Number(e.target.value) })}
               required
             />
 
             <Select
-              label="Destination Finished Goods WH (သိမ်းဆည်းမည့် ကုန်လှောင်ရုံ) *"
+              label="အချောထည် သိမ်းဆည်းမည့် ဂိုဒေါင် *"
               value={prodForm.outputWarehouseId}
               onChange={e => setProdForm({ ...prodForm, outputWarehouseId: e.target.value })}
               required
             >
-              <option value="">Select Finished Goods WH...</option>
+              <option value="">အချောထည်ဂိုဒေါင် ရွေးချယ်ပါ...</option>
               {warehouses.map(w => (
                 <option key={w.id} value={w.id}>
                   {w.name}
@@ -1184,7 +1212,7 @@ export default function ManufacturingPage() {
 
           <Input
             type="date"
-            label="Production Date (ထုတ်လုပ်မည့် ရက်စွဲ) *"
+            label="ထုတ်လုပ်မည့် ရက်စွဲ *"
             value={prodForm.productionDate}
             onChange={e => setProdForm({ ...prodForm, productionDate: e.target.value })}
             required
@@ -1192,10 +1220,10 @@ export default function ManufacturingPage() {
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setProdDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700">
-              Create Production Order (အမှာစာဖွင့်ရန်)
+              ထုတ်လုပ်မှု အမှာစာ ဖွင့်မည်
             </Button>
           </div>
         </form>
@@ -1205,17 +1233,17 @@ export default function ManufacturingPage() {
       <Dialog
         open={completeDialogOpen}
         onOpenChange={setCompleteDialogOpen}
-        title="Complete Production Order (ထုတ်လုပ်မှု အပြီးသတ်ခြင်း)"
+        title="ထုတ်လုပ်မှု အပြီးသတ်ခြင်း (Complete Production)"
         maxWidth="xl"
       >
         <form onSubmit={handleCompleteProdOrder} className="space-y-4">
           <Select
-            label="Raw Material Input Warehouse (ကုန်ကြမ်း ထုတ်ယူသည့် ကုန်လှောင်ရုံ) *"
+            label="ကုန်ကြမ်း ထုတ်ယူမည့် ဂိုဒေါင် *"
             value={completeForm.inputWarehouseId}
             onChange={e => setCompleteForm({ ...completeForm, inputWarehouseId: e.target.value })}
             required
           >
-            <option value="">Select Source WH for Raw Materials...</option>
+            <option value="">ကုန်ကြမ်းဂိုဒေါင် ရွေးချယ်ပါ...</option>
             {warehouses.map(w => (
               <option key={w.id} value={w.id}>
                 {w.name}
@@ -1226,17 +1254,17 @@ export default function ManufacturingPage() {
           {/* Consumed Materials Actuals */}
           <div className="space-y-2.5">
             <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-              Actual Materials Consumed (အမှန်တကယ် သုံးစွဲခဲ့သော ကုန်ကြမ်းများ)
+              အမှန်တကယ် သုံးစွဲခဲ့သော ကုန်ကြမ်းများ (Consumed Materials)
             </h4>
             <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-900">
               {completeForm.materials.map((m, idx) => (
                 <div key={idx} className="p-3 text-xs space-y-2 sm:space-y-0 sm:flex sm:items-center sm:justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-bold text-zinc-900 dark:text-zinc-100 truncate">{m.name}</p>
-                    <p className="text-[11px] text-zinc-500">Unit: {m.uom}</p>
+                    <p className="text-[11px] text-zinc-500">ယူနစ်: {m.uom}</p>
                   </div>
                   <div className="flex items-center justify-between sm:justify-end gap-2 pt-1 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800">
-                    <label className="text-[11px] font-semibold text-zinc-500 shrink-0">Consumed Qty:</label>
+                    <label className="text-[11px] font-semibold text-zinc-500 shrink-0">သုံးစွဲ အရေအတွက်:</label>
                     <div className="flex items-center gap-1.5">
                       <input
                         type="number"
@@ -1261,17 +1289,17 @@ export default function ManufacturingPage() {
           {/* Produced Output Actuals */}
           <div className="space-y-2.5">
             <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-              Actual Finished Output (အမှန်တကယ် ထွက်ရှိလာသော အချောထည်)
+              အမှန်တကယ် ထွက်ရှိလာသော အချောထည် (Finished Goods Output)
             </h4>
             <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-900">
               {completeForm.outputs.map((o, idx) => (
                 <div key={idx} className="p-3 text-xs space-y-2 sm:space-y-0 sm:flex sm:items-center sm:justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-bold text-zinc-900 dark:text-zinc-100 truncate">{o.name}</p>
-                    <p className="text-[11px] text-zinc-500">Unit: {o.uom}</p>
+                    <p className="text-[11px] text-zinc-500">ယူနစ်: {o.uom}</p>
                   </div>
                   <div className="flex items-center justify-between sm:justify-end gap-2 pt-1 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800">
-                    <label className="text-[11px] font-semibold text-zinc-500 shrink-0">Finished Qty:</label>
+                    <label className="text-[11px] font-semibold text-zinc-500 shrink-0">ထွက်ရှိ အရေအတွက်:</label>
                     <div className="flex items-center gap-1.5">
                       <input
                         type="number"
@@ -1295,27 +1323,27 @@ export default function ManufacturingPage() {
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setCompleteDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700">
-              Complete & Update Inventory (အပြီးသတ်၍ စတော့သွင်းမည်)
+              ထုတ်လုပ်မှု အပြီးသတ်၍ စတော့သွင်းမည်
             </Button>
           </div>
         </form>
       </Dialog>
 
       {/* ─── MODAL: DELETE BOM CONFIRMATION ─────────────────────────── */}
-      <Dialog open={deleteBomConfirmOpen} onOpenChange={setDeleteBomConfirmOpen} title="Delete BOM Recipe (ဖော်စပ်နည်းဖျက်ရန်)">
+      <Dialog open={deleteBomConfirmOpen} onOpenChange={setDeleteBomConfirmOpen} title="ဖော်စပ်နည်း ဖျက်သိမ်းရန် အတည်ပြုခြင်း">
         <div className="space-y-4">
           <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300">
-            Are you sure you want to delete BOM recipe <span className="font-bold text-zinc-900 dark:text-zinc-100">{selectedBom?.name}</span>?
+            <span className="font-bold text-zinc-900 dark:text-zinc-100">{selectedBom?.name}</span> ဖော်စပ်နည်းကို ဖျက်ရန် သေချာပါသလား?
           </p>
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setDeleteBomConfirmOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="button" variant="destructive" onClick={handleDeleteBom} className="w-full sm:w-auto">
-              Delete BOM (ဖျက်မည်)
+              ဖော်စပ်နည်း ဖျက်မည်
             </Button>
           </div>
         </div>
@@ -1325,8 +1353,8 @@ export default function ManufacturingPage() {
       <Sheet
         open={bomSheetOpen}
         onOpenChange={setBomSheetOpen}
-        title={selectedBom?.name || 'BOM Recipe'}
-        description={`Target Output: ${selectedBom?.outputProduct?.name || ''}`}
+        title={selectedBom?.name || 'ဖော်စပ်နည်း အသေးစိတ်'}
+        description={`ထွက်ရှိမည့် အချောထည်: ${selectedBom?.outputProduct?.name || ''}`}
         footer={
           selectedBom && (
             <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2 w-full">
@@ -1334,17 +1362,17 @@ export default function ManufacturingPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => openEditBom(selectedBom)}
-                className="text-blue-600 w-full sm:w-auto text-xs border-blue-300"
+                className="text-blue-600 dark:text-blue-400 w-full sm:w-auto text-xs border-blue-300 dark:border-blue-800"
               >
-                <Pencil className="h-3.5 w-3.5 mr-1" /> Edit BOM
+                <Pencil className="h-3.5 w-3.5 mr-1" /> ဖော်စပ်နည်း ပြင်မည်
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setDeleteBomConfirmOpen(true)}
-                className="text-rose-600 w-full sm:w-auto text-xs"
+                className="text-rose-600 dark:text-rose-400 w-full sm:w-auto text-xs border-rose-200 dark:border-rose-900"
               >
-                <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete BOM
+                <Trash2 className="h-3.5 w-3.5 mr-1" /> ဖော်စပ်နည်း ဖျက်မည်
               </Button>
               <Button
                 variant="primary"
@@ -1352,7 +1380,7 @@ export default function ManufacturingPage() {
                 onClick={() => launchProductionFromBom(selectedBom)}
                 className="bg-purple-600 hover:bg-purple-700 gap-1 w-full sm:w-auto text-xs"
               >
-                <Play className="h-3.5 w-3.5" /> Launch Production Run
+                <Play className="h-3.5 w-3.5" /> ထုတ်လုပ်မှု စတင်မည်
               </Button>
             </div>
           )
@@ -1363,45 +1391,45 @@ export default function ManufacturingPage() {
             {/* Header Info Grid */}
             <div className="grid grid-cols-2 gap-2.5 sm:gap-3 p-3.5 sm:p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">BOM ID</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">ဖော်စပ်နည်းကုဒ်</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1 font-mono">#{selectedBom.id}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Status</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">အခြေအနေ</p>
                 <Badge variant={selectedBom.isActive !== false ? 'success' : 'secondary'} className="mt-1">
-                  {selectedBom.isActive !== false ? 'Active' : 'Inactive'}
+                  {selectedBom.isActive !== false ? 'အသုံးပြုဆဲ' : 'ပိတ်ထားသည်'}
                 </Badge>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Finished Product (အချောထည်)</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">ထွက်ရှိမည့် အချောထည်</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedBom.outputProduct?.name}</p>
                 {selectedBom.outputProduct?.sku && (
                   <p className="text-[10px] text-zinc-400 font-mono">{selectedBom.outputProduct.sku}</p>
                 )}
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Batch Output Yield</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">တစ်ကြိမ်ထွက်ရှိမှု နှုန်း</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1 font-mono">
                   {formatQuantity(selectedBom.outputQty)} {selectedBom.outputUom?.symbol || ''}
                 </p>
               </div>
               <div className="col-span-2">
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Default Source Warehouse (ကုန်ကြမ်းထုတ်ယူမည့် ကုန်လှောင်ရုံ)</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">ပုံသေ ကုန်ကြမ်းထုတ်ယူမည့် ဂိုဒေါင်</p>
                 {selectedBom.defaultSourceWarehouse ? (
                   <div className="flex items-center gap-1.5 mt-1">
                     <WarehouseIcon className="h-3.5 w-3.5 text-blue-500" />
                     <p className="font-semibold text-blue-700 dark:text-blue-300">{selectedBom.defaultSourceWarehouse.name}</p>
                   </div>
                 ) : (
-                  <p className="text-zinc-400 italic mt-1">Not set — will be selected at Production Complete time</p>
+                  <p className="text-zinc-400 italic mt-1">မသတ်မှတ်ထားပါ (ထုတ်လုပ်ချိန်တွင် ရွေးချယ်မည်)</p>
                 )}
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Created</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">စတင်ထည့်သွင်းသည့်ရက်စွဲ</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{formatDate(selectedBom.createdAt || '')}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Last Updated</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">နောက်ဆုံးပြင်ဆင်သည့်ရက်စွဲ</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{formatDate(selectedBom.updatedAt || '')}</p>
               </div>
             </div>
@@ -1410,24 +1438,24 @@ export default function ManufacturingPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs">
-                  Ingredients Formula (ကုန်ကြမ်း ပါဝင်မှုနှုန်းထား)
+                  ကုန်ကြမ်း ပါဝင်မှုနှုန်းထား (Ingredients Formula)
                 </h4>
                 <span className="text-[10px] text-zinc-400">
-                  {(selectedBom.ingredients || []).length} component(s) per batch
+                  တစ်ကြိမ်လျှင် ကုန်ကြမ်း {(selectedBom.ingredients || []).length} မျိုး
                 </span>
               </div>
               <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-900">
                 <div className="grid grid-cols-4 bg-zinc-50 dark:bg-zinc-800 p-2.5 text-[10px] font-bold uppercase text-zinc-500">
-                  <span className="col-span-2">Raw Material</span>
-                  <span className="text-right">Per Batch</span>
-                  <span className="text-right">Per 1 unit output</span>
+                  <span className="col-span-2">ကုန်ကြမ်းပစ္စည်း</span>
+                  <span className="text-right">တစ်ကြိမ်စာ လိုအပ်ချက်</span>
+                  <span className="text-right">အချောထည် ၁ ခုစာ</span>
                 </div>
                 <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
                   {(selectedBom.ingredients || []).map((ing, idx) => (
                     <div key={idx} className="grid grid-cols-4 items-center p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
                       <div className="col-span-2">
                         <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-                          {ing.product?.name || `Material #${ing.productId}`}
+                          {ing.product?.name || `ကုန်ကြမ်း #${ing.productId}`}
                         </span>
                         {ing.product?.sku && (
                           <p className="text-[10px] text-zinc-400 font-mono">{ing.product.sku}</p>
@@ -1455,8 +1483,8 @@ export default function ManufacturingPage() {
       <Sheet
         open={prodSheetOpen}
         onOpenChange={setProdSheetOpen}
-        title={`Production Order: ${selectedProd?.productionNo || ''}`}
-        description={`Output: ${selectedProd?.outputProduct?.name || ''}`}
+        title={`ထုတ်လုပ်မှု အမှာစာ: ${selectedProd?.productionNo || ''}`}
+        description={`အချောထည်: ${selectedProd?.outputProduct?.name || ''}`}
         footer={
           selectedProd && (
             <div className="flex justify-end gap-2 w-full">
@@ -1467,7 +1495,7 @@ export default function ManufacturingPage() {
                   onClick={() => handleStartProdOrder(selectedProd.id)}
                   className="bg-purple-600 hover:bg-purple-700 gap-1.5 w-full sm:w-auto text-xs"
                 >
-                  <Play className="h-4 w-4" /> Start Production (ထုတ်လုပ်မှုစတင်ပါ)
+                  <Play className="h-4 w-4" /> ထုတ်လုပ်မှု စတင်မည်
                 </Button>
               )}
               {selectedProd.status === 'IN_PROGRESS' && (
@@ -1480,7 +1508,7 @@ export default function ManufacturingPage() {
                   }}
                   className="bg-emerald-600 hover:bg-emerald-700 gap-1.5 w-full sm:w-auto text-xs"
                 >
-                  <CheckCircle2 className="h-4 w-4" /> Complete Production (အပြီးသတ်ပါ)
+                  <CheckCircle2 className="h-4 w-4" /> ထုတ်လုပ်မှု အပြီးသတ်မည်
                 </Button>
               )}
             </div>
@@ -1491,23 +1519,23 @@ export default function ManufacturingPage() {
           <div className="space-y-6 text-xs">
             <div className="grid grid-cols-2 gap-2.5 sm:gap-3 p-3.5 sm:p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Order Status</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">အမှာစာ အခြေအနေ</p>
                 <div className="mt-1">
                   <StatusBadge status={selectedProd.status} />
                 </div>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Planned Output</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">လျာထား ထွက်ရှိမှု</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1 font-mono">
                   {formatQuantity(selectedProd.plannedQty)} {selectedProd.outputUom?.symbol || ''}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">BOM Recipe</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">ဖော်စပ်နည်း (BOM)</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedProd.bom?.name}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Output Warehouse</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">သိမ်းဆည်းမည့် ဂိုဒေါင်</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedProd.outputWarehouse?.name}</p>
               </div>
             </div>
@@ -1515,19 +1543,19 @@ export default function ManufacturingPage() {
             {/* Consumed Materials */}
             <div className="space-y-2">
               <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs">
-                Material Consumption Breakdown (ကုန်ကြမ်း သုံးစွဲမှု အခြေအနေ)
+                ကုန်ကြမ်း သုံးစွဲမှု အခြေအနေ (Material Consumption Breakdown)
               </h4>
               <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-900">
                 {(selectedProd.materials || []).map((m, idx) => (
                   <div key={idx} className="flex items-center justify-between p-3">
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-100">{m.product?.name || `Material #${m.productId}`}</span>
+                    <span className="font-semibold text-zinc-900 dark:text-zinc-100">{m.product?.name || `ကုန်ကြမ်း #${m.productId}`}</span>
                     <div className="text-right font-mono">
                       <span className="font-bold text-zinc-900 dark:text-zinc-100">
-                        Planned: {formatQuantity(m.plannedQty)} {m.uom?.symbol}
+                        လျာထား: {formatQuantity(m.plannedQty)} {m.uom?.symbol}
                       </span>
                       {m.actualQty !== undefined && m.actualQty !== null && (
                         <p className="text-[10px] text-zinc-500">
-                          Actual: {formatQuantity(m.actualQty)} {m.uom?.symbol}
+                          အမှန်တကယ်: {formatQuantity(m.actualQty)} {m.uom?.symbol}
                         </p>
                       )}
                     </div>
@@ -1548,7 +1576,7 @@ export default function ManufacturingPage() {
             else setProdDialogOpen(true);
           }}
           className="h-14 w-14 rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-xl flex items-center justify-center p-0 active:scale-95 transition-transform"
-          title="Create"
+          title="အသစ်ထည့်ရန်"
         >
           <Plus className="h-6 w-6" />
         </Button>
