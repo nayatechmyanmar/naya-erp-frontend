@@ -135,7 +135,7 @@ export default function AccountingPage() {
       if (custRes.success && Array.isArray(custRes.data)) setCustomers(custRes.data);
       if (supRes.success && Array.isArray(supRes.data)) setSuppliers(supRes.data);
     } catch (err: any) {
-      error('Failed to load accounting data', err.message);
+      error('အချက်အလက် ရယူ၍မရပါ', err.message);
     } finally {
       setIsLoading(false);
     }
@@ -149,7 +149,7 @@ export default function AccountingPage() {
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!accountForm.accountCode || !accountForm.accountName) {
-      error('Please complete account code and name');
+      error('လိုအပ်ချက်', 'ကျေးဇူးပြု၍ စာရင်းကုဒ်နှင့် စာရင်းခေါင်းစဉ်အမည် အပြည့်အစုံ ဖြည့်သွင်းပါ');
       return;
     }
 
@@ -159,12 +159,12 @@ export default function AccountingPage() {
     });
 
     if (res.success) {
-      success('Account Created (စာရင်းခေါင်းစဉ် အသစ်ဖွင့်ပြီးပါပြီ)', `${accountForm.accountCode} - ${accountForm.accountName}`);
+      success('စာရင်းခေါင်းစဉ်သစ် ဖွင့်ပြီးပါပြီ', `${accountForm.accountCode} - ${accountForm.accountName}`);
       setAccountDialogOpen(false);
       setAccountForm({ accountCode: '', accountName: '', accountType: 'ASSET' });
       loadAccountingData();
     } else {
-      error('Creation failed', res.message);
+      error('စာရင်းခေါင်းစဉ် ဖွင့်၍မရပါ', res.message);
     }
   };
 
@@ -172,7 +172,7 @@ export default function AccountingPage() {
   const handleRecordPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!paymentForm.amount || Number(paymentForm.amount) <= 0) {
-      error('Please specify valid positive amount (ငွေပမာဏ မှန်ကန်စွာ ထည့်ပါ)');
+      error('လိုအပ်ချက်', 'ငွေပမာဏ မှန်ကန်စွာ ထည့်သွင်းပါ');
       return;
     }
 
@@ -193,7 +193,7 @@ export default function AccountingPage() {
     });
 
     if (res.success) {
-      success('Payment Recorded & GL Entry Posted (ငွေပေးချေမှု မှတ်တမ်းတင်ပြီး စာရင်းသွင်းပြီးပါပြီ)');
+      success('ငွေပေးချေမှု မှတ်တမ်းတင်ပြီး GL စာရင်းသွင်းပြီးပါပြီ');
       setPaymentDialogOpen(false);
       setPaymentForm({
         paymentType: 'CUSTOMER_PAYMENT',
@@ -206,7 +206,7 @@ export default function AccountingPage() {
       });
       loadAccountingData();
     } else {
-      error('Payment record failed', res.message);
+      error('ငွေပေးချေမှု မှတ်တမ်းတင်ခြင်း မအောင်မြင်ပါ', res.message);
     }
   };
 
@@ -225,11 +225,11 @@ export default function AccountingPage() {
     });
 
     if (res.success) {
-      success('Daily Cash Register Opened (မနက်ပိုင်း ငွေစာရင်း ဖွင့်ပြီးပါပြီ)');
+      success('မနက်ပိုင်း ငွေစာရင်း ဖွင့်လှစ်ပြီးပါပြီ');
       setClosingDialogOpen(false);
       loadAccountingData();
     } else {
-      error('Opening register failed', res.message);
+      error('ငွေစာရင်း ဖွင့်လှစ်ခြင်း မအောင်မြင်ပါ', res.message);
     }
   };
 
@@ -247,11 +247,11 @@ export default function AccountingPage() {
     });
 
     if (res.success) {
-      success('Daily Cash Register Closed (နေ့စဉ် ငွေစာရင်း ချုပ်ပြီးပါပြီ)', `Closing Cash: ${formatCurrency(res.data?.closingCash)}`);
+      success('နေ့စဉ် ငွေစာရင်း ချုပ်ပြီးပါပြီ', `စာရင်းချုပ်ငွေ: ${formatCurrency(res.data?.closingCash)}`);
       setCloseRegisterDialogOpen(false);
       loadAccountingData();
     } else {
-      error('Close register failed', res.message);
+      error('ငွေစာရင်း ချုပ်ခြင်း မအောင်မြင်ပါ', res.message);
     }
   };
 
@@ -270,57 +270,58 @@ export default function AccountingPage() {
 
   // Account Columns
   const accountColumns: Column<Account>[] = [
-    { header: 'Account Code', accessorKey: 'accountCode', sortable: true, className: 'font-mono font-bold text-blue-600' },
-    { header: 'Account Name (စာရင်းခေါင်းစဉ်)', accessorKey: 'accountName', sortable: true, className: 'font-semibold' },
+    { header: 'စာရင်းကုဒ် (Code)', accessorKey: 'accountCode', sortable: true, className: 'font-mono font-bold text-blue-600' },
+    { header: 'စာရင်းခေါင်းစဉ် အမည်', accessorKey: 'accountName', sortable: true, className: 'font-semibold' },
     {
-      header: 'Type (အမျိုးအစား)',
+      header: 'အမျိုးအစား (Type)',
       accessorKey: 'accountType',
       cell: r => {
-        const typeVariants: Record<string, 'default' | 'secondary' | 'success' | 'warning' | 'destructive' | 'info'> = {
-          ASSET: 'info',
-          LIABILITY: 'warning',
-          EQUITY: 'default',
-          REVENUE: 'success',
-          EXPENSE: 'destructive',
+        const typeVariants: Record<string, { label: string; variant: 'default' | 'secondary' | 'success' | 'warning' | 'destructive' | 'info' }> = {
+          ASSET: { label: 'ပိုင်ဆိုင်မှု (ASSET)', variant: 'info' },
+          LIABILITY: { label: 'ပေးရန်ရှိကြွေးမြီ (LIABILITY)', variant: 'warning' },
+          EQUITY: { label: 'မတည်ရင်းနှီးငွေ (EQUITY)', variant: 'default' },
+          REVENUE: { label: 'အရောင်းရငွေ (REVENUE)', variant: 'success' },
+          EXPENSE: { label: 'အသုံးစရိတ် (EXPENSE)', variant: 'destructive' },
         };
-        return <Badge variant={typeVariants[r.accountType] || 'default'}>{r.accountType}</Badge>;
+        const item = typeVariants[r.accountType] || { label: r.accountType, variant: 'default' };
+        return <Badge variant={item.variant}>{item.label}</Badge>;
       },
     },
     {
-      header: 'Status',
-      cell: r => (r.isActive ? <Badge variant="success">Active</Badge> : <Badge variant="destructive">Inactive</Badge>),
+      header: 'အခြေအနေ',
+      cell: r => (r.isActive ? <Badge variant="success">အသုံးပြုဆဲ</Badge> : <Badge variant="destructive">ပိတ်ထားသည်</Badge>),
     },
   ];
 
   // Payment Columns
   const paymentColumns: Column<Payment>[] = [
-    { header: 'Payment No', accessorKey: 'paymentNo', sortable: true, className: 'font-mono font-bold' },
+    { header: 'ပြေစာအမှတ်', accessorKey: 'paymentNo', sortable: true, className: 'font-mono font-bold' },
     {
-      header: 'Payment Type',
+      header: 'ပေးချေမှု အမျိုးအစား',
       accessorKey: 'paymentType',
       cell: r => {
         const typeMap: Record<string, { label: string; variant: 'success' | 'destructive' | 'secondary' }> = {
-          CUSTOMER_PAYMENT: { label: 'Customer Payment (ငွေရ)', variant: 'success' },
-          SUPPLIER_PAYMENT: { label: 'Supplier Payment (ငွေပေး)', variant: 'destructive' },
-          EXPENSE_PAYMENT: { label: 'Expense Payment (အသုံးစရိတ်)', variant: 'secondary' },
+          CUSTOMER_PAYMENT: { label: 'ဝယ်ယူသူထံမှ ရငွေ', variant: 'success' },
+          SUPPLIER_PAYMENT: { label: 'ကုန်သွင်းသူသို့ ပေးငွေ', variant: 'destructive' },
+          EXPENSE_PAYMENT: { label: 'အထွေထွေ အသုံးစရိတ်', variant: 'secondary' },
         };
         const item = typeMap[r.paymentType] || { label: r.paymentType, variant: 'secondary' };
         return <Badge variant={item.variant}>{item.label}</Badge>;
       },
     },
     {
-      header: 'Partner / Memo',
+      header: 'ဆက်သွယ်သူ / မှတ်ချက်',
       cell: r => r.customer?.name || r.supplier?.name || (r.description ? r.description : '-'),
     },
     {
-      header: 'Amount (ကျသင့်ငွေ)',
+      header: 'ကျသင့်ငွေ (Amount)',
       cell: r => <span className="font-bold font-mono text-zinc-900 dark:text-zinc-100">{formatCurrency(r.amount)}</span>,
       sortable: true,
     },
-    { header: 'Method', cell: r => <Badge variant="outline">{r.paymentMethod}</Badge> },
-    { header: 'Date', cell: r => formatDate(r.paymentDate), sortable: true },
+    { header: 'ပေးချေနည်းလမ်း', cell: r => <Badge variant="outline">{r.paymentMethod}</Badge> },
+    { header: 'ရက်စွဲ', cell: r => formatDate(r.paymentDate), sortable: true },
     {
-      header: 'Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => (
         <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
@@ -328,8 +329,8 @@ export default function AccountingPage() {
             variant="ghost"
             size="sm"
             onClick={() => handleOpenPrintPayment(r)}
-            className="h-7 text-xs text-zinc-600 hover:text-blue-600"
-            title={r.paymentType === 'CUSTOMER_PAYMENT' ? 'Print Money Receipt' : 'Print Payment Voucher'}
+            className="h-7 text-xs text-zinc-600 hover:text-blue-600 cursor-pointer"
+            title={r.paymentType === 'CUSTOMER_PAYMENT' ? 'ငွေရပြေစာ ပရင့်ထုတ်ရန်' : 'ငွေပေးချေလွှာ ပရင့်ထုတ်ရန်'}
           >
             <Printer className="h-3.5 w-3.5" />
           </Button>
@@ -340,10 +341,10 @@ export default function AccountingPage() {
               setSelectedPayment(r);
               setPaymentSheetOpen(true);
             }}
-            className="h-7 text-xs"
-            title="View Details"
+            className="h-7 text-xs cursor-pointer"
+            title="အသေးစိတ် ကြည့်ရှုရန်"
           >
-            <Eye className="h-3.5 w-3.5 mr-1" /> View
+            <Eye className="h-3.5 w-3.5 mr-1" /> အသေးစိတ်
           </Button>
         </div>
       ),
@@ -352,21 +353,21 @@ export default function AccountingPage() {
 
   // Daily Closing Columns
   const closingColumns: Column<DailyClosing>[] = [
-    { header: 'Closing Date (ရက်စွဲ)', cell: r => formatDate(r.closingDate), sortable: true, className: 'font-bold' },
-    { header: 'Opening Cash (မနက်ပိုင်း မူလလက်ကျန်)', cell: r => formatCurrency(r.openingCash) },
-    { header: 'Cash Received (ရငွေပေါင်း)', cell: r => formatCurrency(r.cashReceived ?? 0) },
-    { header: 'Cash Paid (ပေးငွေပေါင်း)', cell: r => formatCurrency(r.cashPaid ?? 0) },
+    { header: 'စာရင်းရက်စွဲ', cell: r => formatDate(r.closingDate), sortable: true, className: 'font-bold' },
+    { header: 'မနက်ပိုင်း မူလလက်ကျန်', cell: r => formatCurrency(r.openingCash) },
+    { header: 'ရငွေစုစုပေါင်း (+)', cell: r => formatCurrency(r.cashReceived ?? 0) },
+    { header: 'ပေးငွေစုစုပေါင်း (-)', cell: r => formatCurrency(r.cashPaid ?? 0) },
     {
-      header: 'Closing Cash (ချုပ်ငွေ)',
+      header: 'စာရင်းချုပ်ငွေ (Closing Cash)',
       cell: r => (
         <span className="font-bold font-mono text-blue-600 dark:text-blue-400">
-          {r.closingCash !== null && r.closingCash !== undefined ? formatCurrency(r.closingCash) : 'In Session'}
+          {r.closingCash !== null && r.closingCash !== undefined ? formatCurrency(r.closingCash) : 'စာရင်းဖွင့်ဆဲ'}
         </span>
       ),
     },
-    { header: 'Status', cell: r => <StatusBadge status={r.status} /> },
+    { header: 'အခြေအနေ', cell: r => <StatusBadge status={r.status} /> },
     {
-      header: 'Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r =>
         r.status === 'OPEN' ? (
@@ -378,34 +379,34 @@ export default function AccountingPage() {
               setCloseRegisterForm({ cashReceived: '0', cashPaid: '0' });
               setCloseRegisterDialogOpen(true);
             }}
-            className="h-7 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40"
+            className="h-7 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 cursor-pointer"
           >
-            <Lock className="h-3 w-3 mr-1" /> Close Register (စာရင်းချုပ်ရန်)
+            <Lock className="h-3 w-3 mr-1" /> စာရင်းချုပ်မည်
           </Button>
         ) : (
-          <span className="text-[11px] text-zinc-400">Closed</span>
+          <span className="text-[11px] text-zinc-400">စာရင်းချုပ်ပြီး</span>
         ),
     },
   ];
 
   // Journal Entry Columns
   const jeColumns: Column<JournalEntry>[] = [
-    { header: 'Entry No', accessorKey: 'entryNo', sortable: true, className: 'font-mono font-bold text-blue-600' },
-    { header: 'Date (ရက်စွဲ)', cell: r => formatDate(r.entryDate), sortable: true },
-    { header: 'Description (ဖော်ပြချက်)', accessorKey: 'description' },
-    { header: 'Reference Document', cell: r => r.referenceType ? `${r.referenceType} #${r.referenceId || ''}` : 'Direct' },
-    { header: 'Status', cell: r => <StatusBadge status={r.status} /> },
+    { header: 'ဂျာနယ်အမှတ် (JE#)', accessorKey: 'entryNo', sortable: true, className: 'font-mono font-bold text-blue-600' },
+    { header: 'ရက်စွဲ', cell: r => formatDate(r.entryDate), sortable: true },
+    { header: 'ဖော်ပြချက် / အကြောင်းအရာ', accessorKey: 'description' },
+    { header: 'ကိုးကား စာရွက်စာတမ်း', cell: r => r.referenceType ? `${r.referenceType} #${r.referenceId || ''}` : 'တိုက်ရိုက်' },
+    { header: 'အခြေအနေ', cell: r => <StatusBadge status={r.status} /> },
     {
-      header: 'Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => (
         <Button
           variant="ghost"
           size="sm"
           onClick={() => inspectJe(r)}
-          className="h-7 text-xs"
+          className="h-7 text-xs cursor-pointer"
         >
-          <Eye className="h-3.5 w-3.5 mr-1" /> Inspect GL
+          <Eye className="h-3.5 w-3.5 mr-1" /> GL စစ်ဆေးမည်
         </Button>
       ),
     },
@@ -413,13 +414,14 @@ export default function AccountingPage() {
 
   // ─── MOBILE M3 CARDS RENDERERS ──────────────────────────────────
   const renderAccountCard = (acc: Account) => {
-    const typeVariants: Record<string, 'default' | 'secondary' | 'success' | 'warning' | 'destructive' | 'info'> = {
-      ASSET: 'info',
-      LIABILITY: 'warning',
-      EQUITY: 'default',
-      REVENUE: 'success',
-      EXPENSE: 'destructive',
+    const typeVariants: Record<string, { label: string; variant: 'default' | 'secondary' | 'success' | 'warning' | 'destructive' | 'info' }> = {
+      ASSET: { label: 'ပိုင်ဆိုင်မှု (ASSET)', variant: 'info' },
+      LIABILITY: { label: 'ပေးရန်ရှိကြွေးမြီ (LIABILITY)', variant: 'warning' },
+      EQUITY: { label: 'မတည်ရင်းနှီးငွေ (EQUITY)', variant: 'default' },
+      REVENUE: { label: 'အရောင်းရငွေ (REVENUE)', variant: 'success' },
+      EXPENSE: { label: 'အသုံးစရိတ် (EXPENSE)', variant: 'destructive' },
     };
+    const item = typeVariants[acc.accountType] || { label: acc.accountType, variant: 'default' };
 
     return (
       <div className="rounded-2xl border border-zinc-200/90 bg-white p-3.5 sm:p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 space-y-3 transition-all hover:border-zinc-300 dark:hover:border-zinc-700">
@@ -429,7 +431,7 @@ export default function AccountingPage() {
             {acc.accountCode}
           </span>
           <Badge variant={acc.isActive ? 'success' : 'destructive'} className="text-[10px] px-2 py-0.5">
-            {acc.isActive ? 'Active' : 'Inactive'}
+            {acc.isActive ? 'အသုံးပြုဆဲ' : 'ပိတ်ထားသည်'}
           </Badge>
         </div>
 
@@ -442,9 +444,9 @@ export default function AccountingPage() {
 
         {/* Account Type Footer */}
         <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800 text-xs">
-          <span className="text-[11px] text-zinc-500">Account Classification:</span>
-          <Badge variant={typeVariants[acc.accountType] || 'default'} className="text-xs font-medium">
-            {acc.accountType}
+          <span className="text-[11px] text-zinc-500">စာရင်းအမျိုးအစား:</span>
+          <Badge variant={item.variant} className="text-xs font-medium">
+            {item.label}
           </Badge>
         </div>
       </div>
@@ -453,9 +455,9 @@ export default function AccountingPage() {
 
   const renderPaymentCard = (p: Payment) => {
     const typeMap: Record<string, { label: string; variant: 'success' | 'destructive' | 'secondary' }> = {
-      CUSTOMER_PAYMENT: { label: 'Customer Payment (ငွေရ)', variant: 'success' },
-      SUPPLIER_PAYMENT: { label: 'Supplier Payment (ငွေပေး)', variant: 'destructive' },
-      EXPENSE_PAYMENT: { label: 'Expense (အသုံးစရိတ်)', variant: 'secondary' },
+      CUSTOMER_PAYMENT: { label: 'ဝယ်ယူသူထံမှ ရငွေ', variant: 'success' },
+      SUPPLIER_PAYMENT: { label: 'ကုန်သွင်းသူသို့ ပေးငွေ', variant: 'destructive' },
+      EXPENSE_PAYMENT: { label: 'အထွေထွေ အသုံးစရိတ်', variant: 'secondary' },
     };
     const item = typeMap[p.paymentType] || { label: p.paymentType, variant: 'secondary' };
 
@@ -475,18 +477,18 @@ export default function AccountingPage() {
         <div className="space-y-1">
           <div className="flex items-center justify-between">
             <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">
-              {p.customer?.name || p.supplier?.name || (p.description ? p.description : 'Direct Payment')}
+              {p.customer?.name || p.supplier?.name || (p.description ? p.description : 'တိုက်ရိုက်ပေးချေမှု')}
             </span>
             <Badge variant="outline" className="text-[10px] font-mono">
               {p.paymentMethod}
             </Badge>
           </div>
-          <p className="text-[11px] text-zinc-400">Date: {formatDate(p.paymentDate)}</p>
+          <p className="text-[11px] text-zinc-400">ရက်စွဲ: {formatDate(p.paymentDate)}</p>
         </div>
 
         {/* Amount Box */}
         <div className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800 text-xs">
-          <span className="text-[11px] font-semibold text-zinc-500">Payment Amount:</span>
+          <span className="text-[11px] font-semibold text-zinc-500">ကျသင့်ငွေပမာဏ:</span>
           <span className="font-bold font-mono text-sm text-zinc-900 dark:text-zinc-100">
             {formatCurrency(p.amount)}
           </span>
@@ -498,11 +500,11 @@ export default function AccountingPage() {
             variant="ghost"
             size="sm"
             onClick={() => handleOpenPrintPayment(p)}
-            className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1 hover:text-blue-600"
-            title="Print Voucher / Receipt"
+            className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1 hover:text-blue-600 cursor-pointer"
+            title="ဘောက်ချာ / ပြေစာ ပရင့်ထုတ်ရန်"
           >
             <Printer className="h-3.5 w-3.5" />
-            <span>Print</span>
+            <span>ပရင့်ထုတ်ရန်</span>
           </Button>
 
           <Button
@@ -512,10 +514,10 @@ export default function AccountingPage() {
               setSelectedPayment(p);
               setPaymentSheetOpen(true);
             }}
-            className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1"
+            className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1 cursor-pointer"
           >
             <Eye className="h-3.5 w-3.5" />
-            <span>View Detail</span>
+            <span>အသေးစိတ်</span>
           </Button>
         </div>
       </div>
@@ -537,19 +539,19 @@ export default function AccountingPage() {
         {/* 3-Column Cash Summary */}
         <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800 text-center text-xs">
           <div className="space-y-0.5">
-            <span className="text-[10px] uppercase font-semibold text-zinc-400">Opening</span>
+            <span className="text-[10px] uppercase font-semibold text-zinc-400">မူလလက်ကျန်</span>
             <p className="font-mono font-bold text-zinc-800 dark:text-zinc-200 text-[11px]">
               {formatCurrency(dc.openingCash)}
             </p>
           </div>
           <div className="space-y-0.5 border-x border-zinc-200 dark:border-zinc-700/60">
-            <span className="text-[10px] uppercase font-semibold text-zinc-400">Received (+)</span>
+            <span className="text-[10px] uppercase font-semibold text-zinc-400">ရငွေ (+)</span>
             <p className="font-mono font-bold text-emerald-600 text-[11px]">
               {formatCurrency(dc.cashReceived ?? 0)}
             </p>
           </div>
           <div className="space-y-0.5">
-            <span className="text-[10px] uppercase font-semibold text-zinc-400">Paid (-)</span>
+            <span className="text-[10px] uppercase font-semibold text-zinc-400">ပေးငွေ (-)</span>
             <p className="font-mono font-bold text-rose-600 text-[11px]">
               {formatCurrency(dc.cashPaid ?? 0)}
             </p>
@@ -558,9 +560,9 @@ export default function AccountingPage() {
 
         {/* Closing Cash Total */}
         <div className="flex items-center justify-between px-2 text-xs">
-          <span className="text-zinc-500 font-medium">Closing Cash (ချုပ်ငွေ):</span>
+          <span className="text-zinc-500 font-medium">စာရင်းချုပ်ငွေ (Closing Cash):</span>
           <span className="font-bold font-mono text-blue-600 dark:text-blue-400 text-sm">
-            {dc.closingCash !== null && dc.closingCash !== undefined ? formatCurrency(dc.closingCash) : 'In Session'}
+            {dc.closingCash !== null && dc.closingCash !== undefined ? formatCurrency(dc.closingCash) : 'စာရင်းဖွင့်ဆဲ'}
           </span>
         </div>
 
@@ -575,9 +577,9 @@ export default function AccountingPage() {
                 setCloseRegisterForm({ cashReceived: '0', cashPaid: '0' });
                 setCloseRegisterDialogOpen(true);
               }}
-              className="h-8 w-full sm:w-auto text-xs gap-1.5 text-amber-600 border-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40"
+              className="h-8 w-full sm:w-auto text-xs gap-1.5 text-amber-600 border-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 cursor-pointer"
             >
-              <Lock className="h-3.5 w-3.5" /> Close Register (စာရင်းချုပ်ရန်)
+              <Lock className="h-3.5 w-3.5" /> စာရင်းချုပ်မည်
             </Button>
           </div>
         )}
@@ -599,28 +601,28 @@ export default function AccountingPage() {
         {/* Description & Reference */}
         <div className="space-y-1">
           <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 leading-snug">
-            {je.description || 'General Ledger Entry'}
+            {je.description || 'အထွေထွေ ဂျာနယ်စာရင်း'}
           </h4>
           <div className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-500">
-            <span>Date: {formatDate(je.entryDate)}</span>
-            <span>• Ref: {je.referenceType ? `${je.referenceType} #${je.referenceId || ''}` : 'Direct Entry'}</span>
+            <span>ရက်စွဲ: {formatDate(je.entryDate)}</span>
+            <span>• ကိုးကား: {je.referenceType ? `${je.referenceType} #${je.referenceId || ''}` : 'တိုက်ရိုက်စာရင်း'}</span>
           </div>
         </div>
 
         {/* Balanced Banner & Actions */}
         <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800 text-xs" onClick={e => e.stopPropagation()}>
           <Badge variant="success" className="text-[10px] gap-1 px-2 py-0.5">
-            <CheckCircle2 className="h-3 w-3" /> Auto-Posted Double Entry
+            <CheckCircle2 className="h-3 w-3" /> Double-Entry စာရင်းသွင်းပြီး ✓
           </Badge>
 
           <Button
             variant="ghost"
             size="sm"
             onClick={() => inspectJe(je)}
-            className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1"
+            className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1 cursor-pointer"
           >
             <Eye className="h-3.5 w-3.5" />
-            <span>Inspect GL</span>
+            <span>GL စစ်ဆေးမည်</span>
           </Button>
         </div>
       </div>
@@ -639,30 +641,30 @@ export default function AccountingPage() {
             </h1>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
-            Chart of accounts, double-entry GL, payments, and cashier daily closings
+            စာရင်းခေါင်းစဉ်များ၊ နှစ်ဖက်မျှ GL စာရင်းများ၊ ငွေပေး/ငွေရ မှတ်တမ်းနှင့် နေ့စဉ်ငွေစာရင်းချုပ် စီမံခန့်ခွဲမှု
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
-          <Button variant="outline" size="sm" onClick={loadAccountingData} className="gap-1.5 h-8 text-xs shrink-0">
+          <Button variant="outline" size="sm" onClick={loadAccountingData} className="gap-1.5 h-8 text-xs shrink-0 cursor-pointer">
             <RefreshCw className={isLoading ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />
-            <span className="hidden sm:inline">Refresh (ပြန်ဖွင့်)</span>
-            <span className="sm:hidden">Refresh</span>
+            <span className="hidden sm:inline">ပြန်လည်ရယူရန်</span>
+            <span className="sm:hidden">ပြန်ရယူ</span>
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setAccountDialogOpen(true)} className="gap-1.5 h-8 text-xs shrink-0">
+          <Button variant="outline" size="sm" onClick={() => setAccountDialogOpen(true)} className="gap-1.5 h-8 text-xs shrink-0 cursor-pointer">
             <Plus className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">+ New Account (စာရင်းသစ်ဖွင့်ရန်)</span>
-            <span className="sm:hidden">+ Account</span>
+            <span className="hidden sm:inline">+ စာရင်းခေါင်းစဉ်သစ်</span>
+            <span className="sm:hidden">+ စာရင်းသစ်</span>
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setClosingDialogOpen(true)} className="gap-1.5 h-8 text-xs shrink-0">
+          <Button variant="outline" size="sm" onClick={() => setClosingDialogOpen(true)} className="gap-1.5 h-8 text-xs shrink-0 cursor-pointer">
             <CalendarDays className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Open Register (မနက်ပိုင်းဖွင့်ရန်)</span>
-            <span className="sm:hidden">Register</span>
+            <span className="hidden sm:inline">မနက်ပိုင်း စာရင်းဖွင့်ရန်</span>
+            <span className="sm:hidden">စာရင်းဖွင့်</span>
           </Button>
           <div className="hidden sm:block">
-            <Button variant="primary" size="sm" onClick={() => setPaymentDialogOpen(true)} className="gap-1.5 h-8 text-xs bg-blue-600 hover:bg-blue-700">
+            <Button variant="primary" size="sm" onClick={() => setPaymentDialogOpen(true)} className="gap-1.5 h-8 text-xs bg-blue-600 hover:bg-blue-700 cursor-pointer">
               <Receipt className="h-3.5 w-3.5" />
-              <span>+ Record Payment (ငွေပေး/ငွေရ သွင်းရန်)</span>
+              <span>+ ငွေပေး/ငွေရ စာရင်းသွင်းရန်</span>
             </Button>
           </div>
         </div>
@@ -673,16 +675,16 @@ export default function AccountingPage() {
         <div className="overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
           <TabsList className="w-max sm:w-full justify-start">
             <TabsTrigger value="accounts" count={filteredAccounts.length}>
-              🏛️ Chart of Accounts (စာရင်းခေါင်းစဉ်များ)
+              🏛️ စာရင်းခေါင်းစဉ်များ (Chart of Accounts)
             </TabsTrigger>
             <TabsTrigger value="payments" count={payments.length}>
-              💳 Payments (ငွေပေး/ငွေရ မှတ်တမ်းများ)
+              💳 ငွေပေး/ငွေရ မှတ်တမ်းများ (Payments)
             </TabsTrigger>
             <TabsTrigger value="closings" count={dailyClosings.length}>
-              🔒 Daily Closings (နေ့စဉ် ငွေစာရင်းချုပ်)
+              🔒 နေ့စဉ် ငွေစာရင်းချုပ် (Daily Closings)
             </TabsTrigger>
             <TabsTrigger value="journal" count={journalEntries.length}>
-              ⚖️ General Ledger (Double-Entry စာရင်းများ)
+              ⚖️ အထွေထွေဂျာနယ် စာရင်းများ (General Ledger)
             </TabsTrigger>
           </TabsList>
         </div>
@@ -690,13 +692,13 @@ export default function AccountingPage() {
         {/* ─── TAB 1: CHART OF ACCOUNTS ───────────────────────────────── */}
         <TabsContent value="accounts" className="space-y-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 text-xs">
-            <span className="font-semibold text-zinc-500">Account Type Filter:</span>
+            <span className="font-semibold text-zinc-500">စာရင်းအမျိုးအစား စစ်ထုတ်ရန်:</span>
             <select
               value={accountTypeFilter}
               onChange={e => setAccountTypeFilter(e.target.value)}
-              className="rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-800 w-full sm:w-auto"
+              className="rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-800 w-full sm:w-auto cursor-pointer"
             >
-              <option value="ALL">All Account Types (အားလုံး)</option>
+              <option value="ALL">စာရင်းအမျိုးအစား အားလုံး</option>
               <option value="ASSET">ASSET (ပိုင်ဆိုင်မှုများ)</option>
               <option value="LIABILITY">LIABILITY (ကြွေးမြီနှင့် ပေးရန်များ)</option>
               <option value="EQUITY">EQUITY (မတည်ရင်းနှီးငွေ)</option>
@@ -708,7 +710,7 @@ export default function AccountingPage() {
           <DataTable
             data={filteredAccounts}
             columns={accountColumns}
-            searchPlaceholder="Search accounts by code or name (စာရင်းရှာရန်)..."
+            searchPlaceholder="စာရင်းကုဒ် သို့မဟုတ် အမည်ဖြင့် ရှာဖွေရန်..."
             searchKey="accountName"
             isLoading={isLoading}
             renderCard={renderAccountCard}
@@ -720,7 +722,7 @@ export default function AccountingPage() {
           <DataTable
             data={payments}
             columns={paymentColumns}
-            searchPlaceholder="Search payment transactions by PAY# (ငွေပေး/ငွေရ ရှာရန်)..."
+            searchPlaceholder="ပြေစာအမှတ် (PAY#) ဖြင့် ရှာဖွေရန်..."
             searchKey="paymentNo"
             isLoading={isLoading}
             renderCard={renderPaymentCard}
@@ -732,7 +734,7 @@ export default function AccountingPage() {
           <DataTable
             data={dailyClosings}
             columns={closingColumns}
-            searchPlaceholder="Search daily closings (ငွေစာရင်းချုပ်ရှာရန်)..."
+            searchPlaceholder="နေ့စဉ်ငွေစာရင်းချုပ် ရှာဖွေရန်..."
             isLoading={isLoading}
             renderCard={renderClosingCard}
           />
@@ -743,7 +745,7 @@ export default function AccountingPage() {
           <DataTable
             data={journalEntries}
             columns={jeColumns}
-            searchPlaceholder="Search journal entries by JE# or memo (GL ရှာရန်)..."
+            searchPlaceholder="ဂျာနယ်အမှတ် သို့မဟုတ် အကြောင်းအရာဖြင့် ရှာဖွေရန်..."
             searchKey="entryNo"
             isLoading={isLoading}
             renderCard={renderJeCard}
@@ -753,68 +755,68 @@ export default function AccountingPage() {
       </Tabs>
 
       {/* ─── MODAL: NEW ACCOUNT ─────────────────────────────────────── */}
-      <Dialog open={accountDialogOpen} onOpenChange={setAccountDialogOpen} title="Add Chart of Account (စာရင်းခေါင်းစဉ် အသစ်ဖွင့်ရန်)">
+      <Dialog open={accountDialogOpen} onOpenChange={setAccountDialogOpen} title="စာရင်းခေါင်းစဉ် အသစ်ဖွင့်ရန်">
         <form onSubmit={handleCreateAccount} className="space-y-4">
           <Input
-            label="Account Code *"
-            placeholder="e.g. 1500"
+            label="စာရင်းကုဒ် (Account Code) *"
+            placeholder="ဥပမာ - 1500"
             value={accountForm.accountCode}
             onChange={e => setAccountForm({ ...accountForm, accountCode: e.target.value })}
             required
           />
           <Input
-            label="Account Name *"
-            placeholder="e.g. Factory Equipment"
+            label="စာရင်းခေါင်းစဉ် အမည် (Account Name) *"
+            placeholder="ဥပမာ - စက်ပစ္စည်းနှင့် အသုံးအဆောင်များ"
             value={accountForm.accountName}
             onChange={e => setAccountForm({ ...accountForm, accountName: e.target.value })}
             required
           />
           <Select
-            label="Account Type *"
+            label="စာရင်း အမျိုးအစား (Account Type) *"
             value={accountForm.accountType}
             onChange={e => setAccountForm({ ...accountForm, accountType: e.target.value as AccountType })}
             required
           >
-            <option value="ASSET">ASSET (Current / Fixed Assets - ပိုင်ဆိုင်မှုများ)</option>
-            <option value="LIABILITY">LIABILITY (Payables / Obligations - ပေးရန်ရှိများ)</option>
-            <option value="EQUITY">EQUITY (Capital / Retained Earnings - အရင်းအနှီး)</option>
-            <option value="REVENUE">REVENUE (Sales / Other Income - ဝင်ငွေ)</option>
-            <option value="EXPENSE">EXPENSE (Cost of Goods / Operational - အသုံးစရိတ်)</option>
+            <option value="ASSET">ASSET (ပိုင်ဆိုင်မှုများ - Current / Fixed Assets)</option>
+            <option value="LIABILITY">LIABILITY (ပေးရန်ရှိကြွေးမြီများ - Payables / Obligations)</option>
+            <option value="EQUITY">EQUITY (မတည်ရင်းနှီးငွေ - Capital / Retained Earnings)</option>
+            <option value="REVENUE">REVENUE (အရောင်းရငွေ - Sales / Other Income)</option>
+            <option value="EXPENSE">EXPENSE (အသုံးစရိတ်များ - Cost of Goods / Operational)</option>
           </Select>
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setAccountDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
-              Save Account (စာရင်းသိမ်းရန်)
+              စာရင်း သိမ်းဆည်းမည်
             </Button>
           </div>
         </form>
       </Dialog>
 
       {/* ─── MODAL: RECORD PAYMENT ──────────────────────────────────── */}
-      <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen} title="Record Payment & Sync GL (ငွေပေး/ငွေရ မှတ်တမ်းတင်ရန်)" maxWidth="lg">
+      <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen} title="ငွေပေး/ငွေရ မှတ်တမ်းတင်ရန် (Sync GL)" maxWidth="lg">
         <form onSubmit={handleRecordPayment} className="space-y-4">
           <Select
-            label="Payment Type (အမျိုးအစား) *"
+            label="ပေးချေမှု အမျိုးအစား (Payment Type) *"
             value={paymentForm.paymentType}
             onChange={e => setPaymentForm({ ...paymentForm, paymentType: e.target.value as PaymentType })}
             required
           >
-            <option value="CUSTOMER_PAYMENT">Customer Payment (Accounts Receivable Inflow - ဝယ်သူထံမှ ရငွေ)</option>
-            <option value="SUPPLIER_PAYMENT">Supplier Payment (Accounts Payable Outflow - ကုန်သွင်းသူသို့ ပေးငွေ)</option>
-            <option value="EXPENSE_PAYMENT">Direct Expense Payment (အထွေထွေ အသုံးစရိတ် ပေးချေမှု)</option>
+            <option value="CUSTOMER_PAYMENT">ဝယ်ယူသူထံမှ ရငွေ (Customer Payment - Accounts Receivable Inflow)</option>
+            <option value="SUPPLIER_PAYMENT">ကုန်သွင်းသူသို့ ပေးငွေ (Supplier Payment - Accounts Payable Outflow)</option>
+            <option value="EXPENSE_PAYMENT">အထွေထွေ အသုံးစရိတ် ပေးချေမှု (Direct Expense Payment)</option>
           </Select>
 
           {paymentForm.paymentType === 'CUSTOMER_PAYMENT' && (
             <Select
-              label="Customer (ဝယ်ယူသူ) *"
+              label="ဝယ်ယူသူ (Customer) *"
               value={paymentForm.customerId}
               onChange={e => setPaymentForm({ ...paymentForm, customerId: e.target.value })}
               required
             >
-              <option value="">Select Customer...</option>
+              <option value="">ဝယ်ယူသူ ရွေးချယ်ပါ...</option>
               {customers.map(c => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -825,12 +827,12 @@ export default function AccountingPage() {
 
           {paymentForm.paymentType === 'SUPPLIER_PAYMENT' && (
             <Select
-              label="Supplier (ကုန်သွင်းသူ) *"
+              label="ကုန်သွင်းသူ (Supplier) *"
               value={paymentForm.supplierId}
               onChange={e => setPaymentForm({ ...paymentForm, supplierId: e.target.value })}
               required
             >
-              <option value="">Select Supplier...</option>
+              <option value="">ကုန်သွင်းသူ ရွေးချယ်ပါ...</option>
               {suppliers.map(s => (
                 <option key={s.id} value={s.id}>
                   {s.name}
@@ -843,36 +845,36 @@ export default function AccountingPage() {
             <Input
               type="number"
               step="any"
-              label="Payment Amount (ငွေပမာဏ) *"
-              placeholder="e.g. 500000"
+              label="ငွေပမာဏ (Amount) *"
+              placeholder="ဥပမာ - 500000"
               value={paymentForm.amount}
               onChange={e => setPaymentForm({ ...paymentForm, amount: e.target.value })}
               required
             />
 
             <Select
-              label="Payment Method (ပေးချေသည့် နည်းလမ်း) *"
+              label="ပေးချေသည့် နည်းလမ်း (Payment Method) *"
               value={paymentForm.paymentMethod}
               onChange={e => setPaymentForm({ ...paymentForm, paymentMethod: e.target.value as PaymentMethod })}
               required
             >
-              <option value="CASH">Cash (လက်ငင်းငွေသား)</option>
-              <option value="BANK">Bank Transfer / Check (ဘဏ်လွှဲ/ချက်လက်မှတ်)</option>
-              <option value="OTHER">Other / Mobile Pay (အခြား / မိုဘိုင်းပေးချေမှု)</option>
+              <option value="CASH">လက်ငင်းငွေသား (Cash)</option>
+              <option value="BANK">ဘဏ်လွှဲ / ချက်လက်မှတ် (Bank Transfer / Check)</option>
+              <option value="OTHER">အခြား / မိုဘိုင်းပေးချေမှု (Other / Mobile Pay)</option>
             </Select>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               type="date"
-              label="Payment Date (ရက်စွဲ) *"
+              label="ရက်စွဲ (Date) *"
               value={paymentForm.paymentDate}
               onChange={e => setPaymentForm({ ...paymentForm, paymentDate: e.target.value })}
               required
             />
             <Input
-              label="Description / Memo (မှတ်ချက်)"
-              placeholder="e.g. Invoice settlement"
+              label="ဖော်ပြချက် / မှတ်ချက် (Memo)"
+              placeholder="ဥပမာ - ပြေစာရှင်းလင်းငွေ"
               value={paymentForm.description}
               onChange={e => setPaymentForm({ ...paymentForm, description: e.target.value })}
             />
@@ -880,21 +882,21 @@ export default function AccountingPage() {
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setPaymentDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
-              Record Payment & Post GL (ငွေစာရင်းသွင်းမည်)
+              ငွေစာရင်းသွင်းပြီး GL ချိတ်မည်
             </Button>
           </div>
         </form>
       </Dialog>
 
       {/* ─── MODAL: OPEN DAILY CLOSING ──────────────────────────────── */}
-      <Dialog open={closingDialogOpen} onOpenChange={setClosingDialogOpen} title="Open Daily Cash Register (မနက်ပိုင်း ငွေစာရင်းဖွင့်ရန်)">
+      <Dialog open={closingDialogOpen} onOpenChange={setClosingDialogOpen} title="မနက်ပိုင်း ငွေစာရင်းဖွင့်ရန် (Open Daily Cash Register)">
         <form onSubmit={handleOpenDailyClosing} className="space-y-4">
           <Input
             type="date"
-            label="Closing Register Date *"
+            label="စာရင်းဖွင့်သည့် ရက်စွဲ *"
             value={openClosingForm.closingDate}
             onChange={e => setOpenClosingForm({ ...openClosingForm, closingDate: e.target.value })}
             required
@@ -902,27 +904,27 @@ export default function AccountingPage() {
           <Input
             type="number"
             step="any"
-            label="Opening Cash Float (မနက်ပိုင်း မူလလက်ကျန်) *"
+            label="မနက်ပိုင်း မူလလက်ကျန်ငွေ (Opening Cash Float) *"
             value={openClosingForm.openingCash}
             onChange={e => setOpenClosingForm({ ...openClosingForm, openingCash: e.target.value })}
             required
           />
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={() => setClosingDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+            <Button type="button" variant="outline" onClick={() => setClosingDialogOpen(false)} className="w-full sm:w-auto cursor-pointer">
+              မလုပ်တော့ပါ
             </Button>
-            <Button type="submit" variant="primary" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
-              Open Register (စာရင်းဖွင့်မည်)
+            <Button type="submit" variant="primary" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 cursor-pointer">
+              မနက်ပိုင်း စာရင်းဖွင့်မည်
             </Button>
           </div>
         </form>
       </Dialog>
 
       {/* ─── MODAL: CLOSE DAILY CLOSING REGISTER ─────────────────────── */}
-      <Dialog open={closeRegisterDialogOpen} onOpenChange={setCloseRegisterDialogOpen} title="Close Cash Register (ညနေပိုင်း ငွေစာရင်းချုပ်ရန်)">
+      <Dialog open={closeRegisterDialogOpen} onOpenChange={setCloseRegisterDialogOpen} title="ညနေပိုင်း ငွေစာရင်းချုပ်ရန် (Close Cash Register)">
         <form onSubmit={handleCloseDailyClosing} className="space-y-4">
           <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 text-xs">
-            <p className="text-zinc-500">Opening Balance (မနက်ပိုင်း မူလလက်ကျန်):</p>
+            <p className="text-zinc-500">မနက်ပိုင်း မူလလက်ကျန် (Opening Balance):</p>
             <p className="font-bold text-sm text-zinc-900 dark:text-zinc-100 font-mono">
               {formatCurrency(selectedClosing?.openingCash)}
             </p>
@@ -931,7 +933,7 @@ export default function AccountingPage() {
           <Input
             type="number"
             step="any"
-            label="Total Cash Received Today (ယနေ့ ရငွေစုစုပေါင်း)"
+            label="ယနေ့ ရငွေစုစုပေါင်း (Total Cash Received Today) *"
             value={closeRegisterForm.cashReceived}
             onChange={e => setCloseRegisterForm({ ...closeRegisterForm, cashReceived: e.target.value })}
             required
@@ -940,18 +942,18 @@ export default function AccountingPage() {
           <Input
             type="number"
             step="any"
-            label="Total Cash Disbursed / Paid Today (ယနေ့ ပေးငွေစုစုပေါင်း)"
+            label="ယနေ့ ပေးငွေစုစုပေါင်း (Total Cash Disbursed / Paid Today) *"
             value={closeRegisterForm.cashPaid}
             onChange={e => setCloseRegisterForm({ ...closeRegisterForm, cashPaid: e.target.value })}
             required
           />
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={() => setCloseRegisterDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+            <Button type="button" variant="outline" onClick={() => setCloseRegisterDialogOpen(false)} className="w-full sm:w-auto cursor-pointer">
+              မလုပ်တော့ပါ
             </Button>
-            <Button type="submit" variant="primary" className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700">
-              Confirm Daily Close (အတည်ပြု ချုပ်မည်)
+            <Button type="submit" variant="primary" className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 cursor-pointer">
+              ငွေစာရင်း အတည်ပြုချုပ်မည်
             </Button>
           </div>
         </form>
@@ -961,8 +963,8 @@ export default function AccountingPage() {
       <Sheet
         open={paymentSheetOpen}
         onOpenChange={setPaymentSheetOpen}
-        title={`Payment: ${selectedPayment?.paymentNo || ''}`}
-        description={`Amount: ${formatCurrency(selectedPayment?.amount)} • Method: ${selectedPayment?.paymentMethod || ''}`}
+        title={`ပြေစာအမှတ်: ${selectedPayment?.paymentNo || ''}`}
+        description={`ကျသင့်ငွေ: ${formatCurrency(selectedPayment?.amount)} • ပေးချေနည်းလမ်း: ${selectedPayment?.paymentMethod || ''}`}
         footer={
           selectedPayment && (
             <div className="flex justify-between items-center w-full">
@@ -970,13 +972,13 @@ export default function AccountingPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => handleOpenPrintPayment(selectedPayment)}
-                className="gap-1.5 text-xs text-blue-600 hover:text-blue-700"
+                className="gap-1.5 text-xs text-blue-600 hover:text-blue-700 cursor-pointer"
               >
                 <Printer className="h-4 w-4" />
                 <span>
                   {selectedPayment.paymentType === 'CUSTOMER_PAYMENT'
-                    ? 'Print Money Receipt (ငွေရပြေစာ ပရင့်ထုတ်ပါ)'
-                    : 'Print Payment Voucher (ငွေပေးချေလွှာ ပရင့်ထုတ်ပါ)'}
+                    ? 'ငွေရပြေစာ ပရင့်ထုတ်ပါ (Print Money Receipt)'
+                    : 'ငွေပေးချေလွှာ ပရင့်ထုတ်ပါ (Print Payment Voucher)'}
                 </span>
               </Button>
             </div>
@@ -987,20 +989,26 @@ export default function AccountingPage() {
           <div className="space-y-4 text-xs">
             <div className="grid grid-cols-2 gap-2.5 sm:gap-3 p-3.5 sm:p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Payment Type</p>
-                <p className="font-semibold mt-1">{selectedPayment.paymentType}</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">ပေးချေမှု အမျိုးအစား</p>
+                <p className="font-semibold mt-1">
+                  {selectedPayment.paymentType === 'CUSTOMER_PAYMENT'
+                    ? 'ဝယ်ယူသူထံမှ ရငွေ'
+                    : selectedPayment.paymentType === 'SUPPLIER_PAYMENT'
+                      ? 'ကုန်သွင်းသူသို့ ပေးငွေ'
+                      : 'အထွေထွေ အသုံးစရိတ်'}
+                </p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Payment Date</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">ရက်စွဲ</p>
                 <p className="font-semibold mt-1">{formatDate(selectedPayment.paymentDate)}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Partner</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">ဆက်သွယ်သူ / လက်ခံသူ</p>
                 <p className="font-semibold mt-1">{selectedPayment.customer?.name || selectedPayment.supplier?.name || '-'}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">GL Status</p>
-                <p className="font-semibold text-emerald-600 mt-1">✓ Double-Entry Auto-Posted</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">GL စာရင်းအခြေအနေ</p>
+                <p className="font-semibold text-emerald-600 mt-1">✓ Double-Entry စာရင်းသွင်းပြီး</p>
               </div>
             </div>
           </div>
@@ -1011,14 +1019,14 @@ export default function AccountingPage() {
       <Sheet
         open={jeSheetOpen}
         onOpenChange={setJeSheetOpen}
-        title={`Journal Entry: ${selectedJe?.entryNo || ''}`}
-        description={`Date: ${formatDate(selectedJe?.entryDate)} • Ref: ${selectedJe?.referenceType || 'Direct'} #${selectedJe?.referenceId || ''}`}
+        title={`ဂျာနယ်အမှတ်: ${selectedJe?.entryNo || ''}`}
+        description={`ရက်စွဲ: ${formatDate(selectedJe?.entryDate)} • ကိုးကား: ${selectedJe?.referenceType || 'တိုက်ရိုက်'} #${selectedJe?.referenceId || ''}`}
       >
         {selectedJe && (
           <div className="space-y-6 text-xs">
             <div className="p-3.5 sm:p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 space-y-1">
-              <p className="text-[10px] font-bold uppercase text-zinc-400">Description</p>
-              <p className="font-semibold text-zinc-900 dark:text-zinc-100">{selectedJe.description || 'System Auto-Entry'}</p>
+              <p className="text-[10px] font-bold uppercase text-zinc-400">ဖော်ပြချက် / အကြောင်းအရာ</p>
+              <p className="font-semibold text-zinc-900 dark:text-zinc-100">{selectedJe.description || 'စနစ်အလိုအလျောက် စာရင်းသွင်းချက်'}</p>
             </div>
 
             {/* Balanced T-Account Double Entry Table */}
@@ -1026,10 +1034,10 @@ export default function AccountingPage() {
               <div className="flex items-center justify-between">
                 <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs flex items-center gap-1.5">
                   <Scale className="h-4 w-4 text-blue-600" />
-                  <span>Double-Entry General Ledger Lines (စာရင်းကိုင် နှစ်ဖက်မျှ စာရင်းများ)</span>
+                  <span>Double-Entry GL နှစ်ဖက်မျှ စာရင်းများ</span>
                 </h4>
                 <Badge variant="success" className="gap-1">
-                  <CheckCircle2 className="h-3 w-3" /> Balanced ✓
+                  <CheckCircle2 className="h-3 w-3" /> ကိုက်ညီမှုရှိသည် (Balanced ✓)
                 </Badge>
               </div>
 
@@ -1037,9 +1045,9 @@ export default function AccountingPage() {
                 <table className="w-full text-xs">
                   <thead className="bg-zinc-50 dark:bg-zinc-950/50 border-b border-zinc-200 dark:border-zinc-800">
                     <tr>
-                      <th className="px-3 py-2 text-left font-semibold text-zinc-600 dark:text-zinc-400">Account</th>
-                      <th className="px-3 py-2 text-right font-semibold text-zinc-600 dark:text-zinc-400">Debit (DR)</th>
-                      <th className="px-3 py-2 text-right font-semibold text-zinc-600 dark:text-zinc-400">Credit (CR)</th>
+                      <th className="px-3 py-2 text-left font-semibold text-zinc-600 dark:text-zinc-400">စာရင်းခေါင်းစဉ် (Account)</th>
+                      <th className="px-3 py-2 text-right font-semibold text-zinc-600 dark:text-zinc-400">ဒေဘစ် (DR)</th>
+                      <th className="px-3 py-2 text-right font-semibold text-zinc-600 dark:text-zinc-400">ခရက်ဒစ် (CR)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -1047,7 +1055,7 @@ export default function AccountingPage() {
                       <tr key={idx} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
                         <td className="px-3 py-2.5">
                           <p className="font-semibold text-zinc-900 dark:text-zinc-100">
-                            {line.account?.accountName || `Account #${line.accountId}`}
+                            {line.account?.accountName || `စာရင်း #${line.accountId}`}
                           </p>
                           <p className="font-mono text-[10px] text-zinc-500">{line.account?.accountCode}</p>
                         </td>
@@ -1062,7 +1070,7 @@ export default function AccountingPage() {
                   </tbody>
                   <tfoot className="bg-zinc-100 dark:bg-zinc-800/80 font-bold border-t border-zinc-200 dark:border-zinc-800">
                     <tr>
-                      <td className="px-3 py-2.5">Total (စုစုပေါင်း)</td>
+                      <td className="px-3 py-2.5">စုစုပေါင်း (Total)</td>
                       <td className="px-3 py-2.5 text-right font-mono text-emerald-600">
                         {formatCurrency(
                           (selectedJe.lines || []).reduce((acc, l) => acc + (Number(l.debit) || 0), 0)
@@ -1088,46 +1096,46 @@ export default function AccountingPage() {
         onOpenChange={setPrintDialogOpen}
         title={
           selectedPrintPayment?.paymentType === 'CUSTOMER_PAYMENT'
-            ? 'Print Official Money Receipt (တရားဝင် ငွေရပြေစာ ပရင့်ထုတ်ရန်)'
-            : 'Print Payment Voucher (ငွေပေးချေလွှာ ပရင့်ထုတ်ရန်)'
+            ? 'တရားဝင် ငွေရပြေစာ ပရင့်ထုတ်ရန်'
+            : 'ငွေပေးချေလွှာ ပရင့်ထုတ်ရန်'
         }
         maxWidth="lg"
       >
         <div className="space-y-4 text-xs">
           <div className="space-y-2">
             <label className="font-semibold text-zinc-700 dark:text-zinc-300">
-              Select Output Document Format (ပုံနှိပ်မည့် ပုံစံရွေးချယ်ပါ)
+              ပုံနှိပ်မည့် ပုံစံရွေးချယ်ပါ (Select Output Document Format)
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div
                 onClick={() => setPrintConfig({ ...printConfig, paperSize: 'A4' })}
                 className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${printConfig.paperSize === 'A4'
-                    ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200'
-                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                  ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200'
+                  : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
                   }`}
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
                   <Scale className="h-4 w-4 text-blue-600" />
-                  <span>📄 A4 Formal Financial Document</span>
+                  <span>📄 A4 ဘဏ္ဍာရေး တရားဝင် စာရွက်စာတမ်း</span>
                 </div>
                 <p className="text-[11px] text-zinc-500 mt-1">
-                  Official full-size voucher for finance filing, accounting archives, and audit trails.
+                  စာရင်းကိုင်၊ စာရင်းစစ်နှင့် မော်ကွန်းထိန်းသိမ်းမှုအတွက် တရားဝင် A4 စာရွက်ပုံစံ
                 </p>
               </div>
 
               <div
                 onClick={() => setPrintConfig({ ...printConfig, paperSize: 'THERMAL_80MM' })}
                 className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${printConfig.paperSize === 'THERMAL_80MM'
-                    ? 'border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
-                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                  ? 'border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
+                  : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
                   }`}
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
                   <Receipt className="h-4 w-4 text-emerald-600" />
-                  <span>🧾 80mm POS Thermal Cash Slip</span>
+                  <span>🧾 80mm POS အပူပေးစလစ် (Thermal Slip)</span>
                 </div>
                 <p className="text-[11px] text-zinc-500 mt-1">
-                  Compact roll receipt for counter cashiers, POS printers, and customer walk-ins.
+                  ကောင်တာငွေကိုင်နှင့် လက်ငင်းပေးချေမှုများအတွက် အမြန်ထုတ် စလစ်ပြေစာ
                 </p>
               </div>
             </div>
@@ -1142,7 +1150,7 @@ export default function AccountingPage() {
                 className="rounded border-zinc-300 h-4 w-4 text-blue-600"
               />
               <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                Include Official Enterprise Letterhead (လုပ်ငန်းခေါင်းစီးနှင့် လိပ်စာ)
+                လုပ်ငန်းခေါင်းစီးနှင့် လိပ်စာ ထည့်သွင်းမည် (Include Official Letterhead)
               </span>
             </label>
 
@@ -1154,18 +1162,18 @@ export default function AccountingPage() {
                 className="rounded border-zinc-300 h-4 w-4 text-blue-600"
               />
               <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                Include Signatures & Verification Block (စာရင်းကိုင်/မန်နေဂျာ/ငွေပေး-ငွေလက်ခံသူ လက်မှတ်များ)
+                လက်မှတ်နှင့် စိစစ်အတည်ပြုချက် အကွက်များ ထည့်သွင်းမည် (Include Signatures Block)
               </span>
             </label>
           </div>
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={() => setPrintDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+            <Button type="button" variant="outline" onClick={() => setPrintDialogOpen(false)} className="w-full sm:w-auto cursor-pointer">
+              မလုပ်တော့ပါ
             </Button>
-            <Button type="button" variant="primary" onClick={handleExecutePrint} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 gap-1.5">
+            <Button type="button" variant="primary" onClick={handleExecutePrint} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 gap-1.5 cursor-pointer">
               <Printer className="h-4 w-4" />
-              <span>Print Document (ပရင့်ထုတ်ပါ)</span>
+              <span>ပရင့်ထုတ်မည် (Print Document)</span>
             </Button>
           </div>
         </div>
@@ -1214,40 +1222,40 @@ export default function AccountingPage() {
               <div className="max-w-[76mm] mx-auto text-black font-mono text-[11px] leading-tight p-1 space-y-2">
                 <div className="text-center space-y-0.5 border-b border-dashed border-black pb-2">
                   <h2 className="text-sm font-bold uppercase">{orgContext.tenantName || 'NAYA-ERA ERP'}</h2>
-                  <p className="text-[10px]">{orgContext.branchName || 'Finance Dept'}</p>
-                  <p className="text-[10px] uppercase font-bold mt-1">*** OFFICIAL MONEY RECEIPT ***</p>
-                  <p className="text-[9px]">Receipt#: {selectedPrintPayment.paymentNo}</p>
-                  <p className="text-[9px]">Date: {formatDate(selectedPrintPayment.paymentDate)}</p>
+                  <p className="text-[10px]">{orgContext.branchName || 'ငွေစာရင်းဌာန'}</p>
+                  <p className="text-[10px] uppercase font-bold mt-1">*** တရားဝင် ငွေရပြေစာ (MONEY RECEIPT) ***</p>
+                  <p className="text-[9px]">ပြေစာအမှတ်: {selectedPrintPayment.paymentNo}</p>
+                  <p className="text-[9px]">ရက်စွဲ: {formatDate(selectedPrintPayment.paymentDate)}</p>
                 </div>
 
                 <div className="border-b border-dashed border-black py-1 space-y-0.5 text-[10px]">
-                  <p>Received From: <span className="font-bold">{selectedPrintPayment.customer?.name || 'Customer'}</span></p>
-                  {selectedPrintPayment.customer?.phoneNumber && <p>Phone: {selectedPrintPayment.customer.phoneNumber}</p>}
-                  <p>Method: <span className="font-bold">{selectedPrintPayment.paymentMethod}</span></p>
+                  <p>ငွေပေးသွင်းသူ: <span className="font-bold">{selectedPrintPayment.customer?.name || 'ဝယ်ယူသူ'}</span></p>
+                  {selectedPrintPayment.customer?.phoneNumber && <p>ဖုန်း: {selectedPrintPayment.customer.phoneNumber}</p>}
+                  <p>ပေးချေနည်းလမ်း: <span className="font-bold">{selectedPrintPayment.paymentMethod}</span></p>
                   {selectedPrintPayment.referenceType && (
-                    <p>Ref: {selectedPrintPayment.referenceType} #{selectedPrintPayment.referenceId || ''}</p>
+                    <p>ကိုးကား: {selectedPrintPayment.referenceType} #{selectedPrintPayment.referenceId || ''}</p>
                   )}
                   {selectedPrintPayment.description && (
-                    <p className="truncate">Description: {selectedPrintPayment.description}</p>
+                    <p className="truncate">အကြောင်းအရာ: {selectedPrintPayment.description}</p>
                   )}
                 </div>
 
                 <div className="border-b border-dashed border-black py-2 text-center space-y-1">
-                  <span className="text-[10px] font-bold">TOTAL RECEIVED AMOUNT:</span>
+                  <span className="text-[10px] font-bold">စုစုပေါင်း လက်ခံရရှိငွေ:</span>
                   <p className="text-sm font-bold font-mono">{formatCurrency(selectedPrintPayment.amount)}</p>
                 </div>
 
                 <div className="pt-3 text-[9px] space-y-4 border-t border-dashed border-black">
                   <div className="space-y-3">
                     <div>
-                      <p>Cashier / Receiver Sign: _________________</p>
+                      <p>ငွေကိုင် / လက်ခံသူ လက်မှတ်: _________________</p>
                     </div>
                     <div>
-                      <p>Customer Sign: _________________</p>
+                      <p>ငွေပေးသွင်းသူ လက်မှတ်: _________________</p>
                     </div>
                   </div>
                   <div className="text-center text-[8px] pt-1">
-                    <p>Thank You For Your Payment!</p>
+                    <p>ပေးချေမှုအတွက် ကျေးဇူးတင်ပါသည်!</p>
                     <p>NAYA-ERA Cloud ERP Financial System</p>
                   </div>
                 </div>
@@ -1265,18 +1273,18 @@ export default function AccountingPage() {
                         </h1>
                       </div>
                       <p className="text-xs text-gray-700 font-medium">
-                        Branch: {orgContext.branchName || 'Head Office'} • Accounts & Treasury Department
+                        ဌာနခွဲ: {orgContext.branchName || 'ရုံးချုပ်'} • ဘဏ္ဍာရေးနှင့် စာရင်းကိုင်ဌာန
                       </p>
                       <p className="text-[11px] text-gray-600">
-                        Official Acknowledgment of Accounts Receivable Settlement
+                        တရားဝင် ငွေရပြေစာနှင့် စာရင်းရှင်းလင်းချက် အတည်ပြုလွှာ
                       </p>
                     </div>
 
                     <div className="text-right text-xs space-y-0.5">
                       <p className="font-bold font-mono text-sm">RECEIPT NO: {selectedPrintPayment.paymentNo}</p>
-                      <p className="text-gray-600">Receipt Date: {formatDate(selectedPrintPayment.paymentDate)}</p>
-                      <p className="text-gray-600">Payment Method: <span className="font-bold">{selectedPrintPayment.paymentMethod}</span></p>
-                      <p className="text-gray-600">GL Status: <span className="font-bold text-emerald-600">Auto-Posted ✓</span></p>
+                      <p className="text-gray-600">ပြေစာရက်စွဲ: {formatDate(selectedPrintPayment.paymentDate)}</p>
+                      <p className="text-gray-600">ပေးချေနည်းလမ်း: <span className="font-bold">{selectedPrintPayment.paymentMethod}</span></p>
+                      <p className="text-gray-600">GL အခြေအနေ: <span className="font-bold text-emerald-600">စာရင်းသွင်းပြီး ✓</span></p>
                     </div>
                   </div>
                 )}
@@ -1295,22 +1303,22 @@ export default function AccountingPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="font-bold uppercase text-[10px] text-gray-500">Received From (ငွေပေးသွင်းသူ)</p>
-                      <p className="font-bold text-sm mt-0.5">{selectedPrintPayment.customer?.name || 'Customer'}</p>
-                      <p className="text-gray-600">Contact: {selectedPrintPayment.customer?.phoneNumber || '-'}</p>
-                      <p className="text-gray-600">Address: {selectedPrintPayment.customer?.address || '-'}</p>
+                      <p className="font-bold text-sm mt-0.5">{selectedPrintPayment.customer?.name || 'ဝယ်ယူသူ'}</p>
+                      <p className="text-gray-600">ဆက်သွယ်ရန်: {selectedPrintPayment.customer?.phoneNumber || '-'}</p>
+                      <p className="text-gray-600">နေရပ်လိပ်စာ: {selectedPrintPayment.customer?.address || '-'}</p>
                     </div>
                     <div className="text-right space-y-1">
                       <p className="font-bold uppercase text-[10px] text-gray-500">Accounting Reference</p>
-                      <p className="text-gray-700">Ref Type: {selectedPrintPayment.referenceType || 'Direct Customer Receipt'}</p>
+                      <p className="text-gray-700">ကိုးကား: {selectedPrintPayment.referenceType || 'တိုက်ရိုက် ဝယ်ယူသူငွေသွင်းပြေစာ'}</p>
                       {selectedPrintPayment.referenceId && <p className="text-gray-700 font-mono">Ref Doc ID: #{selectedPrintPayment.referenceId}</p>}
-                      <p className="text-gray-700">Payment Channel: <span className="font-bold">{selectedPrintPayment.paymentMethod}</span></p>
+                      <p className="text-gray-700">ပေးချေနည်းလမ်း: <span className="font-bold">{selectedPrintPayment.paymentMethod}</span></p>
                     </div>
                   </div>
 
                   <div className="border-t border-gray-200 pt-3">
                     <p className="text-gray-600">
-                      <span className="font-semibold text-gray-800">Description / Purpose: </span>
-                      {selectedPrintPayment.description || 'Settlement of outstanding customer sales account.'}
+                      <span className="font-semibold text-gray-800">ဖော်ပြချက် / အကြောင်းအရာ: </span>
+                      {selectedPrintPayment.description || 'ဝယ်ယူသူ အရောင်းစာရင်း ပေးချေရှင်းလင်းငွေ'}
                     </p>
                   </div>
                 </div>
@@ -1319,7 +1327,7 @@ export default function AccountingPage() {
                 <div className="border-2 border-black rounded p-4 bg-white flex items-center justify-between">
                   <div>
                     <p className="text-[10px] font-bold uppercase text-gray-500">Total Net Amount Received (စုစုပေါင်း လက်ခံရရှိငွေ)</p>
-                    <p className="text-xs text-gray-700 font-medium mt-1">Official Currency: Myanmar Kyats (MMK)</p>
+                    <p className="text-xs text-gray-700 font-medium mt-1">တရားဝင်သုံးစွဲငွေကြေး: မြန်မာကျပ်ငွေ (MMK)</p>
                   </div>
                   <div className="text-right">
                     <span className="text-2xl font-bold font-mono text-black">
@@ -1337,7 +1345,7 @@ export default function AccountingPage() {
                         <div className="border-b border-gray-400 mx-8"></div>
                         <div>
                           <p className="font-semibold">{user?.name || 'Chief Cashier'}</p>
-                          <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                          <p className="text-[10px] text-gray-500">ရက်စွဲ: ____/____/202___</p>
                         </div>
                       </div>
 
@@ -1345,8 +1353,8 @@ export default function AccountingPage() {
                         <p className="font-bold uppercase text-[10px] text-gray-600">Payer / Customer Received By (ငွေပေးသွင်းသူ)</p>
                         <div className="border-b border-gray-400 mx-8"></div>
                         <div>
-                          <p className="font-semibold">{selectedPrintPayment.customer?.name || 'Customer'}</p>
-                          <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                          <p className="font-semibold">{selectedPrintPayment.customer?.name || 'ဝယ်ယူသူ'}</p>
+                          <p className="text-[10px] text-gray-500">ရက်စွဲ: ____/____/202___</p>
                         </div>
                       </div>
                     </div>
@@ -1365,33 +1373,33 @@ export default function AccountingPage() {
               <div className="max-w-[76mm] mx-auto text-black font-mono text-[11px] leading-tight p-1 space-y-2">
                 <div className="text-center space-y-0.5 border-b border-dashed border-black pb-2">
                   <h2 className="text-sm font-bold uppercase">{orgContext.tenantName || 'NAYA-ERA ERP'}</h2>
-                  <p className="text-[10px]">{orgContext.branchName || 'Treasury'}</p>
-                  <p className="text-[10px] uppercase font-bold mt-1">*** PAYMENT VOUCHER ***</p>
-                  <p className="text-[9px]">Voucher#: {selectedPrintPayment.paymentNo}</p>
-                  <p className="text-[9px]">Date: {formatDate(selectedPrintPayment.paymentDate)}</p>
+                  <p className="text-[10px]">{orgContext.branchName || 'ငွေတိုက်ဌာန'}</p>
+                  <p className="text-[10px] uppercase font-bold mt-1">*** ငွေပေးချေလွှာ (PAYMENT VOUCHER) ***</p>
+                  <p className="text-[9px]">ဘောက်ချာအမှတ်: {selectedPrintPayment.paymentNo}</p>
+                  <p className="text-[9px]">ရက်စွဲ: {formatDate(selectedPrintPayment.paymentDate)}</p>
                 </div>
 
                 <div className="border-b border-dashed border-black py-1 space-y-0.5 text-[10px]">
-                  <p>Paid To: <span className="font-bold">{selectedPrintPayment.supplier?.name || 'Payee / Supplier'}</span></p>
-                  <p>Type: {selectedPrintPayment.paymentType}</p>
-                  <p>Method: {selectedPrintPayment.paymentMethod}</p>
+                  <p>ငွေလက်ခံသူ: <span className="font-bold">{selectedPrintPayment.supplier?.name || 'ငွေလက်ခံသူ / ကုန်သွင်းသူ'}</span></p>
+                  <p>အမျိုးအစား: {selectedPrintPayment.paymentType}</p>
+                  <p>ပေးချေနည်းလမ်း: {selectedPrintPayment.paymentMethod}</p>
                   {selectedPrintPayment.description && (
-                    <p className="truncate">Note: {selectedPrintPayment.description}</p>
+                    <p className="truncate">မှတ်ချက်: {selectedPrintPayment.description}</p>
                   )}
                 </div>
 
                 <div className="border-b border-dashed border-black py-2 text-center space-y-1">
-                  <span className="text-[10px] font-bold">TOTAL DISBURSED:</span>
+                  <span className="text-[10px] font-bold">ပေးချေငွေ စုစုပေါင်း:</span>
                   <p className="text-sm font-bold font-mono">{formatCurrency(selectedPrintPayment.amount)}</p>
                 </div>
 
                 <div className="pt-3 text-[9px] space-y-4 border-t border-dashed border-black">
                   <div className="space-y-3">
                     <div>
-                      <p>Disbursed By: _________________</p>
+                      <p>ငွေထုတ်ပေးသူ: _________________</p>
                     </div>
                     <div>
-                      <p>Payee Received: _________________</p>
+                      <p>ငွေလက်ခံရရှိသူ: _________________</p>
                     </div>
                   </div>
                   <div className="text-center text-[8px] pt-1">
@@ -1412,18 +1420,18 @@ export default function AccountingPage() {
                         </h1>
                       </div>
                       <p className="text-xs text-gray-700 font-medium">
-                        Branch: {orgContext.branchName || 'Head Office'} • Accounts Payable & Treasury
+                        ဌာနခွဲ: {orgContext.branchName || 'ရုံးချုပ်'} • ပေးရန်တာဝန်နှင့် ဘဏ္ဍာရေးဌာန
                       </p>
                       <p className="text-[11px] text-gray-600">
-                        Official Payment Voucher & Cash Disbursement Authorization
+                        တရားဝင် ငွေပေးချေလွှာနှင့် ငွေထုတ်ပေးမှု ခွင့်ပြုချက်စာရွက်
                       </p>
                     </div>
 
                     <div className="text-right text-xs space-y-0.5">
                       <p className="font-bold font-mono text-sm">VOUCHER NO: {selectedPrintPayment.paymentNo}</p>
-                      <p className="text-gray-600">Voucher Date: {formatDate(selectedPrintPayment.paymentDate)}</p>
-                      <p className="text-gray-600">Payment Type: <span className="font-bold">{selectedPrintPayment.paymentType}</span></p>
-                      <p className="text-gray-600">GL Status: <span className="font-bold text-emerald-600">Auto-Posted ✓</span></p>
+                      <p className="text-gray-600">ဘောက်ချာရက်စွဲ: {formatDate(selectedPrintPayment.paymentDate)}</p>
+                      <p className="text-gray-600">ပေးချေမှု အမျိုးအစား: <span className="font-bold">{selectedPrintPayment.paymentType}</span></p>
+                      <p className="text-gray-600">GL အခြေအနေ: <span className="font-bold text-emerald-600">စာရင်းသွင်းပြီး ✓</span></p>
                     </div>
                   </div>
                 )}
@@ -1442,26 +1450,26 @@ export default function AccountingPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="font-bold uppercase text-[10px] text-gray-500">Paid To (ငွေလက်ခံမည့်သူ / ကုန်သွင်းသူ)</p>
-                      <p className="font-bold text-sm mt-0.5">{selectedPrintPayment.supplier?.name || selectedPrintPayment.description || 'Payee'}</p>
+                      <p className="font-bold text-sm mt-0.5">{selectedPrintPayment.supplier?.name || selectedPrintPayment.description || 'ငွေလက်ခံသူ'}</p>
                       {selectedPrintPayment.supplier?.phoneNumber && (
-                        <p className="text-gray-600">Contact: {selectedPrintPayment.supplier.phoneNumber}</p>
+                        <p className="text-gray-600">ဆက်သွယ်ရန်: {selectedPrintPayment.supplier.phoneNumber}</p>
                       )}
                       {selectedPrintPayment.supplier?.location && (
-                        <p className="text-gray-600">Location: {selectedPrintPayment.supplier.location}</p>
+                        <p className="text-gray-600">တည်နေရာ: {selectedPrintPayment.supplier.location}</p>
                       )}
                     </div>
                     <div className="text-right space-y-1">
                       <p className="font-bold uppercase text-[10px] text-gray-500">Payment Authorization</p>
-                      <p className="text-gray-700">Method: <span className="font-bold">{selectedPrintPayment.paymentMethod}</span></p>
-                      <p className="text-gray-700">Ref Type: {selectedPrintPayment.referenceType || 'Direct AP Payment'}</p>
+                      <p className="text-gray-700">ပေးချေနည်းလမ်း: <span className="font-bold">{selectedPrintPayment.paymentMethod}</span></p>
+                      <p className="text-gray-700">ကိုးကား: {selectedPrintPayment.referenceType || 'တိုက်ရိုက် AP ပေးချေမှု'}</p>
                       {selectedPrintPayment.referenceId && <p className="text-gray-700 font-mono">Ref Doc ID: #{selectedPrintPayment.referenceId}</p>}
                     </div>
                   </div>
 
                   <div className="border-t border-gray-200 pt-3">
                     <p className="text-gray-600">
-                      <span className="font-semibold text-gray-800">Particulars / Payment Details: </span>
-                      {selectedPrintPayment.description || 'Payment disbursement in settlement of supplier invoice or company operational expenses.'}
+                      <span className="font-semibold text-gray-800">အကြောင်းအရာ အသေးစိတ်: </span>
+                      {selectedPrintPayment.description || 'ကုန်သွင်းသူ ပြေစာရှင်းလင်းငွေ သို့မဟုတ် လုပ်ငန်းလည်ပတ်မှု အသုံးစရိတ် ပေးချေငွေ'}
                     </p>
                   </div>
                 </div>
@@ -1470,7 +1478,7 @@ export default function AccountingPage() {
                 <div className="border-2 border-black rounded p-4 bg-white flex items-center justify-between">
                   <div>
                     <p className="text-[10px] font-bold uppercase text-gray-500">Total Net Amount Paid (စုစုပေါင်း ပေးချေငွေ)</p>
-                    <p className="text-xs text-gray-700 font-medium mt-1">Official Currency: Myanmar Kyats (MMK)</p>
+                    <p className="text-xs text-gray-700 font-medium mt-1">တရားဝင်သုံးစွဲငွေကြေး: မြန်မာကျပ်ငွေ (MMK)</p>
                   </div>
                   <div className="text-right">
                     <span className="text-2xl font-bold font-mono text-black">
@@ -1487,8 +1495,8 @@ export default function AccountingPage() {
                         <p className="font-bold uppercase text-[10px] text-gray-600">Prepared By (စာရင်းကိုင်)</p>
                         <div className="border-b border-gray-400 mx-4"></div>
                         <div>
-                          <p className="font-semibold">{user?.name || 'Accountant'}</p>
-                          <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                          <p className="font-semibold">{user?.name || 'စာရင်းကိုင်'}</p>
+                          <p className="text-[10px] text-gray-500">ရက်စွဲ: ____/____/202___</p>
                         </div>
                       </div>
 
@@ -1497,7 +1505,7 @@ export default function AccountingPage() {
                         <div className="border-b border-gray-400 mx-4"></div>
                         <div>
                           <p className="font-semibold">Finance Director / MD</p>
-                          <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                          <p className="text-[10px] text-gray-500">ရက်စွဲ: ____/____/202___</p>
                         </div>
                       </div>
 
@@ -1505,8 +1513,8 @@ export default function AccountingPage() {
                         <p className="font-bold uppercase text-[10px] text-gray-600">Received By Payee (ငွေလက်ခံရရှိသူ)</p>
                         <div className="border-b border-gray-400 mx-4"></div>
                         <div>
-                          <p className="font-semibold">{selectedPrintPayment.supplier?.name || 'Payee'}</p>
-                          <p className="text-[10px] text-gray-500">Date: ____/____/202___</p>
+                          <p className="font-semibold">{selectedPrintPayment.supplier?.name || 'ငွေလက်ခံသူ'}</p>
+                          <p className="text-[10px] text-gray-500">ရက်စွဲ: ____/____/202___</p>
                         </div>
                       </div>
                     </div>
@@ -1531,8 +1539,8 @@ export default function AccountingPage() {
             else if (activeTab === 'closings') setClosingDialogOpen(true);
             else setPaymentDialogOpen(true);
           }}
-          className="h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl flex items-center justify-center p-0 active:scale-95 transition-transform"
-          title="Create"
+          className="h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl flex items-center justify-center p-0 active:scale-95 transition-transform cursor-pointer"
+          title="အသစ်ပြုလုပ်ရန်"
         >
           <Plus className="h-6 w-6" />
         </Button>
