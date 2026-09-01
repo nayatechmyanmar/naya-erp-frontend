@@ -742,10 +742,10 @@ export default function SalesTeamsPage() {
           <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
             <div
               className={`h-2 rounded-full transition-all ${r.fulfillmentRate >= 80
-                  ? 'bg-emerald-500'
-                  : r.fulfillmentRate >= 50
-                    ? 'bg-blue-500'
-                    : 'bg-amber-500'
+                ? 'bg-emerald-500'
+                : r.fulfillmentRate >= 50
+                  ? 'bg-blue-500'
+                  : 'bg-amber-500'
                 }`}
               style={{ width: `${Math.min(r.fulfillmentRate, 100)}%` }}
             />
@@ -816,7 +816,7 @@ export default function SalesTeamsPage() {
           <Button variant="outline" size="sm" onClick={loadPortalData} className="gap-1.5 h-8 text-xs shrink-0">
             <RefreshCw className={isLoading ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />
             <span className="hidden sm:inline">ပြန်လည်ရယူရန်</span>
-            <span className="sm:hidden">Refresh</span>
+            <span className="sm:hidden">ပြန်လည်ရယူရန်</span>
           </Button>
           <Button
             variant="primary"
@@ -826,7 +826,7 @@ export default function SalesTeamsPage() {
           >
             <Plus className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">+ အရောင်းအဖွဲ့ အသစ်</span>
-            <span className="sm:hidden">+ Team</span>
+            <span className="sm:hidden">+ အရောင်းအဖွဲ့ အသစ်</span>
           </Button>
         </div>
       </div>
@@ -1413,8 +1413,8 @@ export default function SalesTeamsPage() {
               type="button"
               onClick={() => setAddMemberTab('select')}
               className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap ${addMemberTab === 'select'
-                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
                 }`}
             >
               👥 ရှိပြီးသား ဝန်ထမ်းရွေးရန်
@@ -1423,8 +1423,8 @@ export default function SalesTeamsPage() {
               type="button"
               onClick={() => setAddMemberTab('register')}
               className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap ${addMemberTab === 'register'
-                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
                 }`}
             >
               ✨ + အရောင်းဝန်ထမ်းသစ် ဖွင့်ရန်
@@ -1766,8 +1766,8 @@ export default function SalesTeamsPage() {
               <div
                 onClick={() => setPrintConfig({ ...printConfig, paperSize: 'THERMAL_80MM' })}
                 className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${printConfig.paperSize === 'THERMAL_80MM'
-                    ? 'border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
-                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                  ? 'border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
+                  : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
                   }`}
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
@@ -1782,8 +1782,8 @@ export default function SalesTeamsPage() {
               <div
                 onClick={() => setPrintConfig({ ...printConfig, paperSize: 'A4' })}
                 className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${printConfig.paperSize === 'A4'
-                    ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200'
-                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                  ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200'
+                  : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
                   }`}
               >
                 <div className="flex items-center gap-2 font-bold text-sm">

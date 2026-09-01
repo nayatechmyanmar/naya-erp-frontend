@@ -1288,8 +1288,8 @@ export default function ProductsPage() {
             className="gap-1.5 h-8 text-xs shrink-0"
           >
             <RefreshCw className={isLoading ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />
-            <span className="hidden sm:inline">Refresh (ပြန်ဖွင့်)</span>
-            <span className="sm:hidden">Refresh</span>
+            <span className="hidden sm:inline">ပြန်လည်ရယူရန်</span>
+            <span className="sm:hidden">ပြန်ရယူ</span>
           </Button>
 
           {/* Desktop primary add button */}
@@ -1414,28 +1414,28 @@ export default function ProductsPage() {
         <div className="overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
           <TabsList className="w-max sm:w-full justify-start">
             <TabsTrigger value="products" count={products.length}>
-              📦 Products (ကုန်ပစ္စည်း)
+              📦 ကုန်ပစ္စည်းများ (Products)
             </TabsTrigger>
             <TabsTrigger value="categories" count={categories.length}>
-              🏷️ Categories (အမျိုးအစားများ)
+              🏷️ အမျိုးအစားများ (Categories)
             </TabsTrigger>
             <TabsTrigger value="uoms" count={uoms.length}>
-              📏 UOM (ယူနစ်များ)
+              📏 ယူနစ်များ (UOM)
             </TabsTrigger>
             <TabsTrigger value="suppliers" count={suppliers.length}>
-              🚚 Suppliers (ကုန်သည်များ)
+              🚚 ကုန်သည်များ (Suppliers)
             </TabsTrigger>
             <TabsTrigger value="customers" count={customers.length}>
-              👥 Customers (ဝယ်ယူသူများ)
+              👥 ဝယ်ယူသူများ (Customers)
             </TabsTrigger>
             <TabsTrigger value="warehouses" count={warehouses.length}>
-              🏬 Warehouses (ဂိုထောင်များ)
+              🏬 ဂိုထောင်များ (Warehouses)
             </TabsTrigger>
             <TabsTrigger value="branches" count={branches.length}>
-              🏢 Branches (အခွဲများ)
+              🏢 ရုံးခွဲများ (Branches)
             </TabsTrigger>
             <TabsTrigger value="teams" count={saleTeams.length}>
-              🤝 Teams (အရောင်းအဖွဲ့များ)
+              🤝 အရောင်းအဖွဲ့များ (Teams)
             </TabsTrigger>
           </TabsList>
         </div>

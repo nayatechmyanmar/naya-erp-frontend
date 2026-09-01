@@ -714,12 +714,12 @@ export default function InventoryPage() {
           <Button variant="outline" size="sm" onClick={loadInventoryData} className="gap-1.5 h-8 text-xs shrink-0">
             <RefreshCw className={isLoading ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />
             <span className="hidden sm:inline">ပြန်လည်ရယူရန်</span>
-            <span className="sm:hidden">Refresh</span>
+            <span className="sm:hidden">ပြန်လည်ရယူရန်</span>
           </Button>
           <Button variant="outline" size="sm" onClick={() => setAdjustDialogOpen(true)} className="gap-1.5 h-8 text-xs shrink-0">
             <SlidersHorizontal className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">စတော့ ချိန်ညှိမည်</span>
-            <span className="sm:hidden">Adjust</span>
+            <span className="sm:hidden">စတော့ ချိန်ညှိမည်</span>
           </Button>
           <div className="hidden sm:block">
             <Button variant="primary" size="sm" onClick={() => setTransferDialogOpen(true)} className="gap-1.5 h-8 text-xs">

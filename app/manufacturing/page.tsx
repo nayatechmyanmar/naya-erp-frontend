@@ -677,7 +677,7 @@ export default function ManufacturingPage() {
           <Button variant="outline" size="sm" onClick={loadManufacturingData} className="gap-1.5 h-8 text-xs shrink-0">
             <RefreshCw className={isLoading ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />
             <span className="hidden sm:inline">ပြန်လည်ရယူရန်</span>
-            <span className="sm:hidden">Refresh</span>
+            <span className="sm:hidden">ပြန်လည်ရယူရန်</span>
           </Button>
           <Button variant="outline" size="sm" onClick={() => setBomDialogOpen(true)} className="gap-1.5 h-8 text-xs shrink-0">
             <Layers className="h-3.5 w-3.5" />

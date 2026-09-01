@@ -651,7 +651,7 @@ export default function PurchasingPage() {
           <Button variant="outline" size="sm" onClick={loadPurchasingData} className="gap-1.5 h-8 text-xs shrink-0">
             <RefreshCw className={isLoading ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />
             <span className="hidden sm:inline">ပြန်လည်ရယူရန်</span>
-            <span className="sm:hidden">Refresh</span>
+            <span className="sm:hidden">ပြန်လည်ရယူရန်</span>
           </Button>
           <div className="hidden sm:block">
             <Button variant="primary" size="sm" onClick={() => setPoDialogOpen(true)} className="gap-1.5 h-8 text-xs">
@@ -1327,8 +1327,8 @@ export default function PurchasingPage() {
               <div
                 onClick={() => setPrintConfig({ ...printConfig, paperSize: 'A4' })}
                 className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${printConfig.paperSize === 'A4'
-                    ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200'
-                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                  ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200'
+                  : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
                   }`}
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
@@ -1343,8 +1343,8 @@ export default function PurchasingPage() {
               <div
                 onClick={() => setPrintConfig({ ...printConfig, paperSize: 'THERMAL_80MM' })}
                 className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${printConfig.paperSize === 'THERMAL_80MM'
-                    ? 'border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
-                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                  ? 'border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
+                  : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
                   }`}
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
