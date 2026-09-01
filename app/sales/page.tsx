@@ -386,8 +386,13 @@ export default function SalesPage() {
   };
 
   // Post Shipment (Checks stock, creates movement, posts AR / Revenue / COGS / Inventory GL entries!)
-  const handleOpenPostShipmentDialog = (sh: SalesShipment) => {
-    setSelectedShipment(sh);
+  const handleOpenPostShipmentDialog = async (sh: SalesShipment) => {
+    if (!sh.items || sh.items.length === 0) {
+      const detailRes = await apiFetch<SalesShipment>(`/api/sales/sales-shipments/${sh.id}`);
+      setSelectedShipment(detailRes.success && detailRes.data ? detailRes.data : sh);
+    } else {
+      setSelectedShipment(sh);
+    }
     setPostWhId(warehouses[0]?.id ? String(warehouses[0].id) : '');
     setPostShipmentDialogOpen(true);
   };
@@ -1184,6 +1189,32 @@ export default function SalesPage() {
               </option>
             ))}
           </Select>
+
+          {selectedShipment?.items && selectedShipment.items.length > 0 && (
+            <div className="space-y-2 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 text-xs">
+              <p className="font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider text-[10px]">
+                ထုတ်ယူမည့် ပစ္စည်းစာရင်း ({selectedShipment.items.length} မျိုး)
+              </p>
+              <div className="divide-y divide-zinc-200 dark:divide-zinc-700">
+                {selectedShipment.items.map((it, idx) => {
+                  const prod = products.find(p => p.id === it.productId);
+                  return (
+                    <div key={idx} className="flex items-center justify-between py-1.5">
+                      <div>
+                        <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                          {prod?.name || it.product?.name || `ပစ္စည်း #${it.productId}`}
+                        </span>
+                        {prod?.sku && <span className="text-[10px] text-zinc-400 font-mono ml-1.5">({prod.sku})</span>}
+                      </div>
+                      <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100">
+                        {formatQuantity(it.qty)} {it.uom?.symbol || ''}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setPostShipmentDialogOpen(false)} className="w-full sm:w-auto">
