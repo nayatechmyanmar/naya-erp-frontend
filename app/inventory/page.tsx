@@ -173,8 +173,17 @@ export default function InventoryPage() {
     });
   };
 
-  // Submit Warehouse Transfer
-  const handleCreateTransfer = async (e: React.FormEvent) => {
+  // Available on-hand quantity helper for source warehouse
+  const getSourceOnHand = (productId: string) => {
+    if (!transferForm.fromWarehouseId || !productId) return null;
+    const stock = stockList.find(
+      s => String(s.warehouseId) === String(transferForm.fromWarehouseId) && String(s.productId) === String(productId)
+    );
+    return stock ? Number(stock.onHandQty) : 0;
+  };
+
+  // Submit Warehouse Transfer (can be immediate post or draft)
+  const handleCreateTransfer = async (e: React.FormEvent, autoPost: boolean = true) => {
     e.preventDefault();
     if (!transferForm.fromWarehouseId || !transferForm.toWarehouseId) {
       error('မူလဂိုဒေါင်နှင့် လက်ခံမည့်ဂိုဒေါင် နှစ်ခုစလုံးကို ရွေးချယ်ပေးပါ');
@@ -190,6 +199,7 @@ export default function InventoryPage() {
       toWarehouseId: Number(transferForm.toWarehouseId),
       transferDate: transferForm.transferDate,
       branchId: orgContext.branchId,
+      autoPost,
       items: transferForm.items.map(it => ({
         productId: Number(it.productId),
         uomId: Number(it.uomId),
@@ -203,7 +213,11 @@ export default function InventoryPage() {
     });
 
     if (res.success) {
-      success('ကုန်လွှဲပြောင်းလွှာ ဖန်တီးပြီးပါပြီ');
+      success(
+        autoPost
+          ? 'ကုန်လွှဲပြောင်းမှု ပြီးစီးပြီး စတော့စာရင်းများ အဆင့်မြှင့်တင်ပြီးပါပြီ'
+          : 'ကုန်လွှဲပြောင်းလွှာ မူကြမ်း သိမ်းဆည်းပြီးပါပြီ'
+      );
       setTransferDialogOpen(false);
       setTransferForm({
         fromWarehouseId: '',
@@ -212,8 +226,28 @@ export default function InventoryPage() {
         items: [{ productId: '', uomId: '', qty: 1 }],
       });
       loadInventoryData();
+      if (autoPost) setActiveTab('stock');
     } else {
       error('ကုန်လွှဲပြောင်းလွှာ ဖန်တီး၍မရပါ', res.message);
+    }
+  };
+
+  // Inspect full transfer detail
+  const inspectTransfer = async (t: WarehouseTransfer) => {
+    const detailRes = await apiFetch<WarehouseTransfer>(`/api/inventory/warehouse-transfers/${t.id}`);
+    setSelectedTransfer(detailRes.success && detailRes.data ? detailRes.data : t);
+    setTransferSheetOpen(true);
+  };
+
+  // Cancel DRAFT transfer
+  const handleCancelTransfer = async (transferId: number) => {
+    const res = await apiFetch(`/api/inventory/warehouse-transfers/${transferId}/cancel`, { method: 'PUT' });
+    if (res.success) {
+      success('ကုန်လွှဲပြောင်းလွှာ ပယ်ဖျက်ပြီးပါပြီ');
+      loadInventoryData();
+      if (selectedTransfer?.id === transferId) setTransferSheetOpen(false);
+    } else {
+      error('ပယ်ဖျက်၍မရပါ', res.message);
     }
   };
 
@@ -349,6 +383,27 @@ export default function InventoryPage() {
     { header: 'လွှဲပြောင်းလွှာအမှတ်', accessorKey: 'transferNo', sortable: true, className: 'font-mono font-bold text-blue-600 dark:text-blue-400' },
     { header: 'လွှဲပေးသည့်ဂိုဒေါင်', cell: r => r.fromWarehouse?.name || `ဂိုဒေါင် #${r.fromWarehouseId}` },
     { header: 'လက်ခံမည့်ဂိုဒေါင်', cell: r => r.toWarehouse?.name || `ဂိုဒေါင် #${r.toWarehouseId}` },
+    {
+      header: 'လွှဲပြောင်းသည့် ပစ္စည်းများ',
+      cell: r => {
+        const items = r.items || [];
+        if (items.length === 0) return <span className="text-zinc-400 text-xs">-</span>;
+        return (
+          <div className="space-y-0.5 max-w-[220px]">
+            {items.map((it, idx) => (
+              <div key={idx} className="text-xs truncate">
+                <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                  {it.product?.name || `Product #${it.productId}`}
+                </span>
+                <span className="font-mono text-zinc-500 ml-1">
+                  ({formatQuantity(it.qty)} {it.uom?.symbol || ''})
+                </span>
+              </div>
+            ))}
+          </div>
+        );
+      },
+    },
     { header: 'ရက်စွဲ', cell: r => formatDate(r.transferDate), sortable: true },
     { header: 'အခြေအနေ', cell: r => <StatusBadge status={r.status} /> },
     {
@@ -359,10 +414,7 @@ export default function InventoryPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
-              setSelectedTransfer(r);
-              setTransferSheetOpen(true);
-            }}
+            onClick={() => inspectTransfer(r)}
             className="h-7 text-xs"
             title="အသေးစိတ်ကြည့်ရန်"
           >
@@ -370,14 +422,25 @@ export default function InventoryPage() {
           </Button>
 
           {r.status === 'DRAFT' && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => handlePostTransfer(r.id)}
-              className="h-7 text-xs gap-1 bg-blue-600 hover:bg-blue-700"
-            >
-              <CheckCircle2 className="h-3.5 w-3.5" /> လွှဲပြောင်းအတည်ပြုမည်
-            </Button>
+            <>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => handlePostTransfer(r.id)}
+                className="h-7 text-xs gap-1 bg-blue-600 hover:bg-blue-700"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" /> အတည်ပြုမည်
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleCancelTransfer(r.id)}
+                className="h-7 text-xs text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                title="ပယ်ဖျက်မည်"
+              >
+                ပယ်ဖျက်
+              </Button>
+            </>
           )}
         </div>
       ),
@@ -577,6 +640,20 @@ export default function InventoryPage() {
             <span>ရက်စွဲ: {formatDate(t.transferDate)}</span>
             <span>• ပစ္စည်း {itemCount} မျိုး</span>
           </div>
+
+          {/* Transferred items preview */}
+          {t.items && t.items.length > 0 && (
+            <div className="pl-9 space-y-1">
+              {t.items.slice(0, 2).map((it, idx) => (
+                <p key={idx} className="text-[11px] text-zinc-700 dark:text-zinc-300 truncate">
+                  • {it.product?.name || `Product #${it.productId}`} ({formatQuantity(it.qty)} {it.uom?.symbol || ''})
+                </p>
+              ))}
+              {t.items.length > 2 && (
+                <p className="text-[10px] text-zinc-400">+{t.items.length - 2} items more...</p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Action Buttons Footer */}
@@ -584,10 +661,7 @@ export default function InventoryPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
-              setSelectedTransfer(t);
-              setTransferSheetOpen(true);
-            }}
+            onClick={() => inspectTransfer(t)}
             className="h-8 px-2.5 text-zinc-600 dark:text-zinc-300 gap-1"
             title="အသေးစိတ်ကြည့်ရန်"
           >
@@ -596,14 +670,24 @@ export default function InventoryPage() {
           </Button>
 
           {t.status === 'DRAFT' && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => handlePostTransfer(t.id)}
-              className="h-8 px-3 text-xs gap-1 bg-blue-600 hover:bg-blue-700"
-            >
-              <CheckCircle2 className="h-3.5 w-3.5" /> လွှဲပြောင်းအတည်ပြုမည်
-            </Button>
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleCancelTransfer(t.id)}
+                className="h-8 px-2 text-xs text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+              >
+                ပယ်ဖျက်
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => handlePostTransfer(t.id)}
+                className="h-8 px-3 text-xs gap-1 bg-blue-600 hover:bg-blue-700"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" /> အတည်ပြုမည်
+              </Button>
+            </div>
           )}
         </div>
       </div>
@@ -744,10 +828,7 @@ export default function InventoryPage() {
             searchKey="transferNo"
             isLoading={isLoading}
             renderCard={renderTransferCard}
-            onRowClick={r => {
-              setSelectedTransfer(r);
-              setTransferSheetOpen(true);
-            }}
+            onRowClick={r => inspectTransfer(r)}
           />
         </TabsContent>
       </Tabs>
@@ -939,6 +1020,12 @@ export default function InventoryPage() {
                     ))}
                   </Select>
 
+                  {it.productId && getSourceOnHand(it.productId) !== null && (
+                    <p className="text-[11px] text-zinc-500 font-medium">
+                      ဂိုဒေါင်လက်ကျန်: <span className="font-mono font-bold text-blue-600 dark:text-blue-400">{getSourceOnHand(it.productId)}</span>
+                    </p>
+                  )}
+
                   <div className="grid grid-cols-2 gap-2">
                     <Select
                       label="ယူနစ် *"
@@ -992,6 +1079,11 @@ export default function InventoryPage() {
                         </option>
                       ))}
                     </Select>
+                    {it.productId && getSourceOnHand(it.productId) !== null && (
+                      <p className="text-[10px] text-zinc-500 font-medium mt-0.5">
+                        ဂိုဒေါင်လက်ကျန်: <span className="font-mono font-bold text-blue-600 dark:text-blue-400">{getSourceOnHand(it.productId)}</span>
+                      </p>
+                    )}
                   </div>
 
                   <div className="w-32 shrink-0">
@@ -1040,8 +1132,21 @@ export default function InventoryPage() {
             <Button type="button" variant="outline" onClick={() => setTransferDialogOpen(false)} className="w-full sm:w-auto">
               မလုပ်တော့ပါ
             </Button>
-            <Button type="submit" variant="primary" className="w-full sm:w-auto">
-              ကုန်လွှဲပြောင်းလွှာ သိမ်းဆည်းမည်
+            <Button
+              type="button"
+              variant="outline"
+              onClick={(e) => handleCreateTransfer(e, false)}
+              className="w-full sm:w-auto text-zinc-700 dark:text-zinc-300"
+            >
+              မူကြမ်း သိမ်းမည် (Save Draft)
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={(e) => handleCreateTransfer(e, true)}
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 gap-1.5"
+            >
+              <CheckCircle2 className="h-4 w-4" /> ချက်ချင်း လွှဲပြောင်းမည် (Transfer Now)
             </Button>
           </div>
         </form>
@@ -1163,16 +1268,36 @@ export default function InventoryPage() {
         title={`လွှဲပြောင်းလွှာ: ${selectedTransfer?.transferNo || ''}`}
         description={`လွှဲပေးသည့်ဂိုဒေါင်: ${selectedTransfer?.fromWarehouse?.name || ''} → လက်ခံမည့်ဂိုဒေါင်: ${selectedTransfer?.toWarehouse?.name || ''}`}
         footer={
-          selectedTransfer && selectedTransfer.status === 'DRAFT' && (
-            <div className="flex justify-end gap-2 w-full">
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => handlePostTransfer(selectedTransfer.id)}
-                className="bg-blue-600 hover:bg-blue-700 gap-1.5 w-full sm:w-auto text-xs"
-              >
-                <CheckCircle2 className="h-4 w-4" /> လွှဲပြောင်းအတည်ပြုမည်
-              </Button>
+          selectedTransfer && (
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2 w-full">
+              {selectedTransfer.status === 'DRAFT' ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleCancelTransfer(selectedTransfer.id)}
+                    className="text-rose-600 border-rose-300 w-full sm:w-auto text-xs hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-1" /> ပယ်ဖျက်မည်
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handlePostTransfer(selectedTransfer.id)}
+                    className="bg-blue-600 hover:bg-blue-700 gap-1.5 w-full sm:w-auto text-xs"
+                  >
+                    <CheckCircle2 className="h-4 w-4" /> လွှဲပြောင်းအတည်ပြုမည်
+                  </Button>
+                </>
+              ) : selectedTransfer.status === 'POSTED' ? (
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 py-1">
+                  <CheckCircle2 className="h-4 w-4" /> လွှဲပြောင်းမှု ပြီးစီးပြီး စတော့စာရင်း ချိန်ညှိပြီးပါပြီ
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-500 py-1">
+                  ပယ်ဖျက်ထားသော လွှဲပြောင်းလွှာ ဖြစ်ပါသည်
+                </div>
+              )}
             </div>
           )
         }
@@ -1199,8 +1324,11 @@ export default function InventoryPage() {
               <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-900">
                 {(selectedTransfer.items || []).map((it, idx) => (
                   <div key={idx} className="flex items-center justify-between p-3">
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-100">{it.product?.name || `ကုန်ပစ္စည်း #${it.productId}`}</span>
-                    <span className="font-bold font-mono text-zinc-900 dark:text-zinc-100">{it.qty} {it.uom?.symbol || ''}</span>
+                    <div>
+                      <p className="font-semibold text-zinc-900 dark:text-zinc-100">{it.product?.name || `ကုန်ပစ္စည်း #${it.productId}`}</p>
+                      {it.product?.sku && <p className="text-[10px] text-zinc-400 font-mono">{it.product.sku}</p>}
+                    </div>
+                    <span className="font-bold font-mono text-zinc-900 dark:text-zinc-100">{formatQuantity(it.qty)} {it.uom?.symbol || ''}</span>
                   </div>
                 ))}
               </div>

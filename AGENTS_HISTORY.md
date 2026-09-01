@@ -123,3 +123,28 @@
 5. **Build & Quality Assurance**:
    - Client Next.js production build — Exit Code 0 ✅
    - Server TypeScript build — Exit Code 0 ✅
+
+---
+
+## Execution Log: 2026-09-01 — Warehouse Transfer Full Flow & Stock Movement Fix
+
+### Accomplishments:
+
+1. **Warehouse Transfer Creation & Instant Execution (`app/inventory/page.tsx`)**:
+   - Transfer Create Modal now provides two distinct action buttons:
+     - `မူကြမ်း သိမ်းမည် (Save Draft)`: saves transfer in `DRAFT` status without deducting stock.
+     - `ချက်ချင်း လွှဲပြောင်းမည် (Transfer Now)`: creates the transfer in `POSTED` status and immediately performs stock transfer movements atomically.
+   - Added real-time source warehouse on-hand stock display (`ဂိုဒေါင်လက်ကျန်: X`) right below each selected product in both desktop and mobile views.
+
+2. **Transfers Tab List & Table Improvements**:
+   - Added "လွှဲပြောင်းသည့် ပစ္စည်းများ (Transferred Items)" column in the desktop table showing product name and formatted quantity.
+   - Enhanced mobile card view with transferred items preview.
+   - For `DRAFT` transfers, provided both `အတည်ပြုမည် (Post Transfer)` and `ပယ်ဖျက် (Cancel Transfer)` action buttons.
+
+3. **Transfer Inspection Sheet & Cancel Support**:
+   - Enhanced Eye inspection button to load full transfer records via `inspectTransfer`.
+   - Inspection sheet now displays product name, SKU, and formatted transfer quantity.
+   - Provided quick Cancel Transfer and Confirm Transfer buttons directly inside the inspection drawer.
+
+4. **Build & Verification**:
+   - Next.js production build (`npm run build`): ✅ Exit code 0 (57 routes).
