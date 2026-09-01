@@ -32,15 +32,15 @@ export interface DataTableProps<T> {
 export function DataTable<T extends Record<string, unknown>>({
   data,
   columns,
-  searchPlaceholder = 'Search records...',
+  searchPlaceholder = 'ရှာဖွေရန်...',
   searchKey,
   filterComponent,
   actions,
   isLoading = false,
   onRowClick,
   renderCard,
-  emptyTitle = 'No records found',
-  emptyDescription = 'Try adjusting your search or filters to find what you are looking for.',
+  emptyTitle = 'အချက်အလက် မရှိပါ',
+  emptyDescription = 'ရှာဖွေမှု သို့မဟုတ် စစ်ထုတ်မှုများကို ပြန်လည်စစ်ဆေးပါ',
   pageSize = 10,
 }: DataTableProps<T>) {
   const [search, setSearch] = React.useState('');
@@ -265,11 +265,12 @@ export function DataTable<T extends Record<string, unknown>>({
       {!isLoading && sortedData.length > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 shadow-xs">
           <div>
-            Showing <span className="font-medium text-zinc-800 dark:text-zinc-200">{(currentPage - 1) * pageSize + 1}</span> to{' '}
+            စုစုပေါင်း <span className="font-medium text-zinc-800 dark:text-zinc-200">{sortedData.length}</span> ခုအနက်{' '}
+            <span className="font-medium text-zinc-800 dark:text-zinc-200">{(currentPage - 1) * pageSize + 1}</span> မှ{' '}
             <span className="font-medium text-zinc-800 dark:text-zinc-200">
               {Math.min(currentPage * pageSize, sortedData.length)}
             </span>{' '}
-            of <span className="font-medium text-zinc-800 dark:text-zinc-200">{sortedData.length}</span> results
+            အထိ ပြသထားသည်
           </div>
 
           <div className="flex items-center gap-1">
@@ -283,7 +284,7 @@ export function DataTable<T extends Record<string, unknown>>({
               <ChevronLeft className="h-3.5 w-3.5" />
             </Button>
             <span className="px-2 font-medium">
-              Page {currentPage} of {totalPages}
+              စာမျက်နှာ {currentPage} / {totalPages}
             </span>
             <Button
               variant="outline"

@@ -449,10 +449,10 @@ export default function ProductsPage() {
       SERVICE: 'secondary',
     };
     const typeLabels: Record<string, string> = {
-      FINISHED_GOOD: 'Finished Good (အချောထည်)',
-      RAW_MATERIAL: 'Raw Material (ကုန်ကြမ်း)',
-      PACKAGING: 'Packaging (ထုပ်ပိုးပစ္စည်း)',
-      SERVICE: 'Service (ဝန်ဆောင်မှု)',
+      FINISHED_GOOD: 'အချောထည်',
+      RAW_MATERIAL: 'ကုန်ကြမ်း',
+      PACKAGING: 'ထုပ်ပိုးပစ္စည်း',
+      SERVICE: 'ဝန်ဆောင်မှု',
     };
     return (
       <Badge variant={typeVariants[type] || 'default'} className="text-[10px] sm:text-xs">
@@ -497,22 +497,22 @@ export default function ProductsPage() {
 
   // ─── DESKTOP TABLE COLUMNS ──────────────────────────────────────
   const productColumns: Column<Product>[] = [
-    { header: 'SKU', accessorKey: 'sku', sortable: true, className: 'font-mono font-bold text-blue-600 dark:text-blue-400' },
-    { header: 'Product Name', accessorKey: 'name', sortable: true, className: 'font-semibold' },
+    { header: 'ကုန်ပစ္စည်းကုဒ် (SKU)', accessorKey: 'sku', sortable: true, className: 'font-mono font-bold text-blue-600 dark:text-blue-400' },
+    { header: 'ကုန်ပစ္စည်းအမည်', accessorKey: 'name', sortable: true, className: 'font-semibold' },
     {
-      header: 'Type',
+      header: 'ထုတ်ကုန်အမျိုးအစား',
       accessorKey: 'productType',
       cell: r => renderTypeBadge(r.productType),
     },
-    { header: 'Category', cell: r => r.category?.name || '-' },
-    { header: 'Base Unit', cell: r => r.baseUom?.symbol || r.baseUom?.name || '-' },
+    { header: 'အမျိုးအစား', cell: r => r.category?.name || '-' },
+    { header: 'အခြေခံယူနစ်', cell: r => r.baseUom?.symbol || r.baseUom?.name || '-' },
     {
-      header: 'Conversions',
+      header: 'ယူနစ်အချိုးများ',
       cell: r => {
         const count = r.productUoms?.length || 0;
         return count > 0 ? (
           <Badge variant="outline" className="text-[10px] text-blue-600 dark:text-blue-400">
-            {count} unit ratio{count > 1 ? 's' : ''}
+            {count} ယူနစ်အချိုး
           </Badge>
         ) : (
           <span className="text-zinc-400 text-[11px]">-</span>
@@ -520,7 +520,7 @@ export default function ProductsPage() {
       },
     },
     {
-      header: 'Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => (
         <div className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}>
@@ -532,7 +532,7 @@ export default function ProductsPage() {
               setProductSheetOpen(true);
             }}
             className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
-            title="Inspect"
+            title="အသေးစိတ်ကြည့်ရန်"
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
@@ -541,7 +541,7 @@ export default function ProductsPage() {
             size="icon"
             onClick={() => openEditProduct(r)}
             className="h-7 w-7 text-blue-600 hover:text-blue-700 dark:text-blue-400"
-            title="Edit"
+            title="ပြင်ဆင်ရန်"
           >
             <Edit2 className="h-3.5 w-3.5" />
           </Button>
@@ -550,7 +550,7 @@ export default function ProductsPage() {
             size="icon"
             onClick={() => confirmDelete('product', r.id, r.name)}
             className="h-7 w-7 text-rose-500 hover:text-rose-700"
-            title="Delete"
+            title="ဖျက်သိမ်းရန်"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -560,10 +560,10 @@ export default function ProductsPage() {
   ];
 
   const categoryColumns: Column<ProductCategory>[] = [
-    { header: 'Category Name', accessorKey: 'name', sortable: true, className: 'font-semibold' },
-    { header: 'Description', accessorKey: 'description', cell: r => r.description || '-' },
+    { header: 'အမျိုးအစားအမည်', accessorKey: 'name', sortable: true, className: 'font-semibold' },
+    { header: 'ဖော်ပြချက်', accessorKey: 'description', cell: r => r.description || '-' },
     {
-      header: 'Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => (
         <div className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}>
@@ -576,6 +576,7 @@ export default function ProductsPage() {
               setCategoryDialogOpen(true);
             }}
             className="h-7 w-7 text-blue-600"
+            title="ပြင်ဆင်ရန်"
           >
             <Edit2 className="h-3.5 w-3.5" />
           </Button>
@@ -584,6 +585,7 @@ export default function ProductsPage() {
             size="icon"
             onClick={() => confirmDelete('category', r.id, r.name)}
             className="h-7 w-7 text-rose-500"
+            title="ဖျက်သိမ်းရန်"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -593,10 +595,10 @@ export default function ProductsPage() {
   ];
 
   const uomColumns: Column<UOM>[] = [
-    { header: 'Unit Name', accessorKey: 'name', sortable: true, className: 'font-semibold' },
-    { header: 'Symbol', accessorKey: 'symbol', cell: r => <Badge variant="outline">{r.symbol}</Badge> },
+    { header: 'ယူနစ်အမည်', accessorKey: 'name', sortable: true, className: 'font-semibold' },
+    { header: 'အတိုကောက်သင်္ကေတ', accessorKey: 'symbol', cell: r => <Badge variant="outline">{r.symbol}</Badge> },
     {
-      header: 'Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => (
         <div className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}>
@@ -609,6 +611,7 @@ export default function ProductsPage() {
               setUomDialogOpen(true);
             }}
             className="h-7 w-7 text-blue-600"
+            title="ပြင်ဆင်ရန်"
           >
             <Edit2 className="h-3.5 w-3.5" />
           </Button>
@@ -617,6 +620,7 @@ export default function ProductsPage() {
             size="icon"
             onClick={() => confirmDelete('uom', r.id, r.name)}
             className="h-7 w-7 text-rose-500"
+            title="ဖျက်သိမ်းရန်"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -626,12 +630,12 @@ export default function ProductsPage() {
   ];
 
   const supplierColumns: Column<Supplier>[] = [
-    { header: 'Supplier Name', accessorKey: 'name', sortable: true, className: 'font-semibold' },
-    { header: 'Phone Number', cell: r => r.phoneNumber || '-' },
-    { header: 'Township', cell: r => r.township || '-' },
-    { header: 'Location', cell: r => r.location || '-' },
+    { header: 'ကုန်သွင်းသူအမည်', accessorKey: 'name', sortable: true, className: 'font-semibold' },
+    { header: 'ဖုန်းနံပါတ်', cell: r => r.phoneNumber || '-' },
+    { header: 'မြို့နယ်', cell: r => r.township || '-' },
+    { header: 'တိုင်းဒေသကြီး / တည်နေရာ', cell: r => r.location || '-' },
     {
-      header: 'Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => (
         <div className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}>
@@ -643,6 +647,7 @@ export default function ProductsPage() {
               setSupplierSheetOpen(true);
             }}
             className="h-7 w-7 text-zinc-500"
+            title="အသေးစိတ်ကြည့်ရန်"
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
@@ -655,6 +660,7 @@ export default function ProductsPage() {
               setSupplierDialogOpen(true);
             }}
             className="h-7 w-7 text-blue-600"
+            title="ပြင်ဆင်ရန်"
           >
             <Edit2 className="h-3.5 w-3.5" />
           </Button>
@@ -663,6 +669,7 @@ export default function ProductsPage() {
             size="icon"
             onClick={() => confirmDelete('supplier', r.id, r.name)}
             className="h-7 w-7 text-rose-500"
+            title="ဖျက်သိမ်းရန်"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -672,11 +679,11 @@ export default function ProductsPage() {
   ];
 
   const customerColumns: Column<Customer>[] = [
-    { header: 'Customer Name', accessorKey: 'name', sortable: true, className: 'font-semibold' },
-    { header: 'Phone Number', cell: r => r.phoneNumber || '-' },
-    { header: 'Address', cell: r => r.address || '-' },
+    { header: 'ဝယ်ယူသူအမည်', accessorKey: 'name', sortable: true, className: 'font-semibold' },
+    { header: 'ဖုန်းနံပါတ်', cell: r => r.phoneNumber || '-' },
+    { header: 'လိပ်စာ', cell: r => r.address || '-' },
     {
-      header: 'Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => (
         <div className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}>
@@ -688,6 +695,7 @@ export default function ProductsPage() {
               setCustomerSheetOpen(true);
             }}
             className="h-7 w-7 text-zinc-500"
+            title="အသေးစိတ်ကြည့်ရန်"
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
@@ -700,6 +708,7 @@ export default function ProductsPage() {
               setCustomerDialogOpen(true);
             }}
             className="h-7 w-7 text-blue-600"
+            title="ပြင်ဆင်ရန်"
           >
             <Edit2 className="h-3.5 w-3.5" />
           </Button>
@@ -708,6 +717,7 @@ export default function ProductsPage() {
             size="icon"
             onClick={() => confirmDelete('customer', r.id, r.name)}
             className="h-7 w-7 text-rose-500"
+            title="ဖျက်သိမ်းရန်"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -717,11 +727,11 @@ export default function ProductsPage() {
   ];
 
   const warehouseColumns: Column<Warehouse>[] = [
-    { header: 'Warehouse Name', accessorKey: 'name', sortable: true, className: 'font-semibold' },
-    { header: 'Branch', cell: r => r.branch?.name || ('Branch #' + r.branchId) },
-    { header: 'Location', cell: r => r.location || '-' },
+    { header: 'ဂိုဒေါင်အမည်', accessorKey: 'name', sortable: true, className: 'font-semibold' },
+    { header: 'ရုံးခွဲ / ဆိုင်ခွဲ', cell: r => r.branch?.name || ('ရုံးခွဲ #' + r.branchId) },
+    { header: 'တည်နေရာ', cell: r => r.location || '-' },
     {
-      header: 'Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => (
         <div className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}>
@@ -733,6 +743,7 @@ export default function ProductsPage() {
               setWarehouseSheetOpen(true);
             }}
             className="h-7 w-7 text-zinc-500"
+            title="အသေးစိတ်ကြည့်ရန်"
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
@@ -745,6 +756,7 @@ export default function ProductsPage() {
               setWarehouseDialogOpen(true);
             }}
             className="h-7 w-7 text-blue-600"
+            title="ပြင်ဆင်ရန်"
           >
             <Edit2 className="h-3.5 w-3.5" />
           </Button>
@@ -753,6 +765,7 @@ export default function ProductsPage() {
             size="icon"
             onClick={() => confirmDelete('warehouse', r.id, r.name)}
             className="h-7 w-7 text-rose-500"
+            title="ဖျက်သိမ်းရန်"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -762,11 +775,11 @@ export default function ProductsPage() {
   ];
 
   const branchColumns: Column<Branch>[] = [
-    { header: 'Branch Code', accessorKey: 'code', sortable: true, className: 'font-mono font-bold text-blue-600' },
-    { header: 'Branch Name', accessorKey: 'name', sortable: true, className: 'font-semibold' },
-    { header: 'Location', cell: r => r.location || '-' },
+    { header: 'ရုံးခွဲကုဒ်', accessorKey: 'code', sortable: true, className: 'font-mono font-bold text-blue-600' },
+    { header: 'ရုံးခွဲအမည်', accessorKey: 'name', sortable: true, className: 'font-semibold' },
+    { header: 'တည်နေရာ', cell: r => r.location || '-' },
     {
-      header: 'Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => (
         <div className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}>
@@ -779,6 +792,7 @@ export default function ProductsPage() {
               setBranchDialogOpen(true);
             }}
             className="h-7 w-7 text-blue-600"
+            title="ပြင်ဆင်ရန်"
           >
             <Edit2 className="h-3.5 w-3.5" />
           </Button>
@@ -787,6 +801,7 @@ export default function ProductsPage() {
             size="icon"
             onClick={() => confirmDelete('branch', r.id, r.name)}
             className="h-7 w-7 text-rose-500"
+            title="ဖျက်သိမ်းရန်"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -796,10 +811,10 @@ export default function ProductsPage() {
   ];
 
   const saleTeamColumns: Column<SaleTeam>[] = [
-    { header: 'Team Name', accessorKey: 'name', sortable: true, className: 'font-semibold' },
-    { header: 'Branch ID', cell: r => r.branchId ? ('Branch #' + r.branchId) : 'All Branches' },
+    { header: 'အရောင်းအဖွဲ့အမည်', accessorKey: 'name', sortable: true, className: 'font-semibold' },
+    { header: 'တာဝန်ကျရုံးခွဲ', cell: r => r.branchId ? ('ရုံးခွဲ #' + r.branchId) : 'ရုံးခွဲအားလုံး' },
     {
-      header: 'Actions',
+      header: 'လုပ်ဆောင်ချက်',
       className: 'text-right',
       cell: r => (
         <div className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}>
@@ -812,6 +827,7 @@ export default function ProductsPage() {
               setSaleTeamDialogOpen(true);
             }}
             className="h-7 w-7 text-blue-600"
+            title="ပြင်ဆင်ရန်"
           >
             <Edit2 className="h-3.5 w-3.5" />
           </Button>
@@ -820,6 +836,7 @@ export default function ProductsPage() {
             size="icon"
             onClick={() => confirmDelete('saleTeam', r.id, r.name)}
             className="h-7 w-7 text-rose-500"
+            title="ဖျက်သိမ်းရန်"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -842,10 +859,10 @@ export default function ProductsPage() {
         <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 leading-snug">{p.name}</h4>
         <div className="flex flex-wrap items-center gap-1.5 mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
           <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md">
-            🏷️ {p.category?.name || 'Uncategorized'}
+            🏷️ {p.category?.name || 'အမျိုးအစားမရှိ'}
           </span>
           <span className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md">
-            📏 Base: {p.baseUom?.symbol || p.baseUom?.name || 'Unit'}
+            📏 အခြေခံယူနစ်: {p.baseUom?.symbol || p.baseUom?.name || '-'}
           </span>
         </div>
       </div>
@@ -854,10 +871,10 @@ export default function ProductsPage() {
         <div>
           {(p.productUoms?.length || 0) > 0 ? (
             <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-md">
-              ⚡ {p.productUoms?.length} Secondary Unit{(p.productUoms?.length || 0) > 1 ? 's' : ''}
+              ⚡ {p.productUoms?.length} ယူနစ်အချိုး
             </span>
           ) : (
-            <span className="text-[11px] text-zinc-400">Base unit only</span>
+            <span className="text-[11px] text-zinc-400">အခြေခံယူနစ်သာ</span>
           )}
         </div>
 
@@ -870,7 +887,7 @@ export default function ProductsPage() {
               setProductSheetOpen(true);
             }}
             className="h-8 px-2 text-zinc-600 dark:text-zinc-300"
-            title="Inspect"
+            title="အသေးစိတ်ကြည့်ရန်"
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
@@ -879,7 +896,7 @@ export default function ProductsPage() {
             size="sm"
             onClick={() => openEditProduct(p)}
             className="h-8 px-2 text-blue-600 dark:text-blue-400"
-            title="Edit"
+            title="ပြင်ဆင်ရန်"
           >
             <Edit2 className="h-3.5 w-3.5" />
           </Button>
@@ -888,7 +905,7 @@ export default function ProductsPage() {
             size="sm"
             onClick={() => confirmDelete('product', p.id, p.name)}
             className="h-8 px-2 text-rose-500"
-            title="Delete"
+            title="ဖျက်သိမ်းရန်"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -903,7 +920,7 @@ export default function ProductsPage() {
         <div>
           <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{c.name}</h4>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">
-            {c.description || 'No description provided.'}
+            {c.description || 'ဖော်ပြချက် မရှိပါ။'}
           </p>
         </div>
         <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
@@ -916,6 +933,7 @@ export default function ProductsPage() {
               setCategoryDialogOpen(true);
             }}
             className="h-8 px-2 text-blue-600"
+            title="ပြင်ဆင်ရန်"
           >
             <Edit2 className="h-3.5 w-3.5" />
           </Button>
@@ -924,6 +942,7 @@ export default function ProductsPage() {
             size="sm"
             onClick={() => confirmDelete('category', c.id, c.name)}
             className="h-8 px-2 text-rose-500"
+            title="ဖျက်သိမ်းရန်"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -937,7 +956,7 @@ export default function ProductsPage() {
       <div className="space-y-1">
         <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{u.name}</h4>
         <Badge variant="outline" className="text-xs font-mono font-bold">
-          Symbol: {u.symbol || '-'}
+          သင်္ကေတ: {u.symbol || '-'}
         </Badge>
       </div>
       <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
@@ -950,6 +969,7 @@ export default function ProductsPage() {
             setUomDialogOpen(true);
           }}
           className="h-8 px-2 text-blue-600"
+          title="ပြင်ဆင်ရန်"
         >
           <Edit2 className="h-3.5 w-3.5" />
         </Button>
@@ -958,6 +978,7 @@ export default function ProductsPage() {
           size="sm"
           onClick={() => confirmDelete('uom', u.id, u.name)}
           className="h-8 px-2 text-rose-500"
+          title="ဖျက်သိမ်းရန်"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
@@ -989,13 +1010,13 @@ export default function ProductsPage() {
             className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 dark:text-emerald-300 px-3 py-1.5 rounded-lg active:scale-95 transition-transform shrink-0 border border-emerald-200/60 dark:border-emerald-800/40"
           >
             <Phone className="h-3.5 w-3.5" />
-            <span>Call</span>
+            <span>ဖုန်းခေါ်မည်</span>
           </a>
         )}
       </div>
 
       <div className="flex items-center justify-between pt-2.5 border-t border-zinc-100 dark:border-zinc-800 text-xs">
-        <span className="text-[11px] text-zinc-500">{s.phoneNumber || 'No phone recorded'}</span>
+        <span className="text-[11px] text-zinc-500">{s.phoneNumber || 'ဖုန်းနံပါတ် မရှိပါ'}</span>
         <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
           <Button
             variant="ghost"
@@ -1005,6 +1026,7 @@ export default function ProductsPage() {
               setSupplierSheetOpen(true);
             }}
             className="h-8 px-2 text-zinc-600 dark:text-zinc-300"
+            title="အသေးစိတ်ကြည့်ရန်"
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
@@ -1017,6 +1039,7 @@ export default function ProductsPage() {
               setSupplierDialogOpen(true);
             }}
             className="h-8 px-2 text-blue-600"
+            title="ပြင်ဆင်ရန်"
           >
             <Edit2 className="h-3.5 w-3.5" />
           </Button>
@@ -1025,6 +1048,7 @@ export default function ProductsPage() {
             size="sm"
             onClick={() => confirmDelete('supplier', s.id, s.name)}
             className="h-8 px-2 text-rose-500"
+            title="ဖျက်သိမ်းရန်"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -1057,13 +1081,13 @@ export default function ProductsPage() {
             className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 dark:text-emerald-300 px-3 py-1.5 rounded-lg active:scale-95 transition-transform shrink-0 border border-emerald-200/60 dark:border-emerald-800/40"
           >
             <Phone className="h-3.5 w-3.5" />
-            <span>Call</span>
+            <span>ဖုန်းခေါ်မည်</span>
           </a>
         )}
       </div>
 
       <div className="flex items-center justify-between pt-2.5 border-t border-zinc-100 dark:border-zinc-800 text-xs">
-        <span className="text-[11px] text-zinc-500">{c.phoneNumber || 'No phone recorded'}</span>
+        <span className="text-[11px] text-zinc-500">{c.phoneNumber || 'ဖုန်းနံပါတ် မရှိပါ'}</span>
         <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
           <Button
             variant="ghost"
@@ -1073,6 +1097,7 @@ export default function ProductsPage() {
               setCustomerSheetOpen(true);
             }}
             className="h-8 px-2 text-zinc-600 dark:text-zinc-300"
+            title="အသေးစိတ်ကြည့်ရန်"
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
@@ -1085,6 +1110,7 @@ export default function ProductsPage() {
               setCustomerDialogOpen(true);
             }}
             className="h-8 px-2 text-blue-600"
+            title="ပြင်ဆင်ရန်"
           >
             <Edit2 className="h-3.5 w-3.5" />
           </Button>
@@ -1093,6 +1119,7 @@ export default function ProductsPage() {
             size="sm"
             onClick={() => confirmDelete('customer', c.id, c.name)}
             className="h-8 px-2 text-rose-500"
+            title="ဖျက်သိမ်းရန်"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -1108,7 +1135,7 @@ export default function ProductsPage() {
           <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{w.name}</h4>
           <div className="flex items-center gap-1.5 text-[11px] text-zinc-500">
             <span className="bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md font-medium">
-              🏢 {w.branch?.name || ('Branch #' + w.branchId)}
+              🏢 {w.branch?.name || ('ရုံးခွဲ #' + w.branchId)}
             </span>
           </div>
         </div>
@@ -1121,6 +1148,7 @@ export default function ProductsPage() {
               setWarehouseSheetOpen(true);
             }}
             className="h-8 px-2 text-zinc-600 dark:text-zinc-300"
+            title="အသေးစိတ်ကြည့်ရန်"
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
@@ -1133,6 +1161,7 @@ export default function ProductsPage() {
               setWarehouseDialogOpen(true);
             }}
             className="h-8 px-2 text-blue-600"
+            title="ပြင်ဆင်ရန်"
           >
             <Edit2 className="h-3.5 w-3.5" />
           </Button>
@@ -1141,6 +1170,7 @@ export default function ProductsPage() {
             size="sm"
             onClick={() => confirmDelete('warehouse', w.id, w.name)}
             className="h-8 px-2 text-rose-500"
+            title="ဖျက်သိမ်းရန်"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -1176,6 +1206,7 @@ export default function ProductsPage() {
             setBranchDialogOpen(true);
           }}
           className="h-8 px-2 text-blue-600"
+          title="ပြင်ဆင်ရန်"
         >
           <Edit2 className="h-3.5 w-3.5" />
         </Button>
@@ -1184,6 +1215,7 @@ export default function ProductsPage() {
           size="sm"
           onClick={() => confirmDelete('branch', b.id, b.name)}
           className="h-8 px-2 text-rose-500"
+          title="ဖျက်သိမ်းရန်"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
@@ -1196,7 +1228,7 @@ export default function ProductsPage() {
       <div className="min-w-0">
         <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">{t.name}</h4>
         <p className="text-[11px] text-zinc-500 mt-0.5 truncate">
-          {t.branchId ? ('Assigned to Branch #' + t.branchId) : 'All Branches (ဗဟိုရုံး)'}
+          {t.branchId ? ('ရုံးခွဲ #' + t.branchId) : 'ရုံးခွဲအားလုံး (ဗဟိုရုံး)'}
         </p>
       </div>
       <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
@@ -1209,6 +1241,7 @@ export default function ProductsPage() {
             setSaleTeamDialogOpen(true);
           }}
           className="h-8 px-2 text-blue-600"
+          title="ပြင်ဆင်ရန်"
         >
           <Edit2 className="h-3.5 w-3.5" />
         </Button>
@@ -1217,6 +1250,7 @@ export default function ProductsPage() {
           size="sm"
           onClick={() => confirmDelete('saleTeam', t.id, t.name)}
           className="h-8 px-2 text-rose-500"
+          title="ဖျက်သိမ်းရန်"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
@@ -1411,7 +1445,7 @@ export default function ProductsPage() {
           <DataTable
             data={filteredProducts}
             columns={productColumns}
-            searchPlaceholder="Search products by name or SKU (အမည် သို့မဟုတ် SKU ဖြင့်ရှာဖွေရန်)..."
+            searchPlaceholder="ကုန်ပစ္စည်းအမည် သို့မဟုတ် SKU ဖြင့်ရှာဖွေရန်..."
             searchKey="name"
             isLoading={isLoading}
             renderCard={renderProductCard}
@@ -1431,7 +1465,7 @@ export default function ProductsPage() {
                       : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200'
                   )}
                 >
-                  All ({products.length})
+                  အားလုံး ({products.length})
                 </button>
                 <button
                   type="button"
@@ -1443,7 +1477,7 @@ export default function ProductsPage() {
                       : 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100'
                   )}
                 >
-                  Finished Good
+                  အချောထည်
                 </button>
                 <button
                   type="button"
@@ -1455,7 +1489,7 @@ export default function ProductsPage() {
                       : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 hover:bg-amber-100'
                   )}
                 >
-                  Raw Material
+                  ကုန်ကြမ်း
                 </button>
                 <button
                   type="button"
@@ -1467,7 +1501,7 @@ export default function ProductsPage() {
                       : 'bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 hover:bg-sky-100'
                   )}
                 >
-                  Packaging
+                  ထုပ်ပိုးပစ္စည်း
                 </button>
                 <button
                   type="button"
@@ -1479,7 +1513,7 @@ export default function ProductsPage() {
                       : 'bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 hover:bg-purple-100'
                   )}
                 >
-                  Service
+                  ဝန်ဆောင်မှု
                 </button>
               </div>
             }
@@ -1491,7 +1525,7 @@ export default function ProductsPage() {
           <DataTable
             data={categories}
             columns={categoryColumns}
-            searchPlaceholder="Search categories (အမျိုးအစား ရှာရန်)..."
+            searchPlaceholder="အမျိုးအစား ရှာဖွေရန်..."
             searchKey="name"
             isLoading={isLoading}
             renderCard={renderCategoryCard}
@@ -1503,7 +1537,7 @@ export default function ProductsPage() {
           <DataTable
             data={uoms}
             columns={uomColumns}
-            searchPlaceholder="Search units (ယူနစ် ရှာရန်)..."
+            searchPlaceholder="ယူနစ် ရှာဖွေရန်..."
             searchKey="name"
             isLoading={isLoading}
             renderCard={renderUomCard}
@@ -1515,7 +1549,7 @@ export default function ProductsPage() {
           <DataTable
             data={suppliers}
             columns={supplierColumns}
-            searchPlaceholder="Search suppliers (ကုန်သွင်းသူ ရှာရန်)..."
+            searchPlaceholder="ကုန်သွင်းသူ ရှာဖွေရန်..."
             searchKey="name"
             isLoading={isLoading}
             renderCard={renderSupplierCard}
@@ -1531,7 +1565,7 @@ export default function ProductsPage() {
           <DataTable
             data={customers}
             columns={customerColumns}
-            searchPlaceholder="Search customers (ဖောက်သည် ရှာရန်)..."
+            searchPlaceholder="ဝယ်ယူသူ ရှာဖွေရန်..."
             searchKey="name"
             isLoading={isLoading}
             renderCard={renderCustomerCard}
@@ -1547,7 +1581,7 @@ export default function ProductsPage() {
           <DataTable
             data={warehouses}
             columns={warehouseColumns}
-            searchPlaceholder="Search warehouses (ဂိုဒေါင် ရှာရန်)..."
+            searchPlaceholder="ဂိုဒေါင် ရှာဖွေရန်..."
             searchKey="name"
             isLoading={isLoading}
             renderCard={renderWarehouseCard}
@@ -1563,7 +1597,7 @@ export default function ProductsPage() {
           <DataTable
             data={branches}
             columns={branchColumns}
-            searchPlaceholder="Search branches (ရုံးခွဲ ရှာရန်)..."
+            searchPlaceholder="ရုံးခွဲ ရှာဖွေရန်..."
             searchKey="name"
             isLoading={isLoading}
             renderCard={renderBranchCard}
@@ -1575,7 +1609,7 @@ export default function ProductsPage() {
           <DataTable
             data={saleTeams}
             columns={saleTeamColumns}
-            searchPlaceholder="Search sale teams (အရောင်းအဖွဲ့ ရှာရန်)..."
+            searchPlaceholder="အရောင်းအဖွဲ့ ရှာဖွေရန်..."
             searchKey="name"
             isLoading={isLoading}
             renderCard={renderSaleTeamCard}
@@ -1959,8 +1993,8 @@ export default function ProductsPage() {
       <Sheet
         open={productSheetOpen}
         onOpenChange={setProductSheetOpen}
-        title={selectedProduct?.name || 'Product Details'}
-        description={`SKU: ${selectedProduct?.sku || ''}`}
+        title={selectedProduct?.name || 'ကုန်ပစ္စည်း အသေးစိတ်'}
+        description={`ကုန်ပစ္စည်းကုဒ် (SKU): ${selectedProduct?.sku || ''}`}
         footer={
           selectedProduct && (
             <div className="flex items-center justify-between gap-2 w-full">
@@ -1992,21 +2026,21 @@ export default function ProductsPage() {
             {/* Overview Card */}
             <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Product Type</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">ထုတ်ကုန်အမျိုးအစား</p>
                 <div className="mt-1">{renderTypeBadge(selectedProduct.productType)}</div>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Category (အမျိုးအစား)</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">အမျိုးအစား</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedProduct.category?.name || '-'}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Base UOM (အခြေခံယူနစ်)</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">အခြေခံယူနစ်</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">
                   {selectedProduct.baseUom?.name} ({selectedProduct.baseUom?.symbol})
                 </p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Barcode / SKU</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">ဘားကုဒ် / SKU</p>
                 <p className="font-mono font-semibold text-blue-600 dark:text-blue-400 mt-1">{selectedProduct.sku}</p>
               </div>
             </div>
@@ -2015,10 +2049,10 @@ export default function ProductsPage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs flex items-center gap-1.5">
-                  <span>Unit Conversions (ယူနစ် အချိုးများ)</span>
+                  <span>ယူနစ်အချိုး သတ်မှတ်ချက်များ</span>
                 </h4>
                 <Badge variant="outline" className="text-[10px]">
-                  {selectedProduct.productUoms?.length || 0} active
+                  {selectedProduct.productUoms?.length || 0} ခု သတ်မှတ်ထားသည်
                 </Badge>
               </div>
 
@@ -2029,7 +2063,7 @@ export default function ProductsPage() {
                     <div key={idx} className="flex items-center justify-between p-3">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-zinc-800 dark:text-zinc-200">
-                          1 {pu.uom?.name || `Unit #${pu.uomId}`} ({pu.uom?.symbol})
+                          ၁ {pu.uom?.name || `ယူနစ် #${pu.uomId}`} ({pu.uom?.symbol})
                         </span>
                         <ArrowRight className="h-3 w-3 text-zinc-400" />
                         <span className="font-bold font-mono text-blue-600 dark:text-blue-400">
@@ -2041,7 +2075,7 @@ export default function ProductsPage() {
                         size="icon"
                         onClick={() => handleDeleteUnitConversion(pu.uomId)}
                         className="h-7 w-7 text-rose-500 hover:text-rose-700"
-                        title="Remove conversion"
+                        title="ယူနစ်အချိုး ဖျက်မည်"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -2050,7 +2084,7 @@ export default function ProductsPage() {
                 </div>
               ) : (
                 <div className="p-4 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 text-center text-zinc-400 italic">
-                  No secondary unit conversions configured yet.
+                  ယူနစ်အချိုး သတ်မှတ်ထားခြင်း မရှိသေးပါ။
                 </div>
               )}
 
@@ -2061,16 +2095,16 @@ export default function ProductsPage() {
                   className="p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-800/40 space-y-3"
                 >
                   <p className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
-                    + Add Secondary Unit Ratio (ယူနစ်အချိုး အသစ်ထည့်ရန်)
+                    + ယူနစ်အချိုး အသစ်ထည့်ရန်
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <Select
-                      label="Secondary Unit (ယူနစ်)"
+                      label="ပြောင်းလဲမည့်ယူနစ် *"
                       value={newConversionUomId}
                       onChange={e => setNewConversionUomId(e.target.value)}
                       required
                     >
-                      <option value="">Select unit...</option>
+                      <option value="">ယူနစ် ရွေးချယ်ပါ...</option>
                       {availableSecondaryUoms.map(u => (
                         <option key={u.id} value={u.id}>
                           {u.name} ({u.symbol})
@@ -2078,11 +2112,11 @@ export default function ProductsPage() {
                       ))}
                     </Select>
                     <Input
-                      label={`Multiplier (1 Unit = ? ${selectedProduct.baseUom?.symbol || 'Base'})`}
+                      label={`အချိုး (၁ ယူနစ် = ${selectedProduct.baseUom?.symbol || 'အခြေခံယူနစ်'} မည်မျှ) *`}
                       type="number"
                       step="any"
                       min="0.0001"
-                      placeholder="e.g. 24, 12, 100"
+                      placeholder="ဥပမာ- 24, 12, 100"
                       value={newConversionFactor}
                       onChange={e => setNewConversionFactor(e.target.value)}
                       required
@@ -2095,7 +2129,7 @@ export default function ProductsPage() {
                     disabled={isAddingConversion || !newConversionUomId || !newConversionFactor}
                     className="w-full text-xs h-8"
                   >
-                    {isAddingConversion ? 'Adding...' : '+ Save Conversion Ratio'}
+                    {isAddingConversion ? 'ထည့်သွင်းနေသည်...' : '+ ယူနစ်အချိုး သိမ်းဆည်းမည်'}
                   </Button>
                 </form>
               )}
@@ -2108,13 +2142,13 @@ export default function ProductsPage() {
       <Sheet
         open={supplierSheetOpen}
         onOpenChange={setSupplierSheetOpen}
-        title={selectedSupplier?.name || 'Supplier'}
-        description={`Location: ${selectedSupplier?.township || selectedSupplier?.location || '-'}`}
+        title={selectedSupplier?.name || 'ကုန်သွင်းသူ အသေးစိတ်'}
+        description={`တည်နေရာ: ${[selectedSupplier?.township, selectedSupplier?.location].filter(Boolean).join(', ') || '-'}`}
         footer={
           selectedSupplier && (
             <div className="flex items-center justify-between gap-2 w-full">
               <Button variant="outline" size="sm" onClick={() => setSupplierSheetOpen(false)}>
-                Close
+                ပိတ်မည်
               </Button>
               <Button
                 variant="primary"
@@ -2133,7 +2167,7 @@ export default function ProductsPage() {
                 }}
                 className="gap-1.5 text-xs"
               >
-                <Edit2 className="h-3.5 w-3.5" /> Edit Supplier
+                <Edit2 className="h-3.5 w-3.5" /> ပြင်ဆင်မည်
               </Button>
             </div>
           )
@@ -2145,7 +2179,7 @@ export default function ProductsPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-zinc-400" />
-                  <span className="font-semibold">{selectedSupplier.phoneNumber || 'No phone recorded'}</span>
+                  <span className="font-semibold">{selectedSupplier.phoneNumber || 'ဖုန်းနံပါတ် မရှိပါ'}</span>
                 </div>
                 {selectedSupplier.phoneNumber && (
                   <a
@@ -2153,13 +2187,13 @@ export default function ProductsPage() {
                     className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 dark:text-emerald-300 px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
                   >
                     <Phone className="h-3.5 w-3.5" />
-                    <span>Call Now</span>
+                    <span>ဖုန်းခေါ်မည်</span>
                   </a>
                 )}
               </div>
               <div className="flex items-center gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
                 <MapPin className="h-4 w-4 text-zinc-400" />
-                <span>{[selectedSupplier.township, selectedSupplier.location].filter(Boolean).join(', ') || 'No address recorded'}</span>
+                <span>{[selectedSupplier.township, selectedSupplier.location].filter(Boolean).join(', ') || 'လိပ်စာ မရှိပါ'}</span>
               </div>
             </div>
           </div>
@@ -2170,13 +2204,13 @@ export default function ProductsPage() {
       <Sheet
         open={customerSheetOpen}
         onOpenChange={setCustomerSheetOpen}
-        title={selectedCustomer?.name || 'Customer'}
-        description={`Phone: ${selectedCustomer?.phoneNumber || '-'}`}
+        title={selectedCustomer?.name || 'ဝယ်ယူသူ အသေးစိတ်'}
+        description={`ဖုန်းနံပါတ်: ${selectedCustomer?.phoneNumber || '-'}`}
         footer={
           selectedCustomer && (
             <div className="flex items-center justify-between gap-2 w-full">
               <Button variant="outline" size="sm" onClick={() => setCustomerSheetOpen(false)}>
-                Close
+                ပိတ်မည်
               </Button>
               <Button
                 variant="primary"
@@ -2195,7 +2229,7 @@ export default function ProductsPage() {
                 }}
                 className="gap-1.5 text-xs"
               >
-                <Edit2 className="h-3.5 w-3.5" /> Edit Customer
+                <Edit2 className="h-3.5 w-3.5" /> ပြင်ဆင်မည်
               </Button>
             </div>
           )
@@ -2207,7 +2241,7 @@ export default function ProductsPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-zinc-400" />
-                  <span className="font-semibold">{selectedCustomer.phoneNumber || 'No phone recorded'}</span>
+                  <span className="font-semibold">{selectedCustomer.phoneNumber || 'ဖုန်းနံပါတ် မရှိပါ'}</span>
                 </div>
                 {selectedCustomer.phoneNumber && (
                   <a
@@ -2215,13 +2249,13 @@ export default function ProductsPage() {
                     className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 dark:text-emerald-300 px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
                   >
                     <Phone className="h-3.5 w-3.5" />
-                    <span>Call Now</span>
+                    <span>ဖုန်းခေါ်မည်</span>
                   </a>
                 )}
               </div>
               <div className="flex items-center gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
                 <MapPin className="h-4 w-4 text-zinc-400" />
-                <span>{[selectedCustomer.address, selectedCustomer.location].filter(Boolean).join(', ') || 'No address recorded'}</span>
+                <span>{[selectedCustomer.address, selectedCustomer.location].filter(Boolean).join(', ') || 'လိပ်စာ မရှိပါ'}</span>
               </div>
             </div>
           </div>
@@ -2232,13 +2266,13 @@ export default function ProductsPage() {
       <Sheet
         open={warehouseSheetOpen}
         onOpenChange={setWarehouseSheetOpen}
-        title={selectedWarehouse?.name || 'Warehouse'}
-        description={`Branch: ${selectedWarehouse?.branch?.name || ''}`}
+        title={selectedWarehouse?.name || 'ဂိုဒေါင် အသေးစိတ်'}
+        description={`ရုံးခွဲ: ${selectedWarehouse?.branch?.name || ''}`}
         footer={
           selectedWarehouse && (
             <div className="flex items-center justify-between gap-2 w-full">
               <Button variant="outline" size="sm" onClick={() => setWarehouseSheetOpen(false)}>
-                Close
+                ပိတ်မည်
               </Button>
               <Button
                 variant="primary"
@@ -2256,7 +2290,7 @@ export default function ProductsPage() {
                 }}
                 className="gap-1.5 text-xs"
               >
-                <Edit2 className="h-3.5 w-3.5" /> Edit Warehouse
+                <Edit2 className="h-3.5 w-3.5" /> ပြင်ဆင်မည်
               </Button>
             </div>
           )
@@ -2267,11 +2301,11 @@ export default function ProductsPage() {
             <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 space-y-2">
               <div className="flex items-center gap-2">
                 <Building2 className="h-4 w-4 text-zinc-400" />
-                <span className="font-semibold">{selectedWarehouse.branch?.name || `Branch #${selectedWarehouse.branchId}`}</span>
+                <span className="font-semibold">{selectedWarehouse.branch?.name || `ရုံးခွဲ #${selectedWarehouse.branchId}`}</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-zinc-400" />
-                <span>{selectedWarehouse.location || 'Location details not specified'}</span>
+                <span>{selectedWarehouse.location || 'တည်နေရာ မသတ်မှတ်ထားပါ'}</span>
               </div>
             </div>
           </div>
