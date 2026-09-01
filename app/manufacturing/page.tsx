@@ -10,11 +10,8 @@ import {
   Trash2,
   RefreshCw,
   Layers,
-  Sparkles,
-  ArrowRight,
-  Package,
-  Calendar,
   Warehouse as WarehouseIcon,
+  Pencil,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api/bff-client';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -58,6 +55,7 @@ export default function ManufacturingPage() {
   const [selectedBom, setSelectedBom] = React.useState<BOM | null>(null);
   const [selectedProd, setSelectedProd] = React.useState<ProductionOrder | null>(null);
   const [bomSheetOpen, setBomSheetOpen] = React.useState(false);
+  const [editBomDialogOpen, setEditBomDialogOpen] = React.useState(false);
   const [prodSheetOpen, setProdSheetOpen] = React.useState(false);
 
   // BOM Form State
@@ -66,6 +64,16 @@ export default function ManufacturingPage() {
     outputProductId: '',
     outputUomId: '',
     outputQty: 1,
+    defaultSourceWarehouseId: '',
+    ingredients: [{ productId: '', uomId: '', qty: 1 }],
+  });
+
+  const [editBomForm, setEditBomForm] = React.useState({
+    name: '',
+    outputProductId: '',
+    outputUomId: '',
+    outputQty: 1,
+    defaultSourceWarehouseId: '' as string | '',
     ingredients: [{ productId: '', uomId: '', qty: 1 }],
   });
 
@@ -155,6 +163,7 @@ export default function ManufacturingPage() {
       outputProductId: Number(bomForm.outputProductId),
       outputUomId: Number(bomForm.outputUomId),
       outputQty: Number(bomForm.outputQty),
+      defaultSourceWarehouseId: bomForm.defaultSourceWarehouseId ? Number(bomForm.defaultSourceWarehouseId) : null,
       ingredients: bomForm.ingredients.map(it => ({
         productId: Number(it.productId),
         uomId: Number(it.uomId),
@@ -175,6 +184,7 @@ export default function ManufacturingPage() {
         outputProductId: '',
         outputUomId: '',
         outputQty: 1,
+        defaultSourceWarehouseId: '',
         ingredients: [{ productId: '', uomId: '', qty: 1 }],
       });
       loadManufacturingData();
@@ -194,6 +204,60 @@ export default function ManufacturingPage() {
       loadManufacturingData();
     } else {
       error('Delete failed', res.message);
+    }
+  };
+
+  // Open Edit BOM Dialog — pre-fill existing BOM data
+  const openEditBom = (bom: BOM) => {
+    setEditBomForm({
+      name: bom.name,
+      outputProductId: String(bom.outputProductId),
+      outputUomId: String(bom.outputUomId),
+      outputQty: bom.outputQty,
+      defaultSourceWarehouseId: bom.defaultSourceWarehouseId ? String(bom.defaultSourceWarehouseId) : '',
+      ingredients: (bom.ingredients || []).map(ing => ({
+        productId: String(ing.productId),
+        uomId: String(ing.uomId),
+        qty: ing.qty,
+      })),
+    });
+    setEditBomDialogOpen(true);
+  };
+
+  // Submit BOM Edit
+  const handleEditBom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedBom) return;
+    if (!editBomForm.name || !editBomForm.outputProductId || !editBomForm.outputUomId) {
+      error('Please fill all required fields (ပြည့်စုံစွာ ဖြည့်ပါ)');
+      return;
+    }
+
+    const payload = {
+      name: editBomForm.name,
+      outputProductId: Number(editBomForm.outputProductId),
+      outputUomId: Number(editBomForm.outputUomId),
+      outputQty: Number(editBomForm.outputQty),
+      defaultSourceWarehouseId: editBomForm.defaultSourceWarehouseId ? Number(editBomForm.defaultSourceWarehouseId) : null,
+      ingredients: editBomForm.ingredients.map(it => ({
+        productId: Number(it.productId),
+        uomId: Number(it.uomId),
+        qty: Number(it.qty),
+      })),
+    };
+
+    const res = await apiFetch(`/api/manufacturing/boms/${selectedBom.id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+
+    if (res.success) {
+      success('BOM Updated (ဖော်စပ်နည်း ပြင်ဆင်ပြီးပါပြီ)');
+      setEditBomDialogOpen(false);
+      setBomSheetOpen(false);
+      loadManufacturingData();
+    } else {
+      error('Failed to update BOM', res.message);
     }
   };
 
@@ -295,8 +359,13 @@ export default function ManufacturingPage() {
       },
     ];
 
+    const matchedBom = boms.find(b => b.id === fullOrder.bomId);
+    const defaultInputWH = matchedBom?.defaultSourceWarehouseId
+      ? String(matchedBom.defaultSourceWarehouseId)
+      : (warehouses[0]?.id ? String(warehouses[0].id) : '');
+
     setCompleteForm({
-      inputWarehouseId: warehouses[0]?.id ? String(warehouses[0].id) : '',
+      inputWarehouseId: defaultInputWH,
       materials,
       outputs,
     });
@@ -725,6 +794,19 @@ export default function ManufacturingPage() {
             />
           </div>
 
+          <Select
+            label="Default Source Warehouse (ကုန်ကြမ်းထုတ်ယူမည့် ကုန်လှောင်ရုံ — optional)"
+            value={bomForm.defaultSourceWarehouseId}
+            onChange={e => setBomForm({ ...bomForm, defaultSourceWarehouseId: e.target.value })}
+          >
+            <option value="">Not specified (Production ချိန်တွင် ရွေးမည်)</option>
+            {warehouses.map(w => (
+              <option key={w.id} value={w.id}>
+                {w.name}
+              </option>
+            ))}
+          </Select>
+
           {/* Ingredients list */}
           <div className="space-y-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center justify-between">
@@ -868,6 +950,186 @@ export default function ManufacturingPage() {
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700">
               Save BOM Recipe (ဖော်စပ်နည်းသိမ်းရန်)
+            </Button>
+          </div>
+        </form>
+      </Dialog>
+
+      {/* ─── MODAL: EDIT BOM ─────────────────────────────────────────── */}
+      <Dialog
+        open={editBomDialogOpen}
+        onOpenChange={setEditBomDialogOpen}
+        title={`Edit BOM: ${selectedBom?.name || ''}`}
+        maxWidth="xl"
+      >
+        <form onSubmit={handleEditBom} className="space-y-4">
+          <Input
+            label="BOM Recipe Name (ဖော်စပ်နည်းအမည်) *"
+            value={editBomForm.name}
+            onChange={e => setEditBomForm({ ...editBomForm, name: e.target.value })}
+            required
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Select
+              label="Output Finished Product (အချောထည်) *"
+              value={editBomForm.outputProductId}
+              onChange={e => {
+                const pId = e.target.value;
+                const prod = products.find(p => p.id === Number(pId));
+                setEditBomForm({
+                  ...editBomForm,
+                  outputProductId: pId,
+                  outputUomId: prod ? String(prod.baseUomId) : editBomForm.outputUomId,
+                });
+              }}
+              required
+            >
+              <option value="">Select Finished Good...</option>
+              {products.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({p.sku})
+                </option>
+              ))}
+            </Select>
+
+            <Select
+              label="Output Unit (ယူနစ်) *"
+              value={editBomForm.outputUomId}
+              onChange={e => setEditBomForm({ ...editBomForm, outputUomId: e.target.value })}
+              required
+            >
+              <option value="">Select Unit...</option>
+              {uoms.map(u => (
+                <option key={u.id} value={u.id}>
+                  {u.name} ({u.symbol})
+                </option>
+              ))}
+            </Select>
+
+            <Input
+              type="number"
+              step="any"
+              label="Batch Output Qty *"
+              value={editBomForm.outputQty}
+              onChange={e => setEditBomForm({ ...editBomForm, outputQty: Number(e.target.value) })}
+              required
+            />
+          </div>
+
+          <Select
+            label="Default Source Warehouse (ကုန်ကြမ်းထုတ်ယူမည့် ကုန်လှောင်ရုံ — optional)"
+            value={editBomForm.defaultSourceWarehouseId}
+            onChange={e => setEditBomForm({ ...editBomForm, defaultSourceWarehouseId: e.target.value })}
+          >
+            <option value="">Not specified</option>
+            {warehouses.map(w => (
+              <option key={w.id} value={w.id}>
+                {w.name}
+              </option>
+            ))}
+          </Select>
+
+          {/* Edit Ingredients list */}
+          <div className="space-y-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                Ingredients (ကုန်ကြမ်းများ) — Editing replaces all existing ingredients
+              </h4>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setEditBomForm(prev => ({ ...prev, ingredients: [...prev.ingredients, { productId: '', uomId: '', qty: 1 }] }))}
+                className="h-7 text-xs gap-1"
+              >
+                <Plus className="h-3 w-3" /> Add Ingredient
+              </Button>
+            </div>
+            <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+              {editBomForm.ingredients.map((it, idx) => (
+                <div key={idx} className="flex items-center gap-2 p-2 rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/60">
+                  <div className="flex-1">
+                    <Select
+                      value={it.productId}
+                      onChange={e => {
+                        const val = e.target.value;
+                        const prod = products.find(p => p.id === Number(val));
+                        setEditBomForm(prev => {
+                          const updated = [...prev.ingredients];
+                          updated[idx] = { ...updated[idx], productId: val, uomId: prod ? String(prod.baseUomId) : updated[idx].uomId };
+                          return { ...prev, ingredients: updated };
+                        });
+                      }}
+                      required
+                    >
+                      <option value="">Select Raw Material...</option>
+                      {products.map(p => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} ({p.sku})
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+                  <div className="w-28">
+                    <Select
+                      value={it.uomId}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setEditBomForm(prev => {
+                          const updated = [...prev.ingredients];
+                          updated[idx] = { ...updated[idx], uomId: val };
+                          return { ...prev, ingredients: updated };
+                        });
+                      }}
+                      required
+                    >
+                      <option value="">Unit...</option>
+                      {uoms.map(u => (
+                        <option key={u.id} value={u.id}>
+                          {u.symbol || u.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+                  <div className="w-24">
+                    <Input
+                      type="number"
+                      step="any"
+                      placeholder="Qty"
+                      value={it.qty}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setEditBomForm(prev => {
+                          const updated = [...prev.ingredients];
+                          updated[idx] = { ...updated[idx], qty: Number(val) };
+                          return { ...prev, ingredients: updated };
+                        });
+                      }}
+                      required
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setEditBomForm(prev => ({ ...prev, ingredients: prev.ingredients.filter((_, i) => i !== idx) }))}
+                    disabled={editBomForm.ingredients.length === 1}
+                    className="h-8 w-8 text-rose-500 hover:text-rose-700 shrink-0"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <Button type="button" variant="outline" onClick={() => setEditBomDialogOpen(false)} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
+              Save Changes (ပြင်ဆင်ချက်သိမ်းရန်)
             </Button>
           </div>
         </form>
@@ -1071,6 +1333,14 @@ export default function ManufacturingPage() {
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => openEditBom(selectedBom)}
+                className="text-blue-600 w-full sm:w-auto text-xs border-blue-300"
+              >
+                <Pencil className="h-3.5 w-3.5 mr-1" /> Edit BOM
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setDeleteBomConfirmOpen(true)}
                 className="text-rose-600 w-full sm:w-auto text-xs"
               >
@@ -1089,33 +1359,92 @@ export default function ManufacturingPage() {
         }
       >
         {selectedBom && (
-          <div className="space-y-6 text-xs">
+          <div className="space-y-5 text-xs">
+            {/* Header Info Grid */}
             <div className="grid grid-cols-2 gap-2.5 sm:gap-3 p-3.5 sm:p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Batch Yield Output</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">BOM ID</p>
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1 font-mono">#{selectedBom.id}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Status</p>
+                <Badge variant={selectedBom.isActive !== false ? 'success' : 'secondary'} className="mt-1">
+                  {selectedBom.isActive !== false ? 'Active' : 'Inactive'}
+                </Badge>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Finished Product (အချောထည်)</p>
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedBom.outputProduct?.name}</p>
+                {selectedBom.outputProduct?.sku && (
+                  <p className="text-[10px] text-zinc-400 font-mono">{selectedBom.outputProduct.sku}</p>
+                )}
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Batch Output Yield</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1 font-mono">
                   {formatQuantity(selectedBom.outputQty)} {selectedBom.outputUom?.symbol || ''}
                 </p>
               </div>
+              <div className="col-span-2">
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Default Source Warehouse (ကုန်ကြမ်းထုတ်ယူမည့် ကုန်လှောင်ရုံ)</p>
+                {selectedBom.defaultSourceWarehouse ? (
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <WarehouseIcon className="h-3.5 w-3.5 text-blue-500" />
+                    <p className="font-semibold text-blue-700 dark:text-blue-300">{selectedBom.defaultSourceWarehouse.name}</p>
+                  </div>
+                ) : (
+                  <p className="text-zinc-400 italic mt-1">Not set — will be selected at Production Complete time</p>
+                )}
+              </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Finished Product</p>
-                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedBom.outputProduct?.name}</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Created</p>
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{formatDate(selectedBom.createdAt || '')}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Last Updated</p>
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{formatDate(selectedBom.updatedAt || '')}</p>
               </div>
             </div>
 
+            {/* Ingredients Table */}
             <div className="space-y-2">
-              <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs">
-                Ingredients Formula (ကုန်ကြမ်း ပါဝင်မှုနှုန်းထား)
-              </h4>
-              <div className="divide-y divide-zinc-200 dark:divide-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-900">
-                {(selectedBom.ingredients || []).map((ing, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3">
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-100">{ing.product?.name || `Material #${ing.productId}`}</span>
-                    <span className="font-bold font-mono text-zinc-900 dark:text-zinc-100">
-                      {formatQuantity(ing.qty)} {ing.uom?.symbol || ''}
-                    </span>
-                  </div>
-                ))}
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-xs">
+                  Ingredients Formula (ကုန်ကြမ်း ပါဝင်မှုနှုန်းထား)
+                </h4>
+                <span className="text-[10px] text-zinc-400">
+                  {(selectedBom.ingredients || []).length} component(s) per batch
+                </span>
+              </div>
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-900">
+                <div className="grid grid-cols-4 bg-zinc-50 dark:bg-zinc-800 p-2.5 text-[10px] font-bold uppercase text-zinc-500">
+                  <span className="col-span-2">Raw Material</span>
+                  <span className="text-right">Per Batch</span>
+                  <span className="text-right">Per 1 unit output</span>
+                </div>
+                <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                  {(selectedBom.ingredients || []).map((ing, idx) => (
+                    <div key={idx} className="grid grid-cols-4 items-center p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                      <div className="col-span-2">
+                        <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                          {ing.product?.name || `Material #${ing.productId}`}
+                        </span>
+                        {ing.product?.sku && (
+                          <p className="text-[10px] text-zinc-400 font-mono">{ing.product.sku}</p>
+                        )}
+                      </div>
+                      <div className="text-right font-mono font-bold text-zinc-900 dark:text-zinc-100">
+                        {formatQuantity(ing.qty)} {ing.uom?.symbol || ''}
+                      </div>
+                      <div className="text-right font-mono text-zinc-500">
+                        {selectedBom.outputQty > 0
+                          ? `${formatQuantity(ing.qty / selectedBom.outputQty)} ${ing.uom?.symbol || ''}`
+                          : '—'
+                        }
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

@@ -376,13 +376,19 @@ export type BOM = {
   outputProductId: number;
   outputUomId: number;
   outputQty: number;
+  // ကုန်ကြမ်းများ ပုံမှန်ထုတ်ယူမည့် ကုန်လှောင်ရုံ (optional — Production Complete တွင် auto pre-fill ဖြစ်မည်)
+  defaultSourceWarehouseId?: number | null;
+  defaultSourceWarehouse?: Warehouse | null;
+  isActive?: boolean;
   outputProduct?: Product;
   outputUom?: UOM;
   ingredients?: BOMIngredient[];
   createdAt?: string;
+  updatedAt?: string;
 };
 
 export type ProductionOrderStatus = 'DRAFT' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+
 
 export type ProductionOrderMaterial = {
   id?: number;

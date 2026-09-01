@@ -92,3 +92,34 @@
 
 5. **Build & Quality Assurance**:
    - Full Next.js production build (`npm run build`) succeeded with exit code 0 across all 50 routes.
+
+---
+
+## Execution Log: 2026-09-01 — Phase 3: BOM Manufacturing Module Upgrade
+
+### Accomplishments:
+
+1. **BOM Default Source Warehouse (ကုန်ကြမ်းထုတ်ယူမည့် ကုန်လှောင်ရုံ)**:
+   - `types/erp.ts` BOM type: `defaultSourceWarehouseId?: number | null`, `defaultSourceWarehouse?: Warehouse | null`, `isActive?`, `updatedAt?` ထည့်သွင်းခြင်း
+   - BOM Create Dialog: `defaultSourceWarehouseId` warehouse dropdown (optional) ထည့်သွင်းခြင်း
+   - Production Complete Dialog: BOM ၏ `defaultSourceWarehouseId` ရှိပါက `inputWarehouseId` ကို auto pre-fill ဖြစ်အောင် ပြင်ဆင်ခြင်း → "Insufficient stock" error ကို ကာကွယ်ခြင်း
+
+2. **BOM Edit Feature (BOM ပြင်ဆင်ခြင်း)**:
+   - `app/api/manufacturing/boms/[id]/route.ts`: PUT method handler ထည့်သွင်းခြင်း
+   - BOM Detail Sheet: "Edit BOM" button ထည့်သွင်းပြီး edit dialog ဖွင့်ခြင်း
+   - Edit BOM Dialog: Name, Output Product/UOM/Qty, Default Source WH, Ingredients (replace strategy) ပြင်ဆင်နိုင်မည်
+
+3. **BOM Detail Sheet Full Info View (အသေးစိတ် ကြည့်ရှုခြင်း)**:
+   - BOM ID, Status (Active/Inactive), Finished Product + SKU, Batch Output Yield ပြသခြင်း
+   - Default Source Warehouse ပြသခြင်း (မသတ်မှတ်ပါက "Not set" ဟု ပြသ)
+   - Ingredients table: Raw Material Name + SKU, Per Batch Qty, Per 1 unit output qty (calculated) ပြသခြင်း
+   - Created date + Last Updated date ပြသခြင်း
+
+4. **Sequelize Migration Support (VPS deployment)**:
+   - Server ၌ `migrations/20260901000001-add-default-source-warehouse-to-bom.js` migration file ဖန်တီးပြီး
+   - VPS ၌ `npm run migrate` run ပေးမည်ဆိုလျှင် BOM table ၌ `defaultSourceWarehouseId` column safe ဖြင့် ထည့်သွားမည်
+   - Existing BOM/Production data မပျက်ဆီး (nullable column + SET NULL on delete)
+
+5. **Build & Quality Assurance**:
+   - Client Next.js production build — Exit Code 0 ✅
+   - Server TypeScript build — Exit Code 0 ✅
