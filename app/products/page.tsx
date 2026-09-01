@@ -1242,9 +1242,7 @@ export default function ProductsPage() {
               ကုန်ပစ္စည်းများနှင့် အခြေခံအချက်အလက်များ
             </h1>
           </div>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
-            အခြေခံ အချက်အလက်များ (Products, Units, Suppliers, Customers, Warehouses)
-          </p>
+
         </div>
 
         {/* Header Actions */}
@@ -1265,7 +1263,7 @@ export default function ProductsPage() {
             {activeTab === 'products' && (
               <Button variant="primary" size="sm" onClick={openCreateProduct} className="gap-1.5 h-8 text-xs">
                 <Plus className="h-3.5 w-3.5" />
-                <span>+ Product အသစ်</span>
+                <span>ကုန်ပစ္စည်းအသစ်</span>
               </Button>
             )}
             {activeTab === 'categories' && (
@@ -1280,7 +1278,7 @@ export default function ProductsPage() {
                 className="gap-1.5 h-8 text-xs"
               >
                 <Plus className="h-3.5 w-3.5" />
-                <span>+ Category အသစ်</span>
+                <span>အမျိုးအစားအသစ်</span>
               </Button>
             )}
             {activeTab === 'uoms' && (
@@ -1295,7 +1293,7 @@ export default function ProductsPage() {
                 className="gap-1.5 h-8 text-xs"
               >
                 <Plus className="h-3.5 w-3.5" />
-                <span>+ Unit (UOM) အသစ်</span>
+                <span>ယူနစ်အသစ်</span>
               </Button>
             )}
             {activeTab === 'suppliers' && (
@@ -1310,7 +1308,7 @@ export default function ProductsPage() {
                 className="gap-1.5 h-8 text-xs"
               >
                 <Plus className="h-3.5 w-3.5" />
-                <span>+ Supplier အသစ်</span>
+                <span>ကုန်သည်အသစ်</span>
               </Button>
             )}
             {activeTab === 'customers' && (
@@ -1325,7 +1323,7 @@ export default function ProductsPage() {
                 className="gap-1.5 h-8 text-xs"
               >
                 <Plus className="h-3.5 w-3.5" />
-                <span>+ Customer အသစ်</span>
+                <span>ဝယ်ယူသူအသစ်</span>
               </Button>
             )}
             {activeTab === 'warehouses' && (
@@ -1340,7 +1338,7 @@ export default function ProductsPage() {
                 className="gap-1.5 h-8 text-xs"
               >
                 <Plus className="h-3.5 w-3.5" />
-                <span>+ Warehouse အသစ်</span>
+                <span>ကုန်သိုလှောင်ရုံအသစ်</span>
               </Button>
             )}
             {activeTab === 'branches' && (
@@ -1355,7 +1353,7 @@ export default function ProductsPage() {
                 className="gap-1.5 h-8 text-xs"
               >
                 <Plus className="h-3.5 w-3.5" />
-                <span>+ Branch အသစ်</span>
+                <span>ရုံးခွဲအသစ်</span>
               </Button>
             )}
             {activeTab === 'teams' && (
@@ -1370,7 +1368,7 @@ export default function ProductsPage() {
                 className="gap-1.5 h-8 text-xs"
               >
                 <Plus className="h-3.5 w-3.5" />
-                <span>+ Sale Team အသစ်</span>
+                <span>အရောင်းအဖွဲ့အသစ်</span>
               </Button>
             )}
           </div>
@@ -1385,25 +1383,25 @@ export default function ProductsPage() {
               📦 Products (ကုန်ပစ္စည်း)
             </TabsTrigger>
             <TabsTrigger value="categories" count={categories.length}>
-              🏷️ Categories
+              🏷️ Categories (အမျိုးအစားများ)
             </TabsTrigger>
             <TabsTrigger value="uoms" count={uoms.length}>
-              📏 Units (UOM)
+              📏 UOM (ယူနစ်များ)
             </TabsTrigger>
             <TabsTrigger value="suppliers" count={suppliers.length}>
-              🚚 Suppliers
+              🚚 Suppliers (ကုန်သည်များ)
             </TabsTrigger>
             <TabsTrigger value="customers" count={customers.length}>
-              👥 Customers
+              👥 Customers (ဝယ်ယူသူများ)
             </TabsTrigger>
             <TabsTrigger value="warehouses" count={warehouses.length}>
-              🏬 Warehouses
+              🏬 Warehouses (ဂိုထောင်များ)
             </TabsTrigger>
             <TabsTrigger value="branches" count={branches.length}>
-              🏢 Branches
+              🏢 Branches (အခွဲများ)
             </TabsTrigger>
             <TabsTrigger value="teams" count={saleTeams.length}>
-              🤝 Teams
+              🤝 Teams (အရောင်းအဖွဲ့များ)
             </TabsTrigger>
           </TabsList>
         </div>
@@ -1600,7 +1598,7 @@ export default function ProductsPage() {
       <Dialog
         open={productDialogOpen}
         onOpenChange={setProductDialogOpen}
-        title={dialogMode === 'edit' ? 'Edit Product (ကုန်ပစ္စည်းပြင်ဆင်ရန်)' : 'Create Product (ကုန်ပစ္စည်းအသစ်ဖန်တီးရန်)'}
+        title={dialogMode === 'edit' ? 'ကုန်ပစ္စည်းပြင်ဆင်ရန်' : 'ကုန်ပစ္စည်းအသစ်ဖန်တီးရန်'}
         maxWidth="lg"
       >
         <form onSubmit={handleSaveProduct} className="space-y-4">
@@ -1613,7 +1611,7 @@ export default function ProductsPage() {
               required
             />
             <Input
-              label="Product Name (ကုန်ပစ္စည်းအမည်) *"
+              label="ကုန်ပစ္စည်းအမည် *"
               value={productForm.name}
               onChange={e => setProductForm({ ...productForm, name: e.target.value })}
               placeholder="e.g. Premier Coffee Mix 20g"
@@ -1623,7 +1621,7 @@ export default function ProductsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Select
-              label="Category (အမျိုးအစား) *"
+              label="အမျိုးအစား *"
               value={productForm.categoryId}
               onChange={e => setProductForm({ ...productForm, categoryId: e.target.value })}
               required
@@ -1637,7 +1635,7 @@ export default function ProductsPage() {
             </Select>
 
             <Select
-              label="Base UOM (အခြေခံယူနစ်) *"
+              label="အခြေခံယူနစ် *"
               value={productForm.baseUomId}
               onChange={e => setProductForm({ ...productForm, baseUomId: e.target.value })}
               required
@@ -1651,7 +1649,7 @@ export default function ProductsPage() {
             </Select>
 
             <Select
-              label="Product Type (ထုတ်ကုန်အမျိုးအစား) *"
+              label="ထုတ်ကုန်အမျိုးအစား *"
               value={productForm.productType}
               onChange={e => setProductForm({ ...productForm, productType: e.target.value as ProductType })}
               required
@@ -1665,10 +1663,10 @@ export default function ProductsPage() {
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setProductDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel (မလုပ်တော့ပါ)
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto">
-              {dialogMode === 'edit' ? 'Update Product (သိမ်းဆည်းပါ)' : 'Save Product (သိမ်းဆည်းပါ)'}
+              {dialogMode === 'edit' ? 'အတည်ပြုမည်' : 'သိမ်းဆည်းပါ'}
             </Button>
           </div>
         </form>
@@ -1678,28 +1676,28 @@ export default function ProductsPage() {
       <Dialog
         open={categoryDialogOpen}
         onOpenChange={setCategoryDialogOpen}
-        title={dialogMode === 'edit' ? 'Edit Category (အမျိုးအစား ပြင်ရန်)' : 'Create Category (အမျိုးအစား အသစ်)'}
+        title={dialogMode === 'edit' ? 'အမျိုးအစား ပြင်ရန်' : 'အမျိုးအစား အသစ်'}
       >
         <form onSubmit={handleSaveCategory} className="space-y-4">
           <Input
-            label="Category Name (အမျိုးအစား အမည်) *"
+            label="အမျိုးအစား အမည် *"
             value={categoryForm.name}
             onChange={e => setCategoryForm({ ...categoryForm, name: e.target.value })}
             placeholder="e.g. Beverages, Snack, Raw Ingredients"
             required
           />
           <Input
-            label="Description (အသေးစိတ် ဖော်ပြချက်)"
+            label="အသေးစိတ် ဖော်ပြချက်"
             value={categoryForm.description}
             onChange={e => setCategoryForm({ ...categoryForm, description: e.target.value })}
             placeholder="Optional description..."
           />
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setCategoryDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto">
-              Save Category (သိမ်းဆည်းပါ)
+              သိမ်းဆည်းပါ
             </Button>
           </div>
         </form>
@@ -1709,18 +1707,18 @@ export default function ProductsPage() {
       <Dialog
         open={uomDialogOpen}
         onOpenChange={setUomDialogOpen}
-        title={dialogMode === 'edit' ? 'Edit Unit (ယူနစ် ပြင်ရန်)' : 'Create Unit (ယူနစ် အသစ်)'}
+        title={dialogMode === 'edit' ? 'ယူနစ် ပြင်ရန်' : 'ယူနစ် အသစ်'}
       >
         <form onSubmit={handleSaveUom} className="space-y-4">
           <Input
-            label="Unit Name (ယူနစ် အမည်) *"
+            label="ယူနစ် အမည် *"
             placeholder="e.g. Kilogram, Piece, Box, Tin"
             value={uomForm.name}
             onChange={e => setUomForm({ ...uomForm, name: e.target.value })}
             required
           />
           <Input
-            label="Symbol (အတိုကောက် သင်္ကေတ) *"
+            label="အတိုကောက် သင်္ကေတ*"
             placeholder="e.g. kg, pcs, box, tin"
             value={uomForm.symbol}
             onChange={e => setUomForm({ ...uomForm, symbol: e.target.value })}
@@ -1728,10 +1726,10 @@ export default function ProductsPage() {
           />
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setUomDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto">
-              Save Unit (သိမ်းဆည်းပါ)
+              သိမ်းဆည်းပါ
             </Button>
           </div>
         </form>
@@ -1741,25 +1739,25 @@ export default function ProductsPage() {
       <Dialog
         open={supplierDialogOpen}
         onOpenChange={setSupplierDialogOpen}
-        title={dialogMode === 'edit' ? 'Edit Supplier (ကုန်သွင်းသူ ပြင်ရန်)' : 'Create Supplier (ကုန်သွင်းသူ အသစ်)'}
+        title={dialogMode === 'edit' ? 'ကုန်သွင်းသူ ပြင်ရန်' : 'ကုန်သွင်းသူ အသစ်'}
       >
         <form onSubmit={handleSaveSupplier} className="space-y-4">
           <Input
-            label="Supplier Name (ကုန်သွင်းသူ အမည်) *"
+            label="ကုန်သွင်းသူ အမည် *"
             value={supplierForm.name}
             onChange={e => setSupplierForm({ ...supplierForm, name: e.target.value })}
             placeholder="e.g. Shwe Myanmar Trading Co., Ltd."
             required
           />
           <Input
-            label="Phone Number (ဖုန်းနံပါတ်)"
+            label="ဖုန်းနံပါတ်"
             value={supplierForm.phoneNumber}
             onChange={e => setSupplierForm({ ...supplierForm, phoneNumber: e.target.value })}
             placeholder="e.g. 09-123456789"
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
-              label="Township (မြို့နယ်)"
+              label="မြို့နယ်"
               value={supplierForm.township}
               onChange={e => setSupplierForm({ ...supplierForm, township: e.target.value })}
               placeholder="e.g. Hlaing, Kamayut"
@@ -1773,10 +1771,10 @@ export default function ProductsPage() {
           </div>
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setSupplierDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto">
-              Save Supplier (သိမ်းဆည်းပါ)
+              သိမ်းဆည်းပါ
             </Button>
           </div>
         </form>
@@ -1786,34 +1784,34 @@ export default function ProductsPage() {
       <Dialog
         open={customerDialogOpen}
         onOpenChange={setCustomerDialogOpen}
-        title={dialogMode === 'edit' ? 'Edit Customer (ဖောက်သည် ပြင်ရန်)' : 'Create Customer (ဖောက်သည် အသစ်)'}
+        title={dialogMode === 'edit' ? 'ဖောက်သည် ပြင်ရန်' : 'ဖောက်သည် အသစ်'}
       >
         <form onSubmit={handleSaveCustomer} className="space-y-4">
           <Input
-            label="Customer Name (ဖောက်သည် အမည်) *"
+            label="ဖောက်သည် အမည် *"
             value={customerForm.name}
             onChange={e => setCustomerForm({ ...customerForm, name: e.target.value })}
             placeholder="e.g. U Kyaw / City Mart"
             required
           />
           <Input
-            label="Phone Number (ဖုန်းနံပါတ်)"
+            label="ဖုန်းနံပါတ်"
             value={customerForm.phoneNumber}
             onChange={e => setCustomerForm({ ...customerForm, phoneNumber: e.target.value })}
             placeholder="e.g. 09-987654321"
           />
           <Input
-            label="Address / Location (လိပ်စာ)"
+            label="လိပ်စာ/မြို့နယ်"
             value={customerForm.address}
             onChange={e => setCustomerForm({ ...customerForm, address: e.target.value })}
             placeholder="e.g. No. 12, Bogyoke Road, Yangon"
           />
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setCustomerDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto">
-              Save Customer (သိမ်းဆည်းပါ)
+              သိမ်းဆည်းပါ
             </Button>
           </div>
         </form>
@@ -1823,18 +1821,18 @@ export default function ProductsPage() {
       <Dialog
         open={warehouseDialogOpen}
         onOpenChange={setWarehouseDialogOpen}
-        title={dialogMode === 'edit' ? 'Edit Warehouse (ဂိုဒေါင် ပြင်ရန်)' : 'Create Warehouse (ဂိုဒေါင် အသစ်)'}
+        title={dialogMode === 'edit' ? 'ဂိုဒေါင် ပြင်ရန်' : 'ဂိုဒေါင် အသစ်'}
       >
         <form onSubmit={handleSaveWarehouse} className="space-y-4">
           <Input
-            label="Warehouse Name (ဂိုဒေါင် အမည်) *"
+            label="ဂိုဒေါင် အမည် *"
             value={warehouseForm.name}
             onChange={e => setWarehouseForm({ ...warehouseForm, name: e.target.value })}
             placeholder="e.g. Main Central Warehouse"
             required
           />
           <Select
-            label="Branch (ရုံးခွဲ) *"
+            label="ရုံးခွဲ *"
             value={warehouseForm.branchId}
             onChange={e => setWarehouseForm({ ...warehouseForm, branchId: e.target.value })}
             required
@@ -1847,17 +1845,17 @@ export default function ProductsPage() {
             ))}
           </Select>
           <Input
-            label="Location (တည်နေရာ)"
+            label="တည်နေရာ"
             value={warehouseForm.location}
             onChange={e => setWarehouseForm({ ...warehouseForm, location: e.target.value })}
             placeholder="e.g. Bayintnaung Warehouse Compound"
           />
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setWarehouseDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto">
-              Save Warehouse (သိမ်းဆည်းပါ)
+              သိမ်းဆည်းပါ
             </Button>
           </div>
         </form>
@@ -1867,19 +1865,19 @@ export default function ProductsPage() {
       <Dialog
         open={branchDialogOpen}
         onOpenChange={setBranchDialogOpen}
-        title={dialogMode === 'edit' ? 'Edit Branch (ရုံးခွဲ ပြင်ရန်)' : 'Create Branch (ရုံးခွဲ အသစ်)'}
+        title={dialogMode === 'edit' ? 'ရုံးခွဲ ပြင်ရန်' : 'ရုံးခွဲ အသစ်'}
       >
         <form onSubmit={handleSaveBranch} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
-              label="Branch Code (ကုဒ်) *"
+              label="ရုံးခွဲကုဒ် *"
               placeholder="e.g. YGN, MDY, NPT"
               value={branchForm.code}
               onChange={e => setBranchForm({ ...branchForm, code: e.target.value })}
               required
             />
             <Input
-              label="Branch Name (ရုံးခွဲ အမည်) *"
+              label="ရုံးခွဲ အမည် *"
               placeholder="e.g. Yangon Main Branch"
               value={branchForm.name}
               onChange={e => setBranchForm({ ...branchForm, name: e.target.value })}
@@ -1887,17 +1885,17 @@ export default function ProductsPage() {
             />
           </div>
           <Input
-            label="Location (မြို့နယ်/လိပ်စာ)"
+            label="မြို့နယ်/လိပ်စာ"
             placeholder="e.g. Pabedan Township, Yangon"
             value={branchForm.location}
             onChange={e => setBranchForm({ ...branchForm, location: e.target.value })}
           />
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setBranchDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto">
-              Save Branch (သိမ်းဆည်းပါ)
+              သိမ်းဆည်းပါ
             </Button>
           </div>
         </form>
@@ -1907,18 +1905,18 @@ export default function ProductsPage() {
       <Dialog
         open={saleTeamDialogOpen}
         onOpenChange={setSaleTeamDialogOpen}
-        title={dialogMode === 'edit' ? 'Edit Sale Team (အရောင်းအဖွဲ့ ပြင်ရန်)' : 'Create Sale Team (အရောင်းအဖွဲ့ အသစ်)'}
+        title={dialogMode === 'edit' ? 'အရောင်းအဖွဲ့ ပြင်ရန်' : 'အရောင်းအဖွဲ့ အသစ်'}
       >
         <form onSubmit={handleSaveSaleTeam} className="space-y-4">
           <Input
-            label="Team Name (အဖွဲ့အမည်) *"
+            label="အဖွဲ့အမည် *"
             placeholder="e.g. Alpha Van Sales, City Wholesale Team"
             value={saleTeamForm.name}
             onChange={e => setSaleTeamForm({ ...saleTeamForm, name: e.target.value })}
             required
           />
           <Select
-            label="Assigned Branch (ရုံးခွဲ သတ်မှတ်ချက်)"
+            label="ရုံးခွဲ သတ်မှတ်ချက်"
             value={saleTeamForm.branchId}
             onChange={e => setSaleTeamForm({ ...saleTeamForm, branchId: e.target.value })}
           >
@@ -1931,27 +1929,27 @@ export default function ProductsPage() {
           </Select>
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setSaleTeamDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
+              မလုပ်တော့ပါ
             </Button>
             <Button type="submit" variant="primary" className="w-full sm:w-auto">
-              Save Sale Team (သိမ်းဆည်းပါ)
+              သိမ်းဆည်းပါ
             </Button>
           </div>
         </form>
       </Dialog>
 
       {/* ─── MODAL: CONFIRM DELETE ──────────────────────────────────── */}
-      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen} title="Confirm Deletion (ဖျက်ရန် အတည်ပြုပါ)">
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen} title="ဖျက်ရန် အတည်ပြုပါ">
         <div className="space-y-4">
           <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300">
-            Are you sure you want to delete <span className="font-bold text-zinc-900 dark:text-zinc-100">{deleteTarget?.name}</span>? ဤလုပ်ဆောင်ချက်ကို ပြန်လည်ပြင်ဆင်၍ မရပါ။
+            <span className="font-bold text-zinc-900 dark:text-zinc-100">{deleteTarget?.name}</span> ကိုဖျက်မည်မှာ သေချာပါသလား? ဤလုပ်ဆောင်ချက်ကို ပြန်လည်ပြင်ဆင်၍ မရပါ။
           </p>
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={() => setDeleteConfirmOpen(false)} className="w-full sm:w-auto">
-              Cancel (မဖျက်တော့ပါ)
+              မဖျက်တော့ပါ
             </Button>
             <Button type="button" variant="destructive" onClick={executeDelete} className="w-full sm:w-auto">
-              Confirm Delete (ဖျက်သိမ်းပါ)
+              ဖျက်သိမ်းပါ
             </Button>
           </div>
         </div>
@@ -1972,7 +1970,7 @@ export default function ProductsPage() {
                 onClick={() => setProductSheetOpen(false)}
                 className="text-xs"
               >
-                Close (ပိတ်မည်)
+                ပိတ်မည်
               </Button>
               <Button
                 variant="primary"
@@ -1983,7 +1981,7 @@ export default function ProductsPage() {
                 }}
                 className="gap-1.5 text-xs"
               >
-                <Edit2 className="h-3.5 w-3.5" /> Edit Product
+                <Edit2 className="h-3.5 w-3.5" /> ပြင်ဆင်မည်
               </Button>
             </div>
           )
@@ -1998,7 +1996,7 @@ export default function ProductsPage() {
                 <div className="mt-1">{renderTypeBadge(selectedProduct.productType)}</div>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase text-zinc-400">Category</p>
+                <p className="text-[10px] font-bold uppercase text-zinc-400">Category (အမျိုးအစား)</p>
                 <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-1">{selectedProduct.category?.name || '-'}</p>
               </div>
               <div>

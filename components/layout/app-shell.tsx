@@ -38,15 +38,15 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { title: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { title: 'Products & Master', href: '/products', icon: Package },
-  { title: 'Purchasing', href: '/purchasing', icon: ShoppingCart },
-  { title: 'Inventory', href: '/inventory', icon: Boxes },
-  { title: 'Manufacturing', href: '/manufacturing', icon: Factory },
-  { title: 'Sales & Orders', href: '/sales', icon: TrendingUp },
-  { title: 'Sales Teams & Portal', href: '/sales-teams', icon: Users },
-  { title: 'Users & Permissions', href: '/users', icon: ShieldCheck },
-  { title: 'Accounting', href: '/accounting', icon: Landmark },
-  { title: 'Reports', href: '/reports', icon: FileBarChart },
+  { title: 'အခြေခံအချက်အလက်များ', href: '/products', icon: Package },
+  { title: 'အဝယ်နှင့် ကုန်လက်ခံလွှာ', href: '/purchasing', icon: ShoppingCart },
+  { title: 'စတော့နှင့် သိုလှောင်ရုံ', href: '/inventory', icon: Boxes },
+  { title: 'ထုတ်လုပ်မှု လုပ်ငန်းစဉ်များ', href: '/manufacturing', icon: Factory },
+  { title: 'အရောင်းနှင့် ပို့ဆောင်ရေး ', href: '/sales', icon: TrendingUp },
+  { title: 'အရောင်းအဖွဲ့နှင့် လုပ်ငန်းခွင်', href: '/sales-teams', icon: Users },
+  { title: 'အသုံးပြုသူစီမံခန့်ခွဲမှု', href: '/users', icon: ShieldCheck },
+  { title: 'ဘဏ္ဍာရေးနှင့် စာရင်းကိုင်', href: '/accounting', icon: Landmark },
+  { title: 'စာရင်းအစီရင်ခံစာများ', href: '/reports', icon: FileBarChart },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
