@@ -63,26 +63,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // Toggle Dark mode
   React.useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      document.documentElement.classList.add('dark');
-      setIsDark(true);
-    } else {
-      document.documentElement.classList.remove('dark');
-      setIsDark(false);
-    }
+    const isCurrentlyDark = document.documentElement.classList.contains('dark');
+    setIsDark(isCurrentlyDark);
   }, []);
 
   const toggleTheme = () => {
-    if (isDark) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      setIsDark(false);
-    } else {
+    const nextDark = !isDark;
+    setIsDark(nextDark);
+    if (nextDark) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
-      setIsDark(true);
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
   };
 
@@ -118,15 +111,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         )}
       >
         {/* Brand Header */}
-        <div className="flex h-14 items-center justify-between px-4 border-b border-zinc-200 dark:border-zinc-800">
-          <Link href="/" className="flex items-center gap-2.5 overflow-hidden">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-sm shadow-xs">
-              NY
+        <div className="flex h-14 items-center justify-between px-3.5 border-b border-zinc-200 dark:border-zinc-800">
+          <Link href="/" className="flex items-center gap-2.5 overflow-hidden min-w-0">
+            <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white dark:bg-zinc-800 p-0.5 border border-zinc-200/80 dark:border-zinc-700/80 shadow-2xs">
+              <img src="/naya.png" alt="NaYa Logo" className="h-full w-full object-contain" />
             </div>
             {sidebarOpen && (
-              <div className="flex flex-col">
-                <span className="text-sm font-bold tracking-tight text-zinc-900 dark:text-zinc-100">NaYa ERP</span>
-                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">Enterprise Suite</span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-bold tracking-tight text-zinc-900 dark:text-zinc-100 truncate">NaYa ERP</span>
+                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium truncate">Enterprise Suite</span>
               </div>
             )}
           </Link>
@@ -177,24 +170,36 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        {/* User Footer */}
-        <div className="p-2 border-t border-zinc-200 dark:border-zinc-800">
-          <div
+        {/* Footer Branding: NaYa Technology @ 2026 powered by NaYa */}
+        <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-950/40">
+          <a
+            href="https://nayamyanmar.com"
+            target="_blank"
+            rel="noopener noreferrer"
             className={cn(
-              'flex items-center gap-2 rounded-lg p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800',
+              'group flex items-center gap-2.5 rounded-xl p-1 -m-1 transition-all hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 cursor-pointer',
               !sidebarOpen && 'justify-center'
             )}
+            title="Visit NaYa Technology (https://nayamyanmar.com)"
           >
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200 text-xs font-bold">
-              {user?.name?.[0]?.toUpperCase() || 'U'}
+            <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg bg-white p-0.5 shadow-2xs border border-zinc-200/80 dark:border-zinc-700/80 dark:bg-zinc-800 flex items-center justify-center transition-transform group-hover:scale-105">
+              <img
+                src="/naya.png"
+                alt="NaYa Logo"
+                className="h-full w-full object-contain"
+              />
             </div>
             {sidebarOpen && (
-              <div className="flex-1 truncate text-xs">
-                <p className="font-medium text-zinc-900 dark:text-zinc-100 truncate">{user?.name || 'User'}</p>
-                <p className="text-[10px] text-zinc-500 truncate">{user?.email}</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-xs text-zinc-900 dark:text-zinc-100 truncate tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  NaYa Technology @ 2026
+                </p>
+                <p className="text-[10px] font-medium text-blue-600 dark:text-blue-400 truncate">
+                  powered by NaYa
+                </p>
               </div>
             )}
-          </div>
+          </a>
         </div>
       </aside>
 
@@ -204,11 +209,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="fixed inset-0 bg-black/60" onClick={() => setMobileMenuOpen(false)} />
           <div className="relative w-64 max-w-[80vw] bg-white dark:bg-zinc-900 p-4 flex flex-col h-full z-50">
             <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-zinc-800">
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-xs">
-                  NY
+              <div className="flex items-center gap-2.5">
+                <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white dark:bg-zinc-800 p-0.5 border border-zinc-200/80 dark:border-zinc-700/80 shadow-2xs">
+                  <img src="/naya.png" alt="NaYa Logo" className="h-full w-full object-contain" />
                 </div>
-                <span className="font-bold text-sm">NaYa ERP</span>
+                <div className="flex flex-col">
+                  <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100">NaYa ERP</span>
+                  <span className="text-[10px] text-zinc-500 font-medium">Enterprise Suite</span>
+                </div>
               </div>
               <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
                 <X className="h-4 w-4" />
@@ -236,9 +244,32 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 );
               })}
             </nav>
-            <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
-              <Button variant="outline" size="sm" onClick={logout} className="w-full justify-center gap-2 text-red-600 cursor-pointer">
-                <LogOut className="h-4 w-4" /> အကောင့်ထွက်ရန် (Logout)
+            <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-3">
+              <a
+                href="https://nayamyanmar.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2.5 px-1 py-1 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-all cursor-pointer"
+                title="Visit NaYa Technology (https://nayamyanmar.com)"
+              >
+                <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg bg-white p-0.5 shadow-2xs border border-zinc-200/80 dark:border-zinc-700/80 dark:bg-zinc-800 flex items-center justify-center transition-transform group-hover:scale-105">
+                  <img
+                    src="/naya.png"
+                    alt="NaYa Logo"
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-xs text-zinc-900 dark:text-zinc-100 truncate tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    NaYa Technology @ 2026
+                  </p>
+                  <p className="text-[10px] font-medium text-blue-600 dark:text-blue-400 truncate">
+                    powered by NaYa
+                  </p>
+                </div>
+              </a>
+              <Button variant="outline" size="sm" onClick={logout} className="w-full justify-center gap-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer text-xs">
+                <LogOut className="h-3.5 w-3.5" /> အကောင့်ထွက်ရန် (Logout)
               </Button>
             </div>
           </div>

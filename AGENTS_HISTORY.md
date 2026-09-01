@@ -160,3 +160,23 @@
    - Renders a clean breakdown of items and quantities being shipped from the selected warehouse.
 2. **Build Verification**:
    - Next.js production build (`npm run build`): ✅ Exit code 0 (57 routes).
+
+---
+
+## Execution Log: 2026-09-01 — Dark/Light Theme Toggle & NaYa Brand Footer Updates
+
+### Accomplishments:
+
+1. **Tailwind v4 Class-Based Dark Mode Enabled (`app/globals.css` & `app/layout.tsx`)**:
+   - Added `@custom-variant dark (&:where(.dark, .dark *));` to support class-based dark mode switching in Tailwind CSS v4.
+   - Added zero-flicker inline theme detection script inside `<head>` in `app/layout.tsx` to read `localStorage.getItem('theme')` or system preference on page load.
+   - Fixed `toggleTheme` in `components/layout/app-shell.tsx` with proper state sync and persistence.
+
+2. **NaYa Brand Footer & Header Logo (`components/layout/app-shell.tsx`)**:
+   - Replaced "Admin User admin@naya.com" at the bottom of the desktop sidebar with `"NaYa Technology @ 2026"` and `"powered by NaYa"` with `/naya.png` logo image.
+   - Linked footer branding on both desktop sidebar and mobile drawer to `https://nayamyanmar.com` (opens in a new tab via `target="_blank" rel="noopener noreferrer"`).
+   - Updated mobile drawer footer with the same `"NaYa Technology @ 2026 powered by NaYa"` logo & branding.
+   - Updated top brand header logo in sidebar and mobile menu to use `/naya.png`.
+
+3. **Build Verification**:
+   - Next.js production build (`npm run build`): ✅ Exit code 0 (57 routes).
